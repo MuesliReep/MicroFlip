@@ -21,4 +21,3 @@ Program::Program(QObject *parent) : QObject(parent) {
   WorkOrder *wo = new WorkOrder(e,amount,profit);
   workOrders.append(wo);
 }
-

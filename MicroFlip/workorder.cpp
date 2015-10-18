@@ -23,10 +23,7 @@ void WorkOrder::updateTick() {
     case START: {
 
       // Get new data
-      calculateSellOrder(&sellPrice);
-
-      // Create sell order
-      createSellOrder(maxAmount, sellPrice);
+      requestUpdateMarketTicker();
 
       workState = WAITINGFORTICKER;
       break;
@@ -34,14 +31,21 @@ void WorkOrder::updateTick() {
     case WAITINGFORTICKER:
       break;
     case CREATESELL:
+      // Create sell order
+      calculateSellOrder(&sellPrice);
+      createSellOrder(maxAmount, sellPrice);
+
+      workState = WAITINGFORSELL;
       break;
     case WAITINGFORSELL:
+
 
       // if orderID = 0, order executed instantly, goto sold state.
       break;
     case SELLORDER:
 
       // Wait for order to be sold
+      requestOrderInfo(sellOrderID);
       break;
     case SOLD:
 
@@ -59,13 +63,15 @@ void WorkOrder::updateTick() {
   }
 }
 
+
+
 void WorkOrder::calculateSellOrder(double *price) {
 
   // Current price + 0.50 usd
-  *price = 0.0;
+  *price = currentTicker.getLast() + 0.5;
 }
 
-bool WorkOrder::createSellOrder(double amount, double price) {
+void WorkOrder::createSellOrder(double amount, double price) {
 
   // Check balance
 
@@ -74,8 +80,8 @@ bool WorkOrder::createSellOrder(double amount, double price) {
   return false;
 }
 
-void WorkOrder::calculateBuyOrder()
-{
+void WorkOrder::calculateBuyOrder() {
+
 
 }
 
@@ -110,9 +116,50 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
   qDebug() << "\t Buy Total: \t" << *buyTotal << "\t USD";
 }
 
+//----------------------------------//
+//            Requests              //
+//----------------------------------//
+
 void WorkOrder::requestUpdateMarketTicker() {
 
   connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject)), e, SLOT(receiveUpdateMarketTicker(QString,QObject)));
   emit sendUpdateMarketTicker("btc_usd", this);
   disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject)), e, SLOT(receiveUpdateMarketTicker(QString,QObject)));
+}
+
+void WorkOrder::requestCreateOrder() {
+
+}
+
+void WorkOrder::requestOrderInfo(int orderID) {
+
+}
+
+//----------------------------------//
+//             Replies              //
+//----------------------------------//
+
+void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
+
+
+}
+
+void WorkOrder::orderInfoReply() {
+
+  int status = -20; // TODO: real status
+
+  switch(status) {
+    case 0:
+      // Order active, do nothing
+      break;
+    case 1:
+      // Order executed, go to next state
+      workState++;
+      break;
+    case 2:
+    case 3:
+    default:
+      workState = ERROR;
+      break;
+  }
 }
