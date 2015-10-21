@@ -14,6 +14,7 @@ Program::Program(QObject *parent) : QObject(parent) {
   // Create an exchange interface
   Exchange *e = new Exchange_btce();
   e->setConfig(&c);
+  e->startWork();
 
   // Create a work order
   double amount = 0.01;

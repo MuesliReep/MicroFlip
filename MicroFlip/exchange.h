@@ -48,7 +48,18 @@ private:
 /// \brief The Ticker class
 ///
 class Ticker {
+
 public:
+  Ticker(){}
+  Ticker(double high, double low, double avg, double last, double buy, double sell, double age) {
+    this->high = high;
+    this->low  = low;
+    this->avg  = avg;
+    this->last = last;
+    this->buy  = buy;
+    this->sell = sell;
+    this->age  = age;
+  }
   double getHigh() { return high; }
   double getLow()  { return low;  }
   double getAvg()  { return avg;  }
@@ -75,6 +86,8 @@ class Exchange : public QObject
 public:
   explicit Exchange(QObject *parent = 0);
 
+  virtual void startWork() = 0;
+
   void setConfig(Config *c);
 
 private:
@@ -97,7 +110,7 @@ protected:
   QTimer *timer2;
 
   uint lastNonce;
-  ExchangeTask *currentTask;
+  ExchangeTask currentTask;
 
   QList<Order>    activeOrders;
   QList<Balance>  balances;

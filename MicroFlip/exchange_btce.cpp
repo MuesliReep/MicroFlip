@@ -2,11 +2,25 @@
 
 Exchange_btce::Exchange_btce() {
 
-  currentTask = NULL;
+  currentTask = ExchangeTask();
 
   // Initiate download managers
   tickerDownloadManager = new QNetworkAccessManager(this);
   depthDownloadManager  = new QNetworkAccessManager(this);
+
+  // Start the interval timers
+  timer  = new QTimer(this);
+  //timer2 = new QTimer(this);
+
+  connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
+  //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
+
+}
+
+void Exchange_btce::startWork() {
+
+  timer->start(c->getCoolDownTime()*1100);
+  //timer2->start(1*1100); // TODO: determine correct amount
 }
 
 //----------------------------------//
@@ -19,7 +33,7 @@ void Exchange_btce::updateMarketTicker(QString pair) {
   QNetworkRequest request = d.generateRequest(QUrl("https://btc-e.com/api/3/ticker/"+pair));
 
   // Execute the download
-  d.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketDepthReply(QNetworkReply*)));
+  d.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
 }
 
 void Exchange_btce::updateMarketDepth(QString pair) {
@@ -123,7 +137,42 @@ void Exchange_btce::receiveUpdateOrderInfo(uint orderID, QObject *sender){
 
 void Exchange_btce::UpdateMarketTickerReply(QNetworkReply *reply) {
 
+  Ticker ticker;
 
+  if(!reply->error()) {
+
+    QJsonObject jsonObj;
+    QJsonObject tickerData;
+
+    // Extract JSON object from network reply
+    getObjectFromDocument(reply, &jsonObj);
+
+    // Extract the market data we want
+    tickerData = jsonObj.value("btc_usd").toObject();
+
+    // Parse the raw data
+    Ticker ticker = parseRawTickerData(&tickerData);
+
+    // Send signal to GUI to update
+    //sendTicker(m.getTicker());
+  }
+  else
+    qDebug() << "Ticker Packet error";
+
+  reply->deleteLater();
+
+  // Disconnect the download signal and release
+  disconnect(tickerDownloadManager, 0, this, 0);
+
+  // tickerDownloadManager->deleteLater();
+
+  // Connect & send to the initiator
+  connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+  emit sendTicker(ticker);
+  disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+
+  // Mark this task complete
+  currentTask = ExchangeTask();
 }
 
 void Exchange_btce::UpdateMarketDepthReply(QNetworkReply *reply) {
@@ -169,21 +218,56 @@ void Exchange_btce::UpdateOrderInfoReply(QNetworkReply *reply) {
 void Exchange_btce::updateTick() {
 
   // While currentTask is not complete, do nothing
-  if(currentTask != NULL)
+  if(currentTask.getTask() != -1)
     return;
 
   // Get a new task and execute it
   if(exchangeTasks.size() > 0) {
 
     // Get a task and remove it from the list
-    *currentTask = exchangeTasks.takeFirst();
+    currentTask = exchangeTasks.takeFirst();
 
     // Execute the task
-    executeExchangeTask(currentTask);
+    executeExchangeTask(&currentTask);
   }
 }
 
 void Exchange_btce::updateTick2() {
 
   // While currentTask is not complete, do nothing
+}
+
+//----------------------------------//
+//             Parsers              //
+//----------------------------------//
+
+// Grabs a JSON object from a Network reply
+// Returns true if succesfull
+bool Exchange_btce::getObjectFromDocument(QNetworkReply *reply, QJsonObject *object) {
+
+  QJsonDocument   jsonDoc;
+  QJsonParseError error;
+
+  jsonDoc = QJsonDocument().fromJson(reply->readAll(), &error);
+  *object = jsonDoc.object();
+
+  return true; // TODO: check json validity
+}
+
+Ticker Exchange_btce::parseRawTickerData(QJsonObject *rawData) {
+
+  QJsonObject jTicker;
+
+  // Retrieve ticker object from JSON object
+  jTicker = rawData->value("btc_usd").toObject();
+
+  double high = jTicker.value("high").toDouble();
+  double low  = jTicker.value("low").toDouble();
+  double avg  = jTicker.value("avg").toDouble();
+  double last = jTicker.value("last").toDouble();
+  double buy  = jTicker.value("buy").toDouble();
+  double sell = jTicker.value("sell").toDouble();
+  int    age  = jTicker.value("age").toInt();
+
+  return Ticker(high, low, avg, last, buy, sell, age);
 }

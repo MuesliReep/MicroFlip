@@ -7,9 +7,11 @@
 
 class Exchange_btce : public Exchange
 {
+  Q_OBJECT
 public:
   Exchange_btce();
 
+  void startWork();
 private:
 
   Downloader  d;
@@ -28,6 +30,9 @@ private:
   void updateOrderInfo(uint orderID);
 
   void executeExchangeTask(ExchangeTask *exchangeTask);
+
+  bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
+  Ticker parseRawTickerData(QJsonObject *rawData);
 
 public slots:
   void receiveUpdateMarketTicker(QString pair, QObject *sender);
@@ -53,6 +58,7 @@ private slots:
   void updateTick2();
 
 signals:
+  sendTicker(Ticker ticker);
 
 };
 

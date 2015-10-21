@@ -13,6 +13,7 @@ WorkOrder::WorkOrder(Exchange *e, double maxAmount, double profitTarget) {
 
   connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()));
 
+  timer->start(2500);
   // Connect exchangebot signals & slots
 
 }
@@ -32,8 +33,7 @@ void WorkOrder::updateTick() {
       break;
     case CREATESELL:
       // Create sell order
-      calculateSellOrder(&sellPrice);
-      createSellOrder(maxAmount, sellPrice);
+      createSellOrder(maxAmount);
 
       workState = WAITINGFORSELL;
       break;
@@ -63,21 +63,15 @@ void WorkOrder::updateTick() {
   }
 }
 
-
-
-void WorkOrder::calculateSellOrder(double *price) {
+void WorkOrder::createSellOrder(double amount) {
 
   // Current price + 0.50 usd
-  *price = currentTicker.getLast() + 0.5;
-}
-
-void WorkOrder::createSellOrder(double amount, double price) {
+  sellPrice = currentTicker.getLast() + 0.5;
 
   // Check balance
 
-  amount = 0;
-  price  = 0;
-  return false;
+  // Create order
+  qDebug() << "Creating Sell Order: " << amount << " BTC for " << sellPrice << " USD";
 }
 
 void WorkOrder::calculateBuyOrder() {
@@ -85,11 +79,11 @@ void WorkOrder::calculateBuyOrder() {
 
 }
 
-bool WorkOrder::createBuyOrder(double amount, double price) {
+void WorkOrder::createBuyOrder(double amount, double price) {
 
   amount = 0;
   price  = 0;
-  return false;
+
 }
 
 void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit) {
@@ -122,9 +116,9 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
 
 void WorkOrder::requestUpdateMarketTicker() {
 
-  connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject)), e, SLOT(receiveUpdateMarketTicker(QString,QObject)));
+  connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), e, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
   emit sendUpdateMarketTicker("btc_usd", this);
-  disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject)), e, SLOT(receiveUpdateMarketTicker(QString,QObject)));
+  disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), e, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
 }
 
 void WorkOrder::requestCreateOrder() {
@@ -141,7 +135,8 @@ void WorkOrder::requestOrderInfo(int orderID) {
 
 void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
-
+  currentTicker = ticker;
+  qDebug() << "New ticker data: " << "High: " << currentTicker.getHigh() << "Low: " << currentTicker.getLow() << "Avg: " << currentTicker.getAvg() << "Last: " << currentTicker.getLast();
 }
 
 void WorkOrder::orderInfoReply() {
@@ -154,7 +149,8 @@ void WorkOrder::orderInfoReply() {
       break;
     case 1:
       // Order executed, go to next state
-      workState++;
+      // If this is a sellorder goto sold state, if buy order goto complete state
+      workState = (workState == SELLORDER) ? SOLD : COMPLETE;
       break;
     case 2:
     case 3:

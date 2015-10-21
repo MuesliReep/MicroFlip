@@ -30,20 +30,19 @@ private:
   WorkState workState;
   QTimer *timer;
 
+  int sellOrderID;
+  int buyOrderID;
+
   double maxAmount;
   double profitTarget;
-  QString sellOrderID;
-  QString buyOrderID;
-
   double sellPrice;
 
   Ticker currentTicker;
 
-  void calculateSellOrder(double *price);
-  void createSellOrder(double amount, double price);
+  void createSellOrder(double amount);
 
   void calculateBuyOrder();
-  bool createBuyOrder(double amount, double price);
+  void createBuyOrder(double amount, double price);
   void calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit);
 
   void requestUpdateMarketTicker();
@@ -57,10 +56,10 @@ public slots:
   void UpdateMarketTickerReply(Ticker ticker);
 
   void orderInfoReply();
+
 signals:
   sendUpdateMarketTicker(QString pair, QObject *sender);
   sendCreateOrder(int type, double price, double amount, QObject *sender);
-
 
 };
 
