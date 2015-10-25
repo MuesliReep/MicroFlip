@@ -5,9 +5,14 @@ Exchange::Exchange(QObject *parent) : QObject(parent)
 
 }
 
-void Exchange::setConfig(Config *c)
+void Exchange::setConfig(Config *C)
 {
-  this->c = c;
+  this->c = C;
+}
+
+double Exchange::getFee()
+{
+  return fee;
 }
 
 void Exchange::checkBalance(int currency, double amount, bool *result)

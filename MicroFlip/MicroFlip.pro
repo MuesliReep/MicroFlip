@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core #gui
 QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -14,7 +14,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+       # mainwindow.cpp \
     program.cpp \
     workorder.cpp \
     downloader.cpp \
@@ -27,8 +27,8 @@ SOURCES += main.cpp\
     exchange.cpp \
     exchange_btce.cpp
 
-HEADERS  += mainwindow.h \
-    program.h \
+HEADERS  += program.h \
+    #mainwindow.h \
     workorder.h \
     downloader.h \
     marketData.h \
@@ -40,4 +40,4 @@ HEADERS  += mainwindow.h \
     exchange.h \
     exchange_btce.h
 
-FORMS    += mainwindow.ui
+#FORMS    += mainwindow.ui

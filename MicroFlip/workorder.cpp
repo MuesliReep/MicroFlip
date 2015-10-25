@@ -1,10 +1,12 @@
 #include "workorder.h"
 
-WorkOrder::WorkOrder(Exchange *e, double maxAmount, double profitTarget) {
+WorkOrder::WorkOrder(Exchange *e, QString pair, double maxAmount, double profitTarget, double minSellPrice) {
 
   this->e = e;
   this->maxAmount = maxAmount;
   this->profitTarget = profitTarget;
+  this->pair = pair;
+  this->minSellPrice = minSellPrice;
 
   workState = START;
 
@@ -20,8 +22,12 @@ WorkOrder::WorkOrder(Exchange *e, double maxAmount, double profitTarget) {
 
 void WorkOrder::updateTick() {
 
+  QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
+  //QString  time = now.toString("hh:mm:ss");
+
   switch(workState) {
     case START: {
+      qDebug() << time << " State: START";
 
       // Get new data
       requestUpdateMarketTicker();
@@ -30,35 +36,53 @@ void WorkOrder::updateTick() {
       break;
       }
     case WAITINGFORTICKER:
+      qDebug() << time << " State: WAITINGFORTICKER";
       break;
     case CREATESELL:
+      qDebug() << time << " State: CREATESELL";
       // Create sell order
       createSellOrder(maxAmount);
 
       workState = WAITINGFORSELL;
       break;
     case WAITINGFORSELL:
-
+      qDebug() << time << " State: WAITINGFORSELL";
 
       // if orderID = 0, order executed instantly, goto sold state.
       break;
     case SELLORDER:
+      qDebug() << time << " State: SELLORDER";
 
       // Wait for order to be sold
       requestOrderInfo(sellOrderID);
       break;
     case SOLD:
-
+      qDebug() << time << " State: SOLD";
+      workState = CREATEBUY;
+      break;
+    case CREATEBUY:
+      qDebug() << time << " State: CREATEBUY";
       // Calculate buy order & create order
+      createBuyOrder();
+
+      workState = WAITINGFORBUY;
       break;
     case WAITINGFORBUY:
+      qDebug() << time << " State: WAITINGFORBUY";
       break;
     case BUYORDER:
+      qDebug() << time << " State: BUYORDER";
+      // Wait for order to be sold
+      requestOrderInfo(buyOrderID);
       break;
     case COMPLETE:
+      qDebug() << time << " State: COMPLETE";
+      timer->stop();
       break;
     case ERROR:
     default:
+      qDebug() << time << " State: ERROR";
+      timer->stop();
       break;
   }
 }
@@ -66,24 +90,36 @@ void WorkOrder::updateTick() {
 void WorkOrder::createSellOrder(double amount) {
 
   // Current price + 0.50 usd
-  sellPrice = currentTicker.getLast() + 0.5;
+  //sellPrice = currentTicker.getLast() + 0.5;
+
+  // Match current sell order
+  sellPrice = currentTicker.getBuy();
 
   // Check balance
+  // TODO
 
   // Create order
+  int type   = 1; // Sell
+
   qDebug() << "Creating Sell Order: " << amount << " BTC for " << sellPrice << " USD";
+
+  // Connect & send order
+  requestCreateOrder(type, sellPrice, maxAmount);
 }
 
-void WorkOrder::calculateBuyOrder() {
+void WorkOrder::createBuyOrder() {
 
+  double buyAmount;
+  double buyTotal;
+  double fee = e->getFee();
 
-}
+  calculateMinimumBuyTrade(sellPrice, maxAmount,fee, &buyPrice, &buyAmount, &buyTotal, profitTarget);
 
-void WorkOrder::createBuyOrder(double amount, double price) {
+  // Create order
+  int type   = 0; // Buy
 
-  amount = 0;
-  price  = 0;
-
+  // Connect & send order
+  requestCreateOrder(type, buyPrice, buyAmount);
 }
 
 void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit) {
@@ -117,16 +153,22 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
 void WorkOrder::requestUpdateMarketTicker() {
 
   connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), e, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
-  emit sendUpdateMarketTicker("btc_usd", this);
+  emit sendUpdateMarketTicker(pair, this);
   disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), e, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
 }
 
-void WorkOrder::requestCreateOrder() {
+void WorkOrder::requestCreateOrder(int type, double rate, double amount) {
 
+  connect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), e, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
+  emit sendCreateOrder(pair, type, rate, amount, this);
+  disconnect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), e, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
 }
 
 void WorkOrder::requestOrderInfo(int orderID) {
 
+  connect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), e, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
+  emit sendUpdateOrderInfo((uint)orderID, this);
+  disconnect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), e, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
 }
 
 //----------------------------------//
@@ -136,12 +178,73 @@ void WorkOrder::requestOrderInfo(int orderID) {
 void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
   currentTicker = ticker;
-  qDebug() << "New ticker data: " << "High: " << currentTicker.getHigh() << "Low: " << currentTicker.getLow() << "Avg: " << currentTicker.getAvg() << "Last: " << currentTicker.getLast();
+  qDebug() << "New ticker data: " << "Buy: " << currentTicker.getBuy() << "Sell: " << currentTicker.getSell() << "Last: " << currentTicker.getLast();
+
+  // return to START state if buy price is too low
+  if(currentTicker.getBuy() <= minSellPrice) {
+    qDebug() << "Price " << currentTicker.getBuy() << " lower than minimum: " << minSellPrice << ". Reverting state!";
+    workState = START;
+  }
+
+  // Only go to next state if we are in the correct state
+  if(workState == WAITINGFORTICKER)
+    workState = CREATESELL;
 }
 
-void WorkOrder::orderInfoReply() {
+void WorkOrder::orderCreateReply(int orderID) {
 
-  int status = -20; // TODO: real status
+  // Check if this is not an old create reply
+  if(workState != WAITINGFORSELL) {
+    if(workState != WAITINGFORBUY) {
+      qDebug() << "Create reply received during wrong state";
+      return;
+    }
+  }
+
+  // Check if order went through ok
+  if(orderID == -1) {
+    workState = ERROR;
+    return;
+  }
+
+  if(orderID != 0) { // Order executed immediatly
+
+    switch(workState) {
+      case WAITINGFORSELL:
+        sellOrderID = orderID;
+        workState = SELLORDER;
+        break;
+      case WAITINGFORBUY:
+        buyOrderID = orderID;
+        workState = BUYORDER;
+        break;
+    }
+  } else {
+
+    switch(workState) {
+      case WAITINGFORSELL:
+        sellOrderID = orderID;
+        workState = SOLD;
+        break;
+      case WAITINGFORBUY:
+        buyOrderID = orderID;
+        workState = COMPLETE;
+        break;
+    }
+  }
+}
+
+void WorkOrder::orderInfoReply(int status) {
+
+  // Check if this is not an old info reply
+  if(workState != SELLORDER) {
+    if(workState != BUYORDER) {
+      qDebug() << "Received old order info reply";
+      return;
+    }
+  }
+
+  qDebug() << "Order status: " << status;
 
   switch(status) {
     case 0:

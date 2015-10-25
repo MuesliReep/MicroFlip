@@ -88,7 +88,9 @@ public:
 
   virtual void startWork() = 0;
 
-  void setConfig(Config *c);
+  void setConfig(Config *C);
+
+  double getFee();
 
 private:
   virtual void updateMarketTicker(QString pair) = 0;
@@ -111,6 +113,8 @@ protected:
 
   uint lastNonce;
   ExchangeTask currentTask;
+
+  double fee;
 
   QList<Order>    activeOrders;
   QList<Balance>  balances;

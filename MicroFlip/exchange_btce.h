@@ -16,23 +16,32 @@ private:
 
   Downloader  d;
 
+  QString apiKey;
+  QString apiSecret;
+
   QNetworkAccessManager* tickerDownloadManager;
-  QNetworkAccessManager* depthDownloadManager;
+  QNetworkAccessManager* createTradeDownloadManager;
+  QNetworkAccessManager* orderInfoDownloadManager;
+
+  uint lastNonce;
+  void createNonce(QByteArray *nonce);
 
   void updateMarketTicker(QString pair);
   void updateMarketDepth (QString pair) ;
   void updateMarketTrades(QString pair);
 
   void updateBalances();
-  void createOrder(QString pair, int type, double rate, double amount);
+  void createOrder(QString Pair, int Type, double Rate, double Amount);
   void cancelOrder(uint orderID);
   void updateActiveOrders(QString pair);
-  void updateOrderInfo(uint orderID);
+  void updateOrderInfo(uint OrderID);
 
   void executeExchangeTask(ExchangeTask *exchangeTask);
 
   bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
   Ticker parseRawTickerData(QJsonObject *rawData);
+  bool checkSuccess(QJsonObject *object);
+  QString getRequestErrorMessage(QJsonObject *object);
 
 public slots:
   void receiveUpdateMarketTicker(QString pair, QObject *sender);
@@ -58,7 +67,9 @@ private slots:
   void updateTick2();
 
 signals:
-  sendTicker(Ticker ticker);
+  void sendTicker(Ticker ticker);
+  void sendOrderID(int orderID);
+  void sendOrderStatus(int status);
 
 };
 
