@@ -27,7 +27,7 @@ void WorkOrder::updateTick() {
 
   switch(workState) {
     case START: {
-      qDebug() << time << " State: START";
+      qDebug() << time + " State: START";
 
       // Get new data
       requestUpdateMarketTicker();
@@ -36,52 +36,52 @@ void WorkOrder::updateTick() {
       break;
       }
     case WAITINGFORTICKER:
-      qDebug() << time << " State: WAITINGFORTICKER";
+      qDebug() << time + " State: WAITINGFORTICKER";
       break;
     case CREATESELL:
-      qDebug() << time << " State: CREATESELL";
+      qDebug() << time + " State: CREATESELL";
       // Create sell order
       createSellOrder(maxAmount);
 
       workState = WAITINGFORSELL;
       break;
     case WAITINGFORSELL:
-      qDebug() << time << " State: WAITINGFORSELL";
+      qDebug() << time + " State: WAITINGFORSELL";
 
       // if orderID = 0, order executed instantly, goto sold state.
       break;
     case SELLORDER:
-      qDebug() << time << " State: SELLORDER";
+      qDebug() << time + " State: SELLORDER";
 
       // Wait for order to be sold
       requestOrderInfo(sellOrderID);
       break;
     case SOLD:
-      qDebug() << time << " State: SOLD";
+      qDebug() << time + " State: SOLD";
       workState = CREATEBUY;
       break;
     case CREATEBUY:
-      qDebug() << time << " State: CREATEBUY";
+      qDebug() << time + " State: CREATEBUY";
       // Calculate buy order & create order
       createBuyOrder();
 
       workState = WAITINGFORBUY;
       break;
     case WAITINGFORBUY:
-      qDebug() << time << " State: WAITINGFORBUY";
+      qDebug() << time + " State: WAITINGFORBUY";
       break;
     case BUYORDER:
-      qDebug() << time << " State: BUYORDER";
+      qDebug() << time + " State: BUYORDER";
       // Wait for order to be sold
       requestOrderInfo(buyOrderID);
       break;
     case COMPLETE:
-      qDebug() << time << " State: COMPLETE";
+      qDebug() << time + " State: COMPLETE";
       timer->stop();
       break;
     case ERROR:
     default:
-      qDebug() << time << " State: ERROR";
+      qDebug() << time + " State: ERROR";
       timer->stop();
       break;
   }
@@ -184,6 +184,11 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
   if(currentTicker.getBuy() <= minSellPrice) {
     qDebug() << "Price " << currentTicker.getBuy() << " lower than minimum: " << minSellPrice << ". Reverting state!";
     workState = START;
+
+    // Pause workorder for 5 minutes
+    timer->stop();
+    QThread::sleep(5*60);
+    timer->start(2500);
   }
 
   // Only go to next state if we are in the correct state
@@ -244,8 +249,6 @@ void WorkOrder::orderInfoReply(int status) {
     }
   }
 
-  qDebug() << "Order status: " << status;
-
   switch(status) {
     case 0:
       // Order active, do nothing
@@ -258,6 +261,7 @@ void WorkOrder::orderInfoReply(int status) {
     case 2:
     case 3:
     default:
+      qDebug() << "Order status: " << status;
       workState = ERROR;
       break;
   }

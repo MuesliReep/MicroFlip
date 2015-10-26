@@ -95,7 +95,7 @@ void Exchange_btce::createOrder(QString Pair, int Type, double Rate, double Amou
   //QString sAmount; sAmount.setNum(Amount,'f',8);
   amount.append(QString::number(Amount,'f',8));
 
-  QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount); qDebug() << "data: " << data;
+  QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount); //qDebug() << "data: " << data;
 
   // Sign the data
   QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
@@ -133,7 +133,7 @@ void Exchange_btce::updateOrderInfo(uint OrderID) {
   QByteArray orderID("order_id=");
   orderID.append(QString::number(OrderID));
 
-  QByteArray data(method +"&"+ nonce + "&" + orderID);  qDebug() << "data: " << data;
+  QByteArray data(method +"&"+ nonce + "&" + orderID);  //qDebug() << "data: " << data;
 
   // Sign the data
   QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();

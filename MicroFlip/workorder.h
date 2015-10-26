@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QDateTime>
+#include <QThread>
 
 #include "exchange.h"
 
