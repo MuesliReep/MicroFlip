@@ -82,6 +82,7 @@ void WorkOrder::updateTick() {
       timer->stop();
 
       QThread::sleep(10*60); // Wait 10 min
+      workState = START;
       timer->start(interval);
       break;
     case ERROR:
