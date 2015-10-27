@@ -10,12 +10,14 @@ WorkOrder::WorkOrder(Exchange *e, QString pair, double maxAmount, double profitT
 
   workState = START;
 
+  interval = 5000;
+
   // Create timer & connect slot
   timer = new QTimer();
 
   connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()));
 
-  timer->start(2500);
+  timer->start(interval);
   // Connect exchangebot signals & slots
 
 }
@@ -78,6 +80,9 @@ void WorkOrder::updateTick() {
     case COMPLETE:
       qDebug() << time + " State: COMPLETE";
       timer->stop();
+
+      QThread::sleep(10*60); // Wait 10 min
+      timer->start(interval);
       break;
     case ERROR:
     default:
@@ -188,7 +193,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
     // Pause workorder for 5 minutes
     timer->stop();
     QThread::sleep(5*60);
-    timer->start(2500);
+    timer->start(interval);
   }
 
   // Only go to next state if we are in the correct state

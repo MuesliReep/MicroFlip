@@ -47,6 +47,8 @@ private:
 
   Ticker currentTicker;
 
+  int interval;
+
   void createSellOrder(double amount);
   void createBuyOrder ();
 
