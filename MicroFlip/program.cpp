@@ -34,5 +34,6 @@ Program::Program(QObject *parent) : QObject(parent) {
     WorkOrder *wo = new WorkOrder(e,pair,amount,profit, minSell);
     wo->setWorkID(i+1);
     workOrders.append(wo);
+    QThread::sleep(5);
   }
 }

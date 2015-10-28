@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QThread>
 
 #include "config.h"
 #include "workorder.h"
