@@ -206,6 +206,17 @@ void Exchange_btce::receiveUpdateActiveOrders(QString pair, QObject *sender){
   exchangeTasks.append(ExchangeTask(6, sender, attr));
 }
 void Exchange_btce::receiveUpdateOrderInfo(uint orderID, QObject *sender){
+
+  // TODO: beter way of doing this
+  // Check if task already exists in list
+  for(int i = 0; i < exchangeTasks.size(); i++) {
+    ExchangeTask task = exchangeTasks.at(i);
+    if(task.getTask() == 7) {
+      if(sender == task.getSender())
+        return;
+    }
+  }
+
   QList<QString> attr; attr.append(QString::number(orderID));
   exchangeTasks.append(ExchangeTask(7, sender, attr));
 }
@@ -353,6 +364,7 @@ void Exchange_btce::UpdateOrderInfoReply(QNetworkReply *reply) {
     }
   } else {
     qDebug() << "OrderInfo Packet error";
+    status = -2;
   }
 
   // Connect & send order ID to the initiator

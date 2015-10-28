@@ -22,11 +22,17 @@ Program::Program(QObject *parent) : QObject(parent) {
   double minSell= 0.0;
   QString pair = "btc_usd";
 
-  amount = 0.998;
+  amount = 0.1;
   profit = 0.00001;
   pair   = "ltc_usd";
   minSell = 3.038;
 
-  WorkOrder *wo = new WorkOrder(e,pair,amount,profit, minSell);
-  workOrders.append(wo);
+  int numWorkers = 5;
+
+  for(int i = 0; i < numWorkers; i++) {
+
+    WorkOrder *wo = new WorkOrder(e,pair,amount,profit, minSell);
+    wo->setWorkID(i+1);
+    workOrders.append(wo);
+  }
 }

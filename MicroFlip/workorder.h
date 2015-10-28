@@ -29,7 +29,8 @@ public:
   WorkOrder(Exchange *e, QString pair, double maxAmount, double profitTarget, double minSellPrice = 0.0);
 
   double getSellPrice() { return sellPrice; }
-
+  void setWorkID(int workID);
+  int getWorkID() { return workID; }
 private:
   Exchange *e;
   WorkState workState;
@@ -37,6 +38,7 @@ private:
 
   int sellOrderID;
   int buyOrderID;
+  int workID;
 
   double maxAmount;
   double profitTarget;
