@@ -31,6 +31,7 @@ Program::Program(QObject *parent) : QObject(parent) {
 
   for(int i = 0; i < numWorkers; i++) {
 
+    std::cout << "Creating Work Order: " << (i+1) << std::endl;
     WorkOrder *wo = new WorkOrder(e,pair,amount,profit, minSell);
     wo->setWorkID(i+1);
     workOrders.append(wo);

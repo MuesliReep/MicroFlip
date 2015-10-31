@@ -1,6 +1,8 @@
 #ifndef WORKORDER_H
 #define WORKORDER_H
 
+#include <iostream>
+
 #include <QObject>
 #include <QTimer>
 #include <QDebug>
