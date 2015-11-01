@@ -48,3 +48,7 @@ HEADERS  += program.h \
     control.h
 
 #FORMS    += mainwindow.ui
+
+CONFIG += console
+
+win32:DEFINES+=ISWIN

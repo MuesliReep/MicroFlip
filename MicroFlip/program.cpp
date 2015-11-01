@@ -16,6 +16,9 @@ Program::Program(QObject *parent) : QObject(parent) {
   e->setConfig(&c);
   e->startWork();
 
+  Display *d = new Display();
+  connect(this, SIGNAL(updateLog(int,QString)), d, SLOT(logUpdate(int,QString)));
+
   // Create a work order
   double amount = 0.01;
   double profit = 0.00001;
@@ -31,8 +34,12 @@ Program::Program(QObject *parent) : QObject(parent) {
 
   for(int i = 0; i < numWorkers; i++) {
 
-    std::cout << "Creating Work Order: " << (i+1) << std::endl;
+    emit updateLog(99, "Creating Work Order: " + (i+1));
     WorkOrder *wo = new WorkOrder(e,i+1,pair,amount,profit, minSell);
+
+    connect(wo, SIGNAL(updateLog(int,QString)),   d, SLOT(logUpdate(int,QString)));
+    connect(wo, SIGNAL(updateState(int,QString)), d, SLOT(stateUpdate(int,QString)));
+
     workOrders.append(wo);
     QThread::sleep(5);
   }

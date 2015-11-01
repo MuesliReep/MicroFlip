@@ -29,12 +29,9 @@ WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, do
 
 void WorkOrder::updateTick() {
 
-  QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
-  //QString  time = now.toString("hh:mm:ss");
-
   switch(workState) {
     case START: {
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: START" << std::endl;
+        emit updateState(workID, "START");
 
       // Get new data
       requestUpdateMarketTicker();
@@ -43,47 +40,47 @@ void WorkOrder::updateTick() {
       break;
       }
     case WAITINGFORTICKER:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: WAITINGFORTICKER" << std::endl;
+      emit updateState(workID, "WAITINGFORTICKER");
       break;
     case CREATESELL:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: CREATESELL" << std::endl;
+      emit updateState(workID, "CREATESELL");
       // Create sell order
       createSellOrder(maxAmount);
 
       workState = WAITINGFORSELL;
       break;
     case WAITINGFORSELL:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: WAITINGFORSELL" << std::endl;
+      emit updateState(workID, "WAITINGFORSELL");
 
       // if orderID = 0, order executed instantly, goto sold state.
       break;
     case SELLORDER:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: SELLORDER" << std::endl;
+      emit updateState(workID, "SELLORDER");
 
       // Wait for order to be sold
       requestOrderInfo(sellOrderID);
       break;
     case SOLD:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: SOLD" << std::endl;
+      emit updateState(workID, "SOLD");
       workState = CREATEBUY;
       break;
     case CREATEBUY:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: CREATEBUY" << std::endl;
+      emit updateState(workID, "CREATEBUY");
       // Calculate buy order & create order
       createBuyOrder();
 
       workState = WAITINGFORBUY;
       break;
     case WAITINGFORBUY:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: WAITINGFORBUY" << std::endl;
+      emit updateState(workID, "WAITINGFORBUY");
       break;
     case BUYORDER:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: BUYORDER" << std::endl;
+      emit updateState(workID, "BUYORDER");
       // Wait for order to be sold
       requestOrderInfo(buyOrderID);
       break;
     case COMPLETE:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: COMPLETE" << std::endl;
+      emit updateState(workID, "COMPLETE");
       timer->stop();
 
 //      QThread::sleep(10*60); // Wait 10 min
@@ -93,7 +90,7 @@ void WorkOrder::updateTick() {
       break;
     case ERROR:
     default:
-      std::cout << time.toStdString() <<  " ID:" << workID << " State: ERROR" << std::endl;
+      emit updateState(workID, "ERROR");
       timer->stop();
       break;
   }
@@ -113,7 +110,7 @@ void WorkOrder::createSellOrder(double amount) {
   // Create order
   int type   = 1; // Sell
 
-  std::cout << "ID:" << workID << " Creating Sell Order: " << amount << " BTC for " << sellPrice << " USD" << std::endl;
+  emit updateLog(workID, " Creating Sell Order: " + QString::number(amount) + " BTC for " + QString::number(sellPrice) + " USD");
 
   // Connect & send order
   requestCreateOrder(type, sellPrice, maxAmount);
@@ -153,9 +150,9 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
   *buyTotal = sellNetto;
   *buyPrice = *buyTotal / *buyAmount;
 
-  std::cout << "ID:" << workID << "\t Buy Amount: \t" << *buyAmount << "\t BTC" << std::endl;
-  std::cout << "ID:" << workID << "\t Buy Price: \t" << *buyPrice << "\t USD" << std::endl;
-  std::cout << "ID:" << workID << "\t Buy Total: \t" << *buyTotal << "\t USD" << std::endl;
+  emit updateLog(workID, "\t Buy Amount: \t" + QString::number(*buyAmount) + "\t BTC");
+  emit updateLog(workID, "\t Buy Price: \t" + QString::number(*buyPrice) + "\t USD");
+  emit updateLog(workID, "\t Buy Total: \t" + QString::number(*buyTotal) + "\t USD");
 }
 
 //----------------------------------//
@@ -190,11 +187,13 @@ void WorkOrder::requestOrderInfo(int orderID) {
 void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
   currentTicker = ticker;
-  std::cout << "ID:" << workID << " New ticker data: " << "Buy: " << currentTicker.getBuy() << "Sell: " << currentTicker.getSell() << "Last: " << currentTicker.getLast() << std::endl;
+  updateLog(workID, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
+                                 + "Sell: " + QString::number(currentTicker.getSell())
+                                 + "Last: " + QString::number(currentTicker.getLast()));
 
   // return to START state if buy price is too low
   if(currentTicker.getBuy() <= minSellPrice) {
-    std::cout << "ID:" << workID << " Price " << currentTicker.getBuy() << " lower than minimum: " << minSellPrice << ". Reverting state!" << std::endl;
+    updateLog(workID, "Price " + QString::number(currentTicker.getBuy()) + " lower than minimum: " + QString::number(minSellPrice) + ". Reverting state!");
     workState = START;
 
     // Pause workorder for 5 minutes
@@ -214,7 +213,7 @@ void WorkOrder::orderCreateReply(int orderID) {
   // Check if this is not an old create reply
   if(workState != WAITINGFORSELL) {
     if(workState != WAITINGFORBUY) {
-      std::cout << "ID:" << workID << " Create reply received during wrong state" << std::endl;
+      updateLog(workID, "Create reply received during wrong state");
       return;
     }
   }
@@ -226,7 +225,7 @@ void WorkOrder::orderCreateReply(int orderID) {
   }
 
   if(orderID == -2) {
-    std::cout << "ID:" << workID << " Continuing with order" << std::endl;
+    updateLog(workID, "Continuing with order");
     return;
   }
 
@@ -263,7 +262,7 @@ void WorkOrder::orderInfoReply(int status) {
   // Check if this is not an old info reply
   if(workState != SELLORDER) {
     if(workState != BUYORDER) {
-      std::cout << "ID:" << workID << " Received old order info reply" << std::endl;
+      updateLog(workID, "Received old order info reply");
       return;
     }
   }
@@ -280,7 +279,7 @@ void WorkOrder::orderInfoReply(int status) {
     case 2:
     case 3:
     default:
-      std::cout << "ID:" << workID << " Order status: " << status << std::endl;
+      updateLog(workID, " Order status: " + QString::number(status));
       workState = ERROR;
       break;
   }

@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "workorder.h"
+#include "display.h"
 
 #include "exchange.h"
 #include "exchange_btce.h"
@@ -23,6 +24,7 @@ private:
   QList<WorkOrder*> workOrders;
 
 signals:
+  void updateLog(int workID, QString log);
 
 public slots:
 };
