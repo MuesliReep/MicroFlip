@@ -43,6 +43,7 @@ Program::Program(QObject *parent) : QObject(parent) {
     connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
     wo->start();
     emit startOrder();
+    disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
 
     workOrders.append(wo);
     QThread::sleep(5);
