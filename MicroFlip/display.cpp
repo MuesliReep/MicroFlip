@@ -18,7 +18,7 @@ Display::Display()
   std::cout << "Test" << std::endl;
 
   // Minus 1 so there is room for 1 qDebug line
-  columns--;
+  lines--;
 }
 
 void Display::updateScreen()
