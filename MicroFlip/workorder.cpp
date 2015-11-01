@@ -12,7 +12,7 @@ WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, do
   workState = START;
 
   intervalShort = 10*1000;  // 10 seconds
-  itnervalLong  = 5*60*100; // 5 minutes
+  intervalLong  = 5*60*100; // 5 minutes
   stdInterval = true;
 }
 
@@ -20,6 +20,7 @@ void WorkOrder::updateTick() {
 
   if(!stdInterval) {
     timer->setInterval(intervalShort);
+    stdInterval = true;
   }
 
   switch(workState) {
@@ -283,7 +284,7 @@ void WorkOrder::startOrder() {
   // Create timer & connect slot
   workThread = new QThread(this);
   timer = new QTimer(0);
-  timer->setInterval(interval);
+  timer->setInterval(intervalShort);
   timer->moveToThread(workThread);
 
   // Connect timer to updateTick

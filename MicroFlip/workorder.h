@@ -52,7 +52,7 @@ private:
 
   Ticker currentTicker;
 
-  int intervalshort;
+  int intervalShort;
   int intervalLong;
   bool stdInterval;
 
