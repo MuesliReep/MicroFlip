@@ -28,13 +28,13 @@ Program::Program(QObject *parent) : QObject(parent) {
   amount = 0.1;
   profit = 0.00001;
   pair   = "ltc_usd";
-  minSell = 3.038;
+  minSell = 4.038;
 
   int numWorkers = 5;
 
   for(int i = 0; i < numWorkers; i++) {
 
-    emit updateLog(99, "Creating Work Order: " + (i+1));
+    emit updateLog(99, "Creating Work Order: " + QString::number(i+1));
     WorkOrder *wo = new WorkOrder(e,i+1,pair,amount,profit, minSell);
 
     connect(wo, SIGNAL(updateLog(int,QString)),   d, SLOT(logUpdate(int,QString)));
