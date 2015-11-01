@@ -40,6 +40,10 @@ Program::Program(QObject *parent) : QObject(parent) {
     connect(wo, SIGNAL(updateLog(int,QString)),   d, SLOT(logUpdate(int,QString)));
     connect(wo, SIGNAL(updateState(int,QString)), d, SLOT(stateUpdate(int,QString)));
 
+    connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+    wo->start();
+    emit startOrder();
+
     workOrders.append(wo);
     QThread::sleep(5);
   }

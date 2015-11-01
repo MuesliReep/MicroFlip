@@ -24,7 +24,7 @@
 
 enum WorkState { ERROR = -1, START, WAITINGFORTICKER, CREATESELL, WAITINGFORSELL, SELLORDER, SOLD, CREATEBUY, WAITINGFORBUY, BUYORDER, COMPLETE };
 
-class WorkOrder : public QObject
+class WorkOrder : public QThread
 {
   Q_OBJECT
 public:
@@ -71,6 +71,8 @@ public slots:
 
   void orderCreateReply(int orderID);
   void orderInfoReply(int status);
+
+  void startOrder();
 
 signals:
   void sendUpdateMarketTicker(QString pair, QObject *sender);

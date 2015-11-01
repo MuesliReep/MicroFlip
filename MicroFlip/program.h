@@ -25,7 +25,7 @@ private:
 
 signals:
   void updateLog(int workID, QString log);
-
+  void startOrder();
 public slots:
 };
 

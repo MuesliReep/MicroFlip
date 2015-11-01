@@ -12,19 +12,6 @@ WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, do
   workState = START;
 
   interval = 10*1000; // 10 seconds
-
-  // Create timer & connect slot
-  workThread = new QThread(this);
-  timer = new QTimer(0);
-  timer->setInterval(interval);
-  timer->moveToThread(workThread);
-
-  // Connect timer to updateTick
-  connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()), Qt::DirectConnection);
-
-  // Connect thread to timer
-  QObject::connect(workThread, SIGNAL(started()), timer, SLOT(start()));
-  workThread->start();
 }
 
 void WorkOrder::updateTick() {
@@ -83,8 +70,8 @@ void WorkOrder::updateTick() {
       emit updateState(workID, "COMPLETE");
       timer->stop();
 
-//      QThread::sleep(10*60); // Wait 10 min
-      QThread::sleep(10*60);
+//      this->sleep(10*60); // Wait 10 min
+      this->sleep(10*60);
       workState = START;
       timer->start(interval);
       break;
@@ -198,8 +185,8 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
     // Pause workorder for 5 minutes
     timer->stop();
-//    QThread::sleep(5*60);
-    QThread::sleep(5*60);
+//    this->sleep(5*60);
+    this->sleep(5*60);
     timer->start(interval);
   }
 
@@ -283,4 +270,20 @@ void WorkOrder::orderInfoReply(int status) {
       workState = ERROR;
       break;
   }
+}
+
+void WorkOrder::startOrder() {
+
+  // Create timer & connect slot
+  workThread = new QThread(this);
+  timer = new QTimer(0);
+  timer->setInterval(interval);
+  timer->moveToThread(workThread);
+
+  // Connect timer to updateTick
+  connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()), Qt::DirectConnection);
+
+  // Connect thread to timer
+  QObject::connect(workThread, SIGNAL(started()), timer, SLOT(start()));
+  workThread->start();
 }
