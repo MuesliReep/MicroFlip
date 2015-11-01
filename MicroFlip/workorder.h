@@ -28,15 +28,16 @@ class WorkOrder : public QObject
 {
   Q_OBJECT
 public:
-  WorkOrder(Exchange *e, QString pair, double maxAmount, double profitTarget, double minSellPrice = 0.0);
+  WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice = 0.0);
 
   double getSellPrice() { return sellPrice; }
-  void setWorkID(int workID);
   int getWorkID() { return workID; }
+
 private:
   Exchange *e;
   WorkState workState;
   QTimer *timer;
+  QThread *workThread;
 
   int sellOrderID;
   int buyOrderID;

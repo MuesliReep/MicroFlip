@@ -1,8 +1,9 @@
 #include "workorder.h"
 
-WorkOrder::WorkOrder(Exchange *e, QString pair, double maxAmount, double profitTarget, double minSellPrice) {
+WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice) {
 
   this->e = e;
+  this->workID = workID;
   this->maxAmount = maxAmount;
   this->profitTarget = profitTarget;
   this->pair = pair;
@@ -10,22 +11,20 @@ WorkOrder::WorkOrder(Exchange *e, QString pair, double maxAmount, double profitT
 
   workState = START;
 
-  interval = 10*1000;
+  interval = 10*1000; // 10 seconds
 
   // Create timer & connect slot
-  timer = new QTimer();
+  workThread = new QThread(this);
+  timer = new QTimer(0);
+  timer->setInterval(interval);
+  timer->moveToThread(workThread);
 
-  connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()));
+  // Connect timer to updateTick
+  connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()), Qt::DirectConnection);
 
-  timer->start(interval);
-  // Connect exchangebot signals & slots
-
-  workID = -1;
-}
-
-void WorkOrder::setWorkID(int workID) {
-
-  this->workID = workID;
+  // Connect thread to timer
+  QObject::connect(workThread, SIGNAL(started()), timer, SLOT(start()));
+  workThread->start();
 }
 
 void WorkOrder::updateTick() {
@@ -35,7 +34,7 @@ void WorkOrder::updateTick() {
 
   switch(workState) {
     case START: {
-      std::cout << time <<  " ID:" << workID << " State: START" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: START" << std::endl;
 
       // Get new data
       requestUpdateMarketTicker();
@@ -44,56 +43,57 @@ void WorkOrder::updateTick() {
       break;
       }
     case WAITINGFORTICKER:
-      std::cout << time <<  " ID:" << workID << " State: WAITINGFORTICKER" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: WAITINGFORTICKER" << std::endl;
       break;
     case CREATESELL:
-      std::cout << time <<  " ID:" << workID << " State: CREATESELL" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: CREATESELL" << std::endl;
       // Create sell order
       createSellOrder(maxAmount);
 
       workState = WAITINGFORSELL;
       break;
     case WAITINGFORSELL:
-      std::cout << time <<  " ID:" << workID << " State: WAITINGFORSELL" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: WAITINGFORSELL" << std::endl;
 
       // if orderID = 0, order executed instantly, goto sold state.
       break;
     case SELLORDER:
-      std::cout << time <<  " ID:" << workID << " State: SELLORDER" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: SELLORDER" << std::endl;
 
       // Wait for order to be sold
       requestOrderInfo(sellOrderID);
       break;
     case SOLD:
-      std::cout << time <<  " ID:" << workID << " State: SOLD" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: SOLD" << std::endl;
       workState = CREATEBUY;
       break;
     case CREATEBUY:
-      std::cout << time <<  " ID:" << workID << " State: CREATEBUY" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: CREATEBUY" << std::endl;
       // Calculate buy order & create order
       createBuyOrder();
 
       workState = WAITINGFORBUY;
       break;
     case WAITINGFORBUY:
-      std::cout << time <<  " ID:" << workID << " State: WAITINGFORBUY" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: WAITINGFORBUY" << std::endl;
       break;
     case BUYORDER:
-      std::cout << time <<  " ID:" << workID << " State: BUYORDER" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: BUYORDER" << std::endl;
       // Wait for order to be sold
       requestOrderInfo(buyOrderID);
       break;
     case COMPLETE:
-      std::cout << time <<  " ID:" << workID << " State: COMPLETE" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: COMPLETE" << std::endl;
       timer->stop();
 
-      QThread::sleep(10*60); // Wait 10 min
+//      QThread::sleep(10*60); // Wait 10 min
+      QThread::sleep(10*60);
       workState = START;
       timer->start(interval);
       break;
     case ERROR:
     default:
-      std::cout << time <<  " ID:" << workID << " State: ERROR" << std::endl;
+      std::cout << time.toStdString() <<  " ID:" << workID << " State: ERROR" << std::endl;
       timer->stop();
       break;
   }
@@ -199,6 +199,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
     // Pause workorder for 5 minutes
     timer->stop();
+//    QThread::sleep(5*60);
     QThread::sleep(5*60);
     timer->start(interval);
   }
