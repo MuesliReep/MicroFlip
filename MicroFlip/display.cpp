@@ -16,6 +16,9 @@ Display::Display()
 #endif
   std::cout << "\x1b[31m" << std::endl;
   std::cout << "Test" << std::endl;
+
+  // Minus 1 so there is room for 1 qDebug line
+  columns--;
 }
 
 void Display::updateScreen()

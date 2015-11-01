@@ -11,10 +11,16 @@ WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, do
 
   workState = START;
 
-  interval = 10*1000; // 10 seconds
+  intervalShort = 10*1000;  // 10 seconds
+  itnervalLong  = 5*60*100; // 5 minutes
+  stdInterval = true;
 }
 
 void WorkOrder::updateTick() {
+
+  if(!stdInterval) {
+    timer->setInterval(intervalShort);
+  }
 
   switch(workState) {
     case START: {
@@ -68,12 +74,12 @@ void WorkOrder::updateTick() {
       break;
     case COMPLETE:
       emit updateState(workID, "COMPLETE");
-      timer->stop();
 
 //      this->sleep(10*60); // Wait 10 min
-      this->sleep(10*60);
+      timer->setInterval(intervalLong);
+      stdInterval = false;
+
       workState = START;
-      timer->start(interval);
       break;
     case ERROR:
     default:
@@ -184,10 +190,10 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
     workState = START;
 
     // Pause workorder for 5 minutes
-    timer->stop();
+
 //    this->sleep(5*60);
-    this->sleep(5*60);
-    timer->start(interval);
+    timer->setInterval(intervalLong);
+    stdInterval = false;
   }
 
   // Only go to next state if we are in the correct state
