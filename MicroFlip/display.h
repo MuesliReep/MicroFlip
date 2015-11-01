@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include <QObject>
-#include <Qlist>
+#include <QList>
 #include <QDateTime>
 
 enum consoleColours { BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE };
