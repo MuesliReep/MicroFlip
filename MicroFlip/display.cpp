@@ -70,7 +70,8 @@ void Display::drawHeader() {
   resetAttributes();
 
   // Set background to blue
-  std::cout << "\x1b[44m";
+//  std::cout << "\x1b[44m";
+  setBackgroundColour(BLUE);
 
   // Set foreground to white
   std::cout << "\x1b[37m";
@@ -111,12 +112,12 @@ void Display::drawLog() {
   std::cout << std::endl;
   currentLine++;
 
-  for(int i = 0; i < woList.size(); i++) {
+  for(int i = 0; i < logList.size(); i++) {
 
     if(currentLine > lines)
       break;
 
-    QString log = woList.at(i);
+    QString log = logList.at(i);
 
     std::cout << log.toStdString() << std::endl;
     currentLine++;
