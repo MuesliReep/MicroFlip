@@ -25,12 +25,12 @@ Program::Program(QObject *parent) : QObject(parent) {
   double minSell= 0.0;
   QString pair = "btc_usd";
 
-  amount = 0.1;
+  amount = 0.05;
   profit = 0.00001;
   pair   = "ltc_usd";
   minSell = 4.038;
 
-  int numWorkers = 5;
+  int numWorkers = 20;
 
   for(int i = 0; i < numWorkers; i++) {
 
