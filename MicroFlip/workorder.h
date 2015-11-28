@@ -28,7 +28,7 @@ class WorkOrder : public QThread
 {
   Q_OBJECT
 public:
-  WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice = 0.0);
+  WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice = 0.0, bool highSpeed = false);
 
   double getSellPrice() { return sellPrice; }
   int getWorkID() { return workID; }
@@ -36,24 +36,25 @@ public:
 private:
   Exchange *e;
   WorkState workState;
-  QTimer *timer;
-  QThread *workThread;
+  QTimer   *timer;
+  QThread  *workThread;
 
   int sellOrderID;
   int buyOrderID;
   int workID;
 
-  double maxAmount;
-  double profitTarget;
-  double sellPrice;
-  double buyPrice;
+  double  maxAmount;
+  double  profitTarget;
+  double  sellPrice;
+  double  buyPrice;
   QString pair;
-  double minSellPrice;
+  double  minSellPrice;
+  bool    highSpeed;
 
   Ticker currentTicker;
 
-  int intervalShort;
-  int intervalLong;
+  int  intervalShort;
+  int  intervalLong;
   bool stdInterval;
 
   void createSellOrder(double amount);

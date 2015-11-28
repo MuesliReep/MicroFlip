@@ -2,18 +2,19 @@
 
 WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice) {
 
-  this->e = e;
-  this->workID = workID;
-  this->maxAmount = maxAmount;
+  this->e            = e;
+  this->workID       = workID;
+  this->maxAmount    = maxAmount;
   this->profitTarget = profitTarget;
-  this->pair = pair;
+  this->pair         = pair;
   this->minSellPrice = minSellPrice;
+  this->highSpeed    = highSpeed;
 
   workState = START;
 
-  intervalShort = 10*1000;  // 10 seconds
-  intervalLong  = 5*60*1000; // 5 minutes
-  stdInterval = true;
+  intervalShort = 10 * 1000;     // 10 seconds
+  intervalLong  = 5 * 60 * 1000; // 5 minutes
+  stdInterval   = true;
 }
 
 void WorkOrder::updateTick() {
@@ -255,10 +256,10 @@ void WorkOrder::orderInfoReply(int status) {
     }
   }
 
-  if(orderID == -2) {
-    updateLog(workID, "Continuing with order");
-    return;
-  }
+//  if(status == -2) {
+//    updateLog(workID, "Continuing with order");
+//    return;
+//  }
 
   switch(status) {
     case 0:
@@ -269,6 +270,9 @@ void WorkOrder::orderInfoReply(int status) {
       // If this is a sellorder goto sold state, if buy order goto complete state
       workState = (workState == SELLORDER) ? SOLD : COMPLETE;
       break;
+    case -2:
+      // Packet error, continue
+      updateLog(workID, "Continuing with order");
     case 2:
     case 3:
     default:

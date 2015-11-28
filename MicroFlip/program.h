@@ -13,6 +13,7 @@
 
 #include "exchange.h"
 #include "exchange_btce.h"
+#include "exchange_okcoin.h"
 
 class Program : public QObject
 {

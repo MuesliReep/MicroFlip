@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     display.cpp \
     exchange.cpp \
     exchange_btce.cpp \
-    control.cpp
+    control.cpp \
+    exchange_okcoin.cpp
 
 HEADERS  += program.h \
     #mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS  += program.h \
     display.h \
     exchange.h \
     exchange_btce.h \
-    control.h
+    control.h \
+    exchange_okcoin.h
 
 #FORMS    += mainwindow.ui
 
