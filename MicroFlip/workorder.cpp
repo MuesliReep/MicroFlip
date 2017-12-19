@@ -1,6 +1,6 @@
 #include "workorder.h"
 
-WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice) {
+WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice, bool highSpeed) {
 
   this->e            = e;
   this->workID       = workID;

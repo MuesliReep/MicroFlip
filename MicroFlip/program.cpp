@@ -50,34 +50,34 @@ Program::Program(QObject *parent) : QObject(parent) {
   }
 
   // OKCoin CNY workers
+// Disabled for now 19-12-2017
+//  e = new Exchange_OKCoin();
+//  e->setConfig(&c);
+//  e->startWork();
 
-  e = new Exchange_OKCoin();
-  e->setConfig(&c);
-  e->startWork();
+//  amount  = 0.01;
+//  profit  = 0.00001;
+//  pair    = "btc_cny";
+//  minSell = 0.0;
 
-  amount  = 0.01;
-  profit  = 0.00001;
-  pair    = "btc_cny";
-  minSell = 0.0;
+//  numWorkers = 1;
 
-  numWorkers = 1;
+//  bool highSpeed = true;
 
-  bool highSpeed = true;
+//  for(int i = 0; i < numWorkers; i++) {
 
-  for(int i = 0; i < numWorkers; i++) {
+//    emit updateLog(99, "Creating Work Order: " + QString::number(i+1));
+//    WorkOrder *wo = new WorkOrder(e,i+1,pair,amount,profit, minSell, highSpeed);
 
-    emit updateLog(99, "Creating Work Order: " + QString::number(i+1));
-    WorkOrder *wo = new WorkOrder(e,i+1,pair,amount,profit, minSell, highSpeed);
+//    connect(wo, SIGNAL(updateLog(int,QString)),   d, SLOT(logUpdate(int,QString)));
+//    connect(wo, SIGNAL(updateState(int,QString)), d, SLOT(stateUpdate(int,QString)));
 
-    connect(wo, SIGNAL(updateLog(int,QString)),   d, SLOT(logUpdate(int,QString)));
-    connect(wo, SIGNAL(updateState(int,QString)), d, SLOT(stateUpdate(int,QString)));
+//    connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+//    wo->start();
+//    emit startOrder();
+//    disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
 
-    connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
-    wo->start();
-    emit startOrder();
-    disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
-
-    workOrders.append(wo);
-    QThread::sleep(5);
-  }
+//    workOrders.append(wo);
+//    QThread::sleep(5);
+//  }
 }
