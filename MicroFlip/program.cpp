@@ -1,5 +1,7 @@
 #include "program.h"
 
+#include "exchange_wex.h"
+
 Program::Program(QObject *parent) : QObject(parent) {
 
   // Load configuration from file (if any)
@@ -12,30 +14,30 @@ Program::Program(QObject *parent) : QObject(parent) {
 //  e->startBot();
 
   // Create an exchange interface
-  Exchange *e = new Exchange_btce();
-  e->setConfig(&c);
-  e->startWork();
+  Exchange *exchange = new Exchange_wex();
+  exchange->setConfig(&c);
+  exchange->startWork();
 
   Display *d = new Display();
   connect(this, SIGNAL(updateLog(int,QString)), d, SLOT(logUpdate(int,QString)));
 
   // Create a work order
-  double amount = 0.01;
+  double amount = 0.001;
   double profit = 0.00001;
   double minSell= 0.0;
   QString pair = "btc_usd";
 
-  amount  = 0.1;
-  profit  = 0.00001;
-  pair    = "ltc_usd";
-  minSell = 4.038;
+//  amount  = 0.1;
+//  profit  = 0.00001;
+//  pair    = "ltc_usd";
+//  minSell = 0.0;//4.038;
 
-  int numWorkers = 20;
+  int numWorkers = 2; // Was 20
 
   for(int i = 0; i < numWorkers; i++) {
 
     emit updateLog(99, "Creating Work Order: " + QString::number(i+1));
-    WorkOrder *wo = new WorkOrder(e,i+1,pair,amount,profit, minSell);
+    WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, minSell);
 
     connect(wo, SIGNAL(updateLog(int,QString)),   d, SLOT(logUpdate(int,QString)));
     connect(wo, SIGNAL(updateState(int,QString)), d, SLOT(stateUpdate(int,QString)));

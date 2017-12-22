@@ -148,3 +148,29 @@ uint HistorySource::getHistoryCoolDownTime() { return historyCoolDownTime; }
 void HistorySource::setHistoryLastLoadedTimeStamp(int timeStamp) { historyLastLoadedTimeStamp = timeStamp; }
 uint HistorySource::getHistoryLastLoadedTimeStamp() { return historyLastLoadedTimeStamp; }
 int  HistorySource::getSourceID() { return sourceID; }
+
+/* Example:
+
+{
+    "apiKey": "QN1M3IS6-1KVW0SKR-NY3VAY9J-S4O1OL7T-70370K8I",
+    "apiSecret": "a1e313937830a75a810b4409e707f0ee7eda016177a608f4c7f3b6c3c0508f6c",
+    "coolDownTime": 2,
+    "historySources": {
+        "historySourceID": 0,
+        "sourcesList": [
+            {
+                "historyCoolDownTime": 2,
+                "historyLastLoadedTimeStamp": 0,
+                "sourceID": 0
+            },
+            {
+                "historyCoolDownTime": 900,
+                "historyLastLoadedTimeStamp": 0,
+                "sourceID": 1
+            }
+        ]
+    },
+    "lastLoadedTimeStamp": 1422385480
+}
+
+ */
