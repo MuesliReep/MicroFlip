@@ -1,10 +1,7 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#ifndef ISWIN
 #include <sys/ioctl.h>
-#endif
-
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
@@ -41,6 +38,7 @@ private:
   void drawLog();
   void setForegroundColour(int colour);
   void setBackgroundColour(int colour);
+  void getTerminalSize();
 public slots:
   void logUpdate(int workID, QString state);
   void stateUpdate(int workID, QString state);

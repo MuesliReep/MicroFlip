@@ -2,20 +2,22 @@
 
 Display::Display()
 {
-#ifndef ISWIN
+    getTerminalSize();
+
+    printf ("lines %d\n", lines);
+    printf ("columns %d\n", columns);
+
+    std::cout << "\x1b[31m" << std::endl;
+    std::cout << "Test"     << std::endl;
+}
+
+void Display::getTerminalSize() {
+
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-  printf ("lines %d\n", w.ws_row);
-  printf ("columns %d\n", w.ws_col);
   columns = (int)w.ws_col;
   lines   = (int)w.ws_row;
-#else
-  columns = 50;
-  lines = 24;
-#endif
-  std::cout << "\x1b[31m" << std::endl;
-  std::cout << "Test" << std::endl;
 
   // Minus 1 so there is room for 1 qDebug line
   lines--;
@@ -23,6 +25,7 @@ Display::Display()
 
 void Display::updateScreen()
 {
+  getTerminalSize();
   clearScreen();
   drawHeader();
   drawWorkOrders();
