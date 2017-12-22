@@ -49,10 +49,10 @@ void Exchange_btce::createNonce(QByteArray *nonce) {
 void Exchange_btce::updateMarketTicker(QString pair) {
 
   // Create the request to download new data
-  QNetworkRequest request = d.generateRequest(QUrl("https://btc-e.com/api/3/ticker/"+pair));
+  QNetworkRequest request = downloader.generateRequest(QUrl("https://btc-e.com/api/3/ticker/"+pair));
 
   // Execute the download
-  d.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
+  downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
 }
 
 void Exchange_btce::updateMarketDepth(QString pair) {
@@ -101,15 +101,15 @@ void Exchange_btce::createOrder(QString Pair, int Type, double Rate, double Amou
   QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
 
   // Create request
-  QNetworkRequest request = d.generateRequest(QUrl("https://btc-e.com/tapi/3/"));
+  QNetworkRequest request = downloader.generateRequest(QUrl("https://btc-e.com/tapi/3/"));
 
   // Add headers
-  d.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
-  d.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
-  d.addHeaderToRequest(&request, QByteArray("Sign"), sign);
+  downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+  downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
+  downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
   // Execute the download
-  d.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
+  downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
 }
 
 void Exchange_btce::cancelOrder(uint orderID) {
@@ -139,15 +139,15 @@ void Exchange_btce::updateOrderInfo(uint OrderID) {
   QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
 
   // Create request
-  QNetworkRequest request = d.generateRequest(QUrl("https://btc-e.com/tapi/3/"));
+  QNetworkRequest request = downloader.generateRequest(QUrl("https://btc-e.com/tapi/3/"));
 
   // Add headers
-  d.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
-  d.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
-  d.addHeaderToRequest(&request, QByteArray("Sign"), sign);
+  downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+  downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
+  downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
   // Execute the download
-  d.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
+  downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
 }
 
 void Exchange_btce::executeExchangeTask(ExchangeTask *exchangeTask) {

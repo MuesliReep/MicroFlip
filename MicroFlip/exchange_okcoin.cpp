@@ -48,11 +48,13 @@ void Exchange_OKCoin::updateMarketTicker(QString pair) {
 
 void Exchange_OKCoin::updateMarketDepth(QString pair) {
 
+    (void)pair;
   // TODO
 }
 
 void Exchange_OKCoin::updateMarketTrades(QString pair) {
 
+    (void)pair;
   // TODO
 }
 
@@ -105,11 +107,13 @@ void Exchange_OKCoin::createOrder(QString Pair, int Type, double Rate, double Am
 
 void Exchange_OKCoin::cancelOrder(uint orderID) {
 
+    (void)orderID;
   // TODO
 }
 
 void Exchange_OKCoin::updateActiveOrders(QString pair) {
 
+    (void)pair;
   // TODO
 }
 

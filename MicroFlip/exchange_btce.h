@@ -14,7 +14,7 @@ public:
   void startWork();
 private:
 
-  Downloader  d;
+  Downloader downloader;
 
   QString apiKey;
   QString apiSecret;
