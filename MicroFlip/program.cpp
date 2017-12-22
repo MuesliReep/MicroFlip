@@ -24,7 +24,7 @@ Program::Program(QObject *parent) : QObject(parent) {
   // Create a work order
   double amount = 0.001;
   double profit = 0.00001;
-  double minSell= 0.0;
+  double minSell= 25000.0;
   QString pair = "btc_usd";
 
 //  amount  = 0.1;
@@ -32,7 +32,7 @@ Program::Program(QObject *parent) : QObject(parent) {
 //  pair    = "ltc_usd";
 //  minSell = 0.0;//4.038;
 
-  int numWorkers = 2; // Was 20
+  int numWorkers = 5; // Was 20
 
   for(int i = 0; i < numWorkers; i++) {
 

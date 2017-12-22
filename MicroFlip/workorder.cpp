@@ -1,27 +1,47 @@
 #include "workorder.h"
 
-WorkOrder::WorkOrder(Exchange *e, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice, bool highSpeed) {
+///
+/// \brief WorkOrder::WorkOrder
+/// \param exchange
+/// \param workID
+/// \param pair
+/// \param maxAmount
+/// \param profitTarget
+/// \param minSellPrice
+/// \param sellTTL Time in minutes a Sell order may live
+/// \param buyTTL Time in minutes a Buy order may live
+/// \param highSpeed
+///
+WorkOrder::WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice, int sellTTL, int buyTTL, bool highSpeed) {
 
-  this->e            = e;
+  this->exchange     = exchange;
   this->workID       = workID;
   this->maxAmount    = maxAmount;
   this->profitTarget = profitTarget;
   this->pair         = pair;
   this->minSellPrice = minSellPrice;
+  this->sellTTL      = sellTTL;
+  this->buyTTL       = buyTTL;
   this->highSpeed    = highSpeed;
 
   workState = START;
 
-  intervalShort = 10 * 1000;     // 10 seconds
-  intervalLong  = 5 * 60 * 1000; // 5 minutes
-  stdInterval   = true;
+  intervalShort       = 10 * 1000;     // 10 seconds
+  intervalLong        = 5 * 60 * 1000; // 5 minutes
+  stdInterval         = true;
+  longIntervalRequest = false;
 }
 
 void WorkOrder::updateTick() {
 
-  if(!stdInterval) {
+  if(!stdInterval && longIntervalRequest) {
+    timer->setInterval(intervalLong - intervalShort);
+    stdInterval         = false;
+    longIntervalRequest = false;
+  } else if(!stdInterval && !longIntervalRequest) {
     timer->setInterval(intervalShort);
-    stdInterval = true;
+    stdInterval         = true;
+    longIntervalRequest = false;
   }
 
   switch(workState) {
@@ -78,8 +98,9 @@ void WorkOrder::updateTick() {
       emit updateState(workID, "COMPLETE");
 
 //      this->sleep(10*60); // Wait 10 min
-      timer->setInterval(intervalLong);
-      stdInterval = false;
+      //timer->setInterval(intervalLong);
+      stdInterval         = false;
+      longIntervalRequest = true;
 
       workState = START;
       break;
@@ -115,7 +136,7 @@ void WorkOrder::createBuyOrder() {
 
   double buyAmount;
   double buyTotal;
-  double fee = e->getFee();
+  double fee = exchange->getFee();
 
   calculateMinimumBuyTrade(sellPrice, maxAmount,fee, &buyPrice, &buyAmount, &buyTotal, profitTarget);
 
@@ -156,23 +177,23 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
 
 void WorkOrder::requestUpdateMarketTicker() {
 
-  connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), e, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
+  connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
   emit sendUpdateMarketTicker(pair, this);
-  disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), e, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
+  disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
 }
 
 void WorkOrder::requestCreateOrder(int type, double rate, double amount) {
 
-  connect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), e, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
+  connect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
   emit sendCreateOrder(pair, type, rate, amount, this);
-  disconnect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), e, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
+  disconnect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
 }
 
 void WorkOrder::requestOrderInfo(int orderID) {
 
-  connect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), e, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
+  connect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
   emit sendUpdateOrderInfo((uint)orderID, this);
-  disconnect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), e, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
+  disconnect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
 }
 
 //----------------------------------//
@@ -194,8 +215,9 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
     // Pause workorder for 5 minutes
 
 //    this->sleep(5*60);
-    timer->setInterval(intervalLong);
-    stdInterval = false;
+    //timer->setInterval(intervalLong);
+    stdInterval         = false;
+    longIntervalRequest = true;
   }
 
   // Only go to next state if we are in the correct state
