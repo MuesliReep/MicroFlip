@@ -82,8 +82,10 @@ void Display::drawHeader() {
   // Set foreground to white
   std::cout << "\x1b[37m";
 
+  std::cout << "  MicroFlip";
+
   // Draw header
-  for(int i=0; i<columns; i++) {
+  for(int i=11; i<columns; i++) { // MicroFlip text is 11 characters
     std::cout << ' ';
   }
 
