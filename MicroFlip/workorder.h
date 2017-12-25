@@ -52,6 +52,7 @@ private:
   int     sellTTL;
   int     buyTTL;
   bool    highSpeed;
+  bool    dynamicMinSell;
 
   Ticker currentTicker;
 

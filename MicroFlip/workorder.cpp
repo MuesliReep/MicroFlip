@@ -7,7 +7,7 @@
 /// \param pair
 /// \param maxAmount
 /// \param profitTarget
-/// \param minSellPrice
+/// \param minSellPrice Static minimum selling price. Set to a negative number to use a dynamic price
 /// \param sellTTL Time in minutes a Sell order may live
 /// \param buyTTL Time in minutes a Buy order may live
 /// \param highSpeed
@@ -25,6 +25,8 @@ WorkOrder::WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmo
   this->sellTTL      = sellTTL;
   this->buyTTL       = buyTTL;
   this->highSpeed    = highSpeed;
+
+  dynamicMinSell = this->minSellPrice < 0 ? true : false;
 
   workState = START;
 
@@ -206,8 +208,15 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
   currentTicker = ticker;
   updateLog(workID, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
-                                 + "Sell: " + QString::number(currentTicker.getSell())
-                                 + "Last: " + QString::number(currentTicker.getLast()));
+                                 + " Sell: " + QString::number(currentTicker.getSell())
+                                 + " Last: " + QString::number(currentTicker.getLast()));
+
+  // If we are using a dynamic minimum sell price, calculate it here
+  // TODO: Use something smarter than just using the 24h average
+  if(dynamicMinSell) {
+    minSellPrice = currentTicker.getAvg();
+    updateLog(workID, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice));
+  }
 
   // return to START state if buy price is too low
   if(currentTicker.getBuy() <= minSellPrice) {
