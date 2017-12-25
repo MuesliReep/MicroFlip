@@ -7,13 +7,8 @@
 #include <QList>
 #include <QThread>
 
-#include "config.h"
 #include "workorder.h"
-#include "display.h"
-
 #include "exchange.h"
-#include "exchange_btce.h"
-//#include "exchange_okcoin.h"
 
 class Program : public QObject
 {

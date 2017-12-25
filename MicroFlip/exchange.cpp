@@ -49,5 +49,3 @@ QList<QString> ExchangeTask::getAttributes() const
 {
   return attributes;
 }
-
-

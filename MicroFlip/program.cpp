@@ -1,5 +1,10 @@
 #include "program.h"
 
+#include "display.h"
+#include "config.h"
+
+#include "exchange_btce.h"
+//#include "exchange_okcoin.h"
 #include "exchange_wex.h"
 
 Program::Program(QObject *parent) : QObject(parent) {
@@ -18,8 +23,8 @@ Program::Program(QObject *parent) : QObject(parent) {
   exchange->setConfig(&c);
   exchange->startWork();
 
-  Display *d = new Display();
-  connect(this, SIGNAL(updateLog(int,QString)), d, SLOT(logUpdate(int,QString)));
+  Display *display = new Display();
+  connect(this, SIGNAL(updateLog(int,QString)), display, SLOT(logUpdate(int,QString)));
 
   // Create a work order
   double amount = 0.001;
@@ -39,8 +44,8 @@ Program::Program(QObject *parent) : QObject(parent) {
     emit updateLog(99, "Creating Work Order: " + QString::number(i+1));
     WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, minSell);
 
-    connect(wo, SIGNAL(updateLog(int,QString)),   d, SLOT(logUpdate(int,QString)));
-    connect(wo, SIGNAL(updateState(int,QString)), d, SLOT(stateUpdate(int,QString)));
+    connect(wo, SIGNAL(updateLog(int,QString)),   display, SLOT(logUpdate(int,QString)));
+    connect(wo, SIGNAL(updateState(int,QString)), display, SLOT(stateUpdate(int,QString)));
 
     connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
     wo->start();
