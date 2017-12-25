@@ -2,8 +2,8 @@
 
 ///
 /// \brief WorkOrder::WorkOrder
-/// \param exchange
-/// \param workID
+/// \param exchange Pointer to the exchange interface
+/// \param workID This workers assigned ID
 /// \param pair
 /// \param maxAmount
 /// \param profitTarget
@@ -12,7 +12,9 @@
 /// \param buyTTL Time in minutes a Buy order may live
 /// \param highSpeed
 ///
-WorkOrder::WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget, double minSellPrice, int sellTTL, int buyTTL, bool highSpeed) {
+WorkOrder::WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount,
+                     double profitTarget, double minSellPrice, int sellTTL,
+                     int buyTTL, bool highSpeed) {
 
   this->exchange     = exchange;
   this->workID       = workID;

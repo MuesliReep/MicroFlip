@@ -35,7 +35,7 @@ void Display::updateScreen()
 void Display::logUpdate(int workID, QString log) {
 
   QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
-  QString logLine = time + " ID:" + QString::number(workID) + " " + log;
+  QString logLine = "[" + time + "]" + " ID:" + QString::number(workID) + " " + log;
 
   logList.prepend(logLine);
 
