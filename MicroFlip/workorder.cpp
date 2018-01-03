@@ -200,6 +200,10 @@ void WorkOrder::requestOrderInfo(int orderID) {
   disconnect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
 }
 
+void WorkOrder::requestCancelOrder(int orderID) {
+
+}
+
 //----------------------------------//
 //             Replies              //
 //----------------------------------//
@@ -256,12 +260,14 @@ void WorkOrder::orderCreateReply(int orderID) {
 
     switch(workState) {
       case WAITINGFORSELL:
-        sellOrderID = orderID;
-        workState = SELLORDER;
+        sellOrderID   = orderID;
+        workState     = SELLORDER;
+        sellOrderTime = QDateTime::currentDateTime();
         break;
       case WAITINGFORBUY:
-        buyOrderID = orderID;
-        workState = BUYORDER;
+        buyOrderID   = orderID;
+        workState    = BUYORDER;
+        buyOrderTime = QDateTime::currentDateTime();
         break;
     }
   } else {
@@ -269,11 +275,11 @@ void WorkOrder::orderCreateReply(int orderID) {
     switch(workState) {
       case WAITINGFORSELL:
         sellOrderID = orderID;
-        workState = SOLD;
+        workState   = SOLD;
         break;
       case WAITINGFORBUY:
         buyOrderID = orderID;
-        workState = COMPLETE;
+        workState  = COMPLETE;
         break;
     }
   }

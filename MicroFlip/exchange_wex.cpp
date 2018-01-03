@@ -268,17 +268,17 @@ void Exchange_wex::UpdateMarketTickerReply(QNetworkReply *reply) {
 
 void Exchange_wex::UpdateMarketDepthReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_wex::UpdateMarketTradesReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_wex::UpdateBalancesReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_wex::CreateOrderReply(QNetworkReply *reply) {
@@ -326,12 +326,16 @@ void Exchange_wex::CreateOrderReply(QNetworkReply *reply) {
 
 void Exchange_wex::CancelOrderReply(QNetworkReply *reply) {
 
+  int status = -1;
 
+  if(!reply->error()) {
+
+  }
 }
 
 void Exchange_wex::UpdateActiveOrdersReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_wex::UpdateOrderInfoReply(QNetworkReply *reply) {

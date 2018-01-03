@@ -71,7 +71,8 @@ private:
 
   void requestUpdateMarketTicker();
   void requestCreateOrder(int type, double rate, double amount);
-  void requestOrderInfo(int orderID);
+  void requestOrderInfo(int orderID);  
+  void requestCancelOrder(int orderID);
 
 private slots:
   void updateTick();
@@ -81,6 +82,7 @@ public slots:
 
   void orderCreateReply(int orderID);
   void orderInfoReply(int status);
+  void orderCancelReply(bool succes);
 
   void startOrder();
 

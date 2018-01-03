@@ -20,6 +20,7 @@ class Exchange_wex : public Exchange
     QNetworkAccessManager* tickerDownloadManager;
     QNetworkAccessManager* createTradeDownloadManager;
     QNetworkAccessManager* orderInfoDownloadManager;
+    QNetworkAccessManager* cancelOrderDownloadManager;
 
     uint lastNonce;
     void createNonce(QByteArray *nonce);
