@@ -30,10 +30,12 @@ void Exchange_bitstamp::startWork() {
   apiKey    = c->getApiKey();
   apiSecret = c->getApiSecret();
 
-  timer->start(c->getCoolDownTime()*1100);
+  //timer->start(c->getCoolDownTime()*1100);
   //timer2->start(1*1100); // TODO: determine correct amount
 
   // TODO: bitstamp is 600 calls per 10mins
+  uint coolDownTime = 1010;
+  timer->start(coolDownTime);
 }
 
 void Exchange_bitstamp::createNonce(QByteArray *nonce) {
@@ -56,7 +58,7 @@ void Exchange_bitstamp::createNonce(QByteArray *nonce) {
 void Exchange_bitstamp::updateMarketTicker(QString pair) {
 
   // Create the request to download new data
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/api/3/ticker/"+pair));
+  QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/v2/ticker/"+pair));
 
   // Execute the download
   downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
@@ -174,8 +176,43 @@ void Exchange_bitstamp::receiveUpdateOrderInfo(uint orderID, QObject *sender){
 
 void Exchange_bitstamp::UpdateMarketTickerReply(QNetworkReply *reply) {
 
-  (void) reply;
-  // TODO
+  Ticker ticker;
+  if(!reply->error()) {
+
+      QJsonObject jsonObj;
+      QJsonObject tickerData;
+
+      // Extract JSON object from network reply
+      getObjectFromDocument(reply, &jsonObj);
+
+      // Extract the market data we want
+      QString pair = currentTask.getAttributes().at(0);
+      tickerData = jsonObj.value(pair).toObject();
+
+      // Parse the raw data
+      Ticker ticker = parseRawTickerData(&tickerData);
+
+      // Connect & send to the initiator
+      connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+      emit sendTicker(ticker);
+      disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+
+      // Send signal to GUI to update
+      //sendTicker(m.getTicker());
+  }
+  else {
+    qDebug() << "Ticker Packet error: " << reply->errorString();
+  }
+
+  reply->deleteLater();
+
+  // Disconnect the download signal and release
+  disconnect(tickerDownloadManager, 0, this, 0);
+
+  // tickerDownloadManager->deleteLater();
+
+  // Mark this task complete
+  currentTask = ExchangeTask();
 }
 
 void Exchange_bitstamp::UpdateMarketDepthReply(QNetworkReply *reply) {
@@ -274,11 +311,11 @@ Ticker Exchange_bitstamp::parseRawTickerData(QJsonObject *rawData) {
   //
   double high = rawData->value("high").toDouble();
   double low  = rawData->value("low").toDouble();
-  double avg  = rawData->value("avg").toDouble();
+  double avg  = rawData->value("vwap").toDouble();
   double last = rawData->value("last").toDouble();
-  double buy  = rawData->value("buy").toDouble();
-  double sell = rawData->value("sell").toDouble();
-  int    age  = rawData->value("age").toInt();
+  double buy  = rawData->value("bid").toDouble();
+  double sell = rawData->value("ask").toDouble();
+  int    age  = rawData->value("timestamp").toInt();
 
   return Ticker(high, low, avg, last, buy, sell, age);
 }

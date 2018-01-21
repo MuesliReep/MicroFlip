@@ -5,6 +5,7 @@
 #include "exchange_btce.h"
 //#include "exchange_okcoin.h"
 #include "exchange_wex.h"
+#include "exchange_bitstamp.h"
 
 Program::Program(QObject *parent) : QObject(parent) {
 
@@ -13,7 +14,8 @@ Program::Program(QObject *parent) : QObject(parent) {
   c.loadConfigFromFile();
 
   // Create an exchange interface
-  Exchange *exchange = new Exchange_wex();
+  //Exchange *exchange = new Exchange_wex();
+  Exchange *exchange = new Exchange_bitstamp();
   exchange->setConfig(&c);
   exchange->startWork();
 
