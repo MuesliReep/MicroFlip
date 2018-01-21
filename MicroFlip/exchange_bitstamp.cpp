@@ -22,8 +22,9 @@ Exchange_bitstamp::Exchange_bitstamp() {
 
 void Exchange_bitstamp::startWork() {
 
-  apiKey    = c->getApiKey();
-  apiSecret = c->getApiSecret();
+  apiKey     = c->getApiKey();
+  apiSecret  = c->getApiSecret();
+  customerID = c->getCustomerID();
 
   //timer->start(c->getCoolDownTime()*1100);
   //timer2->start(1*1100); // TODO: determine correct amount
@@ -76,7 +77,43 @@ void Exchange_bitstamp::updateBalances() {
 
 void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double Amount) {
 
-  // TODO
+    // Create POST data from method and nonce
+
+    QByteArray nonce;
+    createNonce(&nonce);
+    nonce.prepend("nonce=");
+
+
+
+    QByteArray type("type=");
+    if(Type == 0)
+      type.append("buy");
+    else
+      type.append("sell");
+
+    QByteArray price("rate=");
+    //QString sPrice; sPrice.setNum(Price,'f',3);
+    price.append(QString::number(Rate,'f',3));
+
+    QByteArray amount("amount=");
+    //QString sAmount; sAmount.setNum(Amount,'f',8);
+    amount.append(QString::number(Amount,'f',8));
+
+    QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount); //qDebug() << "data: " << data;
+
+    // Sign the data
+    QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
+
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/v2/buy/"+Pair+"/"));
+
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
+
+    // Execute the download
+    downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
 }
 
 void Exchange_bitstamp::cancelOrder(uint orderID) {
@@ -91,7 +128,38 @@ void Exchange_bitstamp::updateActiveOrders(QString pair) {
 
 void Exchange_bitstamp::updateOrderInfo(uint OrderID) {
 
-  // TODO
+    QByteArray orderID("id=");
+    orderID.append(QString::number(OrderID));
+
+    // Create signature from nonce, userid & apikey
+    QByteArray nonce;
+    createNonce(&nonce);
+    QByteArray customerID(this->customerID.toUtf8());
+    QByteArray APIkey(apiKey.toUtf8());
+
+    QByteArray signatureMessage(nonce+customerID+apiKey.toUtf8());
+
+    // Sign the data
+    QByteArray signature = QMessageAuthenticationCode::hash(signatureMessage, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
+
+    // Add tags
+    signature.prepend("signature=");
+    nonce.prepend("nonce=");
+    APIkey.prepend("key=");
+
+    // Create the data string
+    QByteArray data(APIkey + "&" + signature + "&" + nonce + "&" + orderID);
+
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/order_status/"));
+
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+    //downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
+    //downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
+
+    // Execute the download
+    downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
 }
 
 void Exchange_bitstamp::executeExchangeTask(ExchangeTask *exchangeTask) {
@@ -249,8 +317,49 @@ void Exchange_bitstamp::UpdateActiveOrdersReply(QNetworkReply *reply) {
 
 void Exchange_bitstamp::UpdateOrderInfoReply(QNetworkReply *reply) {
 
-    (void) reply;
-    // TODO
+    // TODO:!!!!!!!
+    int status = -1;
+
+    if(!reply->error()) {
+
+      QJsonObject jsonObj;
+      QJsonObject returnInfoData;
+      QJsonObject orderInfoData;
+
+      // Extract JSON object from network reply
+      getObjectFromDocument(reply, &jsonObj);
+
+      // Check if authentication was a succes
+      if(checkSuccess(&jsonObj)) {
+
+        // Extract the info data we want
+        returnInfoData = jsonObj.value("return").toObject();
+
+        int orderID = currentTask.getAttributes().at(0).toInt();
+        orderInfoData = returnInfoData.value(QString::number(orderID)).toObject();
+
+        // Parse new data
+        status = orderInfoData.value("status").toInt(-1);
+      }
+      else {
+        qDebug() << "OrderInfo error: " << getRequestErrorMessage(&jsonObj);
+      }
+    } else {
+      qDebug() << "OrderInfo Packet error";
+      status = -2;
+    }
+
+    // Connect & send order ID to the initiator
+    connect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
+    emit sendOrderStatus(status);
+    disconnect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
+
+    reply->deleteLater();
+
+    disconnect(orderInfoDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
 }
 
 

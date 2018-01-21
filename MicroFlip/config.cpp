@@ -40,6 +40,7 @@ bool Config::loadConfigFromFile() {
     coolDownTime        = (uint)object.value("coolDownTime").toInt();
     apiKey              = object.value("apiKey").toString();
     apiSecret           = object.value("apiSecret").toString();
+    customerID          = object.value("customerID").toString();
 
     // Read history values
     QJsonObject historyObject = object.value("historySources").toObject();
@@ -81,6 +82,7 @@ void Config::saveConfigToFile() {
   object.insert("coolDownTime", QJsonValue((int)coolDownTime));
   object.insert("apiKey", QJsonValue(apiKey));
   object.insert("apiSecret", QJsonValue(apiSecret));
+  object.insert("customerID", QJsonValue(customerID));
 
   // Add history values to history object
   QJsonObject historyObject;
@@ -123,8 +125,10 @@ void Config::setLastLoadedTimeStamp(uint LastLoadedTimeStamp) { lastLoadedTimeSt
 
 QString Config::getApiKey() { return apiKey; }
 QString Config::getApiSecret() { return apiSecret; }
+QString Config::getCustomerID() { return customerID; }
 void    Config::setApiKey(QString ApiKey){ apiKey = ApiKey; }
 void    Config::setApiSecret(QString ApiSecret){ apiSecret = ApiSecret; }
+void    Config::setCustomerID(QString CustomerID){ customerID = CustomerID; }
 
 int  Config::getHistorySource() { return historySourceID; }
 uint Config::getHistoryCoolDownTime() { return historyCoolDownTime; }
@@ -154,6 +158,7 @@ int  HistorySource::getSourceID() { return sourceID; }
 {
     "apiKey": "QN1M3IS6-1KVW0SKR-NY3VAY9J-S4O1OL7T-70370K8I",
     "apiSecret": "a1e313937830a75a810b4409e707f0ee7eda016177a608f4c7f3b6c3c0508f6c",
+    "customerID":"123456",
     "coolDownTime": 2,
     "historySources": {
         "historySourceID": 0,

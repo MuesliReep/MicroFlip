@@ -47,9 +47,11 @@ public:
 
   QString getApiKey();
   QString getApiSecret();
+  QString getCustomerID();
 
   void setApiKey(QString);
   void setApiSecret(QString);
+  void setCustomerID(QString);
 
   void setCoolDownTime(uint CoolDownTime);
   uint getCoolDownTime();
@@ -66,6 +68,7 @@ private:
   uint coolDownTime;
   QString apiKey;
   QString apiSecret;
+  QString customerID;
 
   int  historySourceID;
   uint historyCoolDownTime;
