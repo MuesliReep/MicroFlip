@@ -30,7 +30,7 @@ Program::Program(QObject *parent) : QObject(parent) {
 
   amount  = 0.1;
   profit  = 0.00001;
-  pair    = "ltc_usd";
+  pair    = "ltcusd";
   minSell = -1.0;//4.038;
 
   int numWorkers = 1; // Was 20

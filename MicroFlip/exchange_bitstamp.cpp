@@ -186,7 +186,7 @@ void Exchange_bitstamp::UpdateMarketTickerReply(QNetworkReply *reply) {
       tickerData = jsonObj.value(pair).toObject();
 
       // Parse the raw data
-      Ticker ticker = parseRawTickerData(&tickerData);
+      Ticker ticker = parseRawTickerData(&jsonObj);
 
       // Connect & send to the initiator
       connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
@@ -299,19 +299,14 @@ bool Exchange_bitstamp::getObjectFromDocument(QNetworkReply *reply, QJsonObject 
 
 Ticker Exchange_bitstamp::parseRawTickerData(QJsonObject *rawData) {
 
-  QJsonObject jTicker;
-
-  // Retrieve ticker object from JSON object
-  //jTicker = rawData->value("btc_usd").toObject();
-
-  //
-  double high = rawData->value("high").toDouble();
-  double low  = rawData->value("low").toDouble();
-  double avg  = rawData->value("vwap").toDouble();
-  double last = rawData->value("last").toDouble();
-  double buy  = rawData->value("bid").toDouble();
-  double sell = rawData->value("ask").toDouble();
-  int    age  = rawData->value("timestamp").toInt();
+  // Retrieve ticker data from JSON object
+  double high = rawData->value("high").toString().toDouble();
+  double low  = rawData->value("low").toString().toDouble();
+  double avg  = rawData->value("vwap").toString().toDouble();
+  double last = rawData->value("last").toString().toDouble();
+  double buy  = rawData->value("bid").toString().toDouble();
+  double sell = rawData->value("ask").toString().toDouble();
+  int    age  = rawData->value("timestamp").toString().toInt();
 
   return Ticker(high, low, avg, last, buy, sell, age);
 }
