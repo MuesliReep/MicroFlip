@@ -3,8 +3,9 @@
 
 #include "exchange.h"
 
-class Exchange_bitstamp : public exchange
+class Exchange_bitstamp : public Exchange
 {
+    Q_OBJECT
 public:
     Exchange_bitstamp();
 

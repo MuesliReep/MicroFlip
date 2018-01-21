@@ -1,10 +1,5 @@
 #include "exchange_bitstamp.h"
 
-Exchange_bitstamp::Exchange_bitstamp()
-{
-
-}
-
 Exchange_bitstamp::Exchange_bitstamp() {
 
   currentTask = ExchangeTask();
@@ -177,6 +172,7 @@ void Exchange_bitstamp::receiveUpdateOrderInfo(uint orderID, QObject *sender){
 void Exchange_bitstamp::UpdateMarketTickerReply(QNetworkReply *reply) {
 
   Ticker ticker;
+
   if(!reply->error()) {
 
       QJsonObject jsonObj;

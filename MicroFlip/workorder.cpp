@@ -321,6 +321,11 @@ void WorkOrder::orderInfoReply(int status) {
   }
 }
 
+void WorkOrder::orderCancelReply(bool succes)
+{
+    (void) succes;
+}
+
 void WorkOrder::startOrder() {
 
   // Create timer & connect slot
