@@ -83,34 +83,31 @@ void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double 
     createNonce(&nonce);
     nonce.prepend("nonce=");
 
-
-
-    QByteArray type("type=");
-    if(Type == 0)
-      type.append("buy");
-    else
-      type.append("sell");
+    // Set the type of order, 0 = buy, 1 = sell
+    QByteArray type(Type == 0 ? "buy" : "sell");
 
     QByteArray price("rate=");
-    //QString sPrice; sPrice.setNum(Price,'f',3);
     price.append(QString::number(Rate,'f',3));
 
     QByteArray amount("amount=");
-    //QString sAmount; sAmount.setNum(Amount,'f',8);
     amount.append(QString::number(Amount,'f',8));
 
-    QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount); //qDebug() << "data: " << data;
+    // Create signature
+    QByteArray signatureData;
 
-    // Sign the data
-    QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
+    QByteArray signature = QMessageAuthenticationCode::hash(signatureData, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
+
+    QByteArray data(key +"&"+ signature +"&"+ nonce +"&"+ pair +"&"+ price +"&"+ amount);
+
+
 
     // Create request
-    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/v2/buy/"+Pair+"/"));
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/v2/"+type+"/"+Pair+"/"));
 
     // Add headers
     downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
-    downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
-    downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
+    //downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
+    //downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
     // Execute the download
     downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
