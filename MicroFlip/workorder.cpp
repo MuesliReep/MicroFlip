@@ -122,7 +122,7 @@ void WorkOrder::createSellOrder(double amount) {
   //sellPrice = currentTicker.getLast() + 0.5;
 
   // Match current sell order
-  sellPrice = currentTicker.getBuy();
+  sellPrice = currentTicker.getBuy();// * 1.19;
 
   // Check balance
   // TODO

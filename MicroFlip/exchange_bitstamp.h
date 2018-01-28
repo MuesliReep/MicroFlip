@@ -39,8 +39,11 @@ private:
 
   bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
   Ticker parseRawTickerData(QJsonObject *rawData);
-  bool checkSuccess(QJsonObject *object);
   QString getRequestErrorMessage(QJsonObject *object);
+
+  bool checkSuccess(QJsonObject *object);
+  bool checkUpdateOrderInfoSuccess(QJsonObject *object);
+  bool checkCreateOrderSucces(QJsonObject *object);
 
 public slots:
   void receiveUpdateMarketTicker(QString pair, QObject *sender);

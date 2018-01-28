@@ -28,9 +28,12 @@ Program::Program(QObject *parent) : QObject(parent) {
   double minSell= 25000.0;
   QString pair = "btc_usd";
 
-  amount  = 0.1;
-  profit  = 0.00001;
-  pair    = "ltcusd";
+  amount = 16.5;
+  profit = 0.0001;
+
+  //amount  = 0.01;
+  //profit  = 0.00001;
+  pair    = "xrpusd";
   minSell = -1.0;//4.038;
 
   int numWorkers = 1; // Was 20
