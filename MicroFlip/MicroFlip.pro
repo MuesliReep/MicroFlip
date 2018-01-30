@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     control.cpp \
 #    exchange_okcoin.cpp \
     exchange_wex.cpp \
-    exchange_bitstamp.cpp
+    exchange_bitstamp.cpp \
+    exchange_bitfinex.cpp
 
 HEADERS  += program.h \
     #mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS  += program.h \
     control.h \
 #    exchange_okcoin.h \
     exchange_wex.h \
-    exchange_bitstamp.h
+    exchange_bitstamp.h \
+    exchange_bitfinex.h
 
 #FORMS    += mainwindow.ui
 

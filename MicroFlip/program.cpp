@@ -6,6 +6,7 @@
 //#include "exchange_okcoin.h"
 #include "exchange_wex.h"
 #include "exchange_bitstamp.h"
+#include "exchange_bitfinex.h"
 
 Program::Program(QObject *parent) : QObject(parent) {
 
