@@ -210,7 +210,21 @@ void WorkOrder::requestCancelOrder(int orderID) {
 
 void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
+  // Check ticker validity
+  if (ticker.getAge() < 0) {
+
+      updateLog(workID, "Received invalid ticker data, resetting");
+
+      // Something went wrong with the ticker, we need to revert to start state
+      workState = START;
+
+      stdInterval         = false;
+      longIntervalRequest = true;
+  }
+
+  // Save the ticker data locally
   currentTicker = ticker;
+
   updateLog(workID, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
                                  + " Sell: " + QString::number(currentTicker.getSell())
                                  + " Last: " + QString::number(currentTicker.getLast()));
@@ -229,8 +243,6 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
     // Pause workorder for 5 minutes
 
-//    this->sleep(5*60);
-    //timer->setInterval(intervalLong);
     stdInterval         = false;
     longIntervalRequest = true;
   }

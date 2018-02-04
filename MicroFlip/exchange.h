@@ -50,7 +50,15 @@ private:
 class Ticker {
 
 public:
-  Ticker(){}
+  Ticker(){
+    this->high = -1.0;
+    this->low  = -1.0;
+    this->avg  = -1.0;
+    this->last = -1.0;
+    this->buy  = -1.0;
+    this->sell = -1.0;
+    this->age  = -1;
+  }
   Ticker(double high, double low, double avg, double last, double buy, double sell, double age) {
     this->high = high;
     this->low  = low;
