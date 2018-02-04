@@ -22,10 +22,11 @@ Exchange_bitfinex::Exchange_bitfinex() {
 
 void Exchange_bitfinex::startWork() {
 
-  apiKey = c->getApiKey();
-  apiSecret = c->getApiSecret();
+  this->apiKey    = c->getApiKey();
+  this->apiSecret = c->getApiSecret();
 
-  timer->start(c->getCoolDownTime()*1100);
+  // 30 requests per min
+  timer->start(2000);
   //timer2->start(1*1100); // TODO: determine correct amount
 }
 
@@ -195,6 +196,37 @@ void Exchange_bitfinex::receiveUpdateOrderInfo(uint orderID, QObject *sender){
 void Exchange_bitfinex::UpdateMarketTickerReply(QNetworkReply *reply) {
 
 //TODO!!!!!!!!!!!!!!!!!!!!!
+
+    Ticker ticker;
+
+    if(!reply->error()) {
+
+        QJsonObject jsonObj;
+
+        // Extract JSON object from network reply
+        getObjectFromDocument(reply, &jsonObj);
+
+        // Parse the raw data
+        Ticker ticker = parseRawTickerData(&tickerData);
+
+    } else {
+        qDebug() << "Ticker Packet error: " << reply->errorString();
+
+        // TODO: send empty ticker!
+    }
+
+    // Connect & send to the initiator
+    connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+    emit sendTicker(ticker);
+    disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(tickerDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
 }
 
 void Exchange_bitfinex::UpdateMarketDepthReply(QNetworkReply *reply) {
@@ -269,6 +301,37 @@ void Exchange_bitfinex::UpdateActiveOrdersReply(QNetworkReply *reply) {
 void Exchange_bitfinex::UpdateOrderInfoReply(QNetworkReply *reply) {
 
 //TODO!!!!!!!!!!!!!!!!!!!!!
+    int status = -1;
+
+    if(!reply->error()) {
+
+        QJsonObject jsonObj;
+
+        // Extract JSON object from network reply
+        getObjectFromDocument(reply, &jsonObj);
+
+        bool statusBool = orderInfoData.value("is_live").toBo
+
+        if(statusString.compare("is_live", Qt::CaseInsensitive) == 0) {
+            status = 0;
+        }
+
+    } else {
+        qDebug() << "OrderInfo Packet error";
+        status = -2;
+    }
+
+    // Connect & send order ID to the initiator
+    connect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
+    emit sendOrderStatus(status);
+    disconnect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
+
+    reply->deleteLater();
+
+    disconnect(orderInfoDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
 }
 
 
@@ -317,19 +380,16 @@ bool Exchange_bitfinex::getObjectFromDocument(QNetworkReply *reply, QJsonObject 
 
 Ticker Exchange_bitfinex::parseRawTickerData(QJsonObject *rawData) {
 
-  QJsonObject jTicker; //TODO!!!!!!!!!!!!!!!!!!!!!
-
-  // Retrieve ticker object from JSON object
-  //jTicker = rawData->value("btc_usd").toObject();
+  //TODO!!!!!!!!!!!!!!!!!!!!!
 
   //
   double high = rawData->value("high").toDouble();
   double low  = rawData->value("low").toDouble();
-  double avg  = rawData->value("avg").toDouble();
-  double last = rawData->value("last").toDouble();
-  double buy  = rawData->value("buy").toDouble();
-  double sell = rawData->value("sell").toDouble();
-  int    age  = rawData->value("age").toInt();
+  double avg  = rawData->value("avg").toDouble(-1.0);
+  double last = rawData->value("last_price").toDouble();
+  double buy  = rawData->value("bid").toDouble();
+  double sell = rawData->value("ask").toDouble();
+  int    age  = rawData->value("timestamp").toInt();
 
   return Ticker(high, low, avg, last, buy, sell, age);
 }
