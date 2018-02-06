@@ -39,7 +39,7 @@ Program::Program(QObject *parent) : QObject(parent) {
 
   int numWorkers = 1; // Was 20
 
-  addWorkOrder(numWorkers, exchange, amount, profit, pair);
+  addWorkOrder(numWorkers, exchange, amount, profit, pair, minSell);
 
 //  for(int i = 0; i < numWorkers; i++) {
 
