@@ -116,6 +116,28 @@ void Exchange_bitfinex::updateActiveOrders(QString pair) {
 void Exchange_bitfinex::updateOrderInfo(uint OrderID) {
 
 //TODO!!!!!!!!!!!!!!!!!!!!!
+
+    QJsonObject payload;
+    payload.insert("request", "/v1/order/status");
+    payload.insert("nonce", createNonce());
+    payload.insert("id", OrderID);
+
+    QJsonDocument payloadDocument(payload);
+
+    // Sign the data
+    QByteArray signature = QMessageAuthenticationCode::hash(payloadDocument.toJson(), apiSecret.toUtf8(), QCryptographicHash::Sha384).toHex();
+
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/order/status"));
+
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadDocument.toJson());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
+
+    // Execute the download
+    downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::executeExchangeTask(ExchangeTask *exchangeTask) {
@@ -310,10 +332,18 @@ void Exchange_bitfinex::UpdateOrderInfoReply(QNetworkReply *reply) {
         // Extract JSON object from network reply
         getObjectFromDocument(reply, &jsonObj);
 
-        bool statusBool = orderInfoData.value("is_live").toBo
+        // First check if the "is_live" value is available
+        if(jsonObj.contains("is_live")) {
 
-        if(statusString.compare("is_live", Qt::CaseInsensitive) == 0) {
-            status = 0;
+            bool statusBool = jsonObj.value("is_live").toBool();
+
+            if(statusBool) {
+                status = 0;
+            } else {
+                status = 1;
+            }
+        } else {
+            status = -2;
         }
 
     } else {
