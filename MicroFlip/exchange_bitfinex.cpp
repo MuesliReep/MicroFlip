@@ -94,9 +94,10 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
     QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/order/new"));
 
     // Add headers
-    downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/json"));
+    downloader.addHeaderToRequest(&request, QByteArray("Accept"),          QByteArray("application/json"));
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    apiKey.toUtf8());
-    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadDocument.toJson());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadDocument.toJson().toBase64());
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
@@ -105,11 +106,13 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
 
 void Exchange_bitfinex::cancelOrder(uint orderID) {
 
+    (void) orderID;
   // TODO
 }
 
 void Exchange_bitfinex::updateActiveOrders(QString pair) {
 
+    (void) pair;
   // TODO
 }
 
@@ -229,7 +232,7 @@ void Exchange_bitfinex::UpdateMarketTickerReply(QNetworkReply *reply) {
         getObjectFromDocument(reply, &jsonObj);
 
         // Parse the raw data
-        Ticker ticker = parseRawTickerData(&tickerData);
+        ticker = parseRawTickerData(&jsonObj);
 
     } else {
         qDebug() << "Ticker Packet error: " << reply->errorString();
