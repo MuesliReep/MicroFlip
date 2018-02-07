@@ -58,11 +58,13 @@ void Exchange_bitfinex::updateMarketTicker(QString pair) {
 
 void Exchange_bitfinex::updateMarketDepth(QString pair) {
 
+    (void) pair;
   // TODO
 }
 
 void Exchange_bitfinex::updateMarketTrades(QString pair) {
 
+    (void) pair;
   // TODO
 }
 
@@ -101,7 +103,7 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
-    downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
+    downloader.doPostDownload(request, createTradeDownloadManager, payloadDocument.toJson().toBase64(), this, SLOT(CreateOrderReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::cancelOrder(uint orderID) {
@@ -123,7 +125,7 @@ void Exchange_bitfinex::updateOrderInfo(uint OrderID) {
     QJsonObject payload;
     payload.insert("request", "/v1/order/status");
     payload.insert("nonce", createNonce());
-    payload.insert("id", OrderID);
+    payload.insert("id", QString(OrderID));
 
     QJsonDocument payloadDocument(payload);
 
@@ -136,11 +138,11 @@ void Exchange_bitfinex::updateOrderInfo(uint OrderID) {
     // Add headers
     downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/x-www-form-urlencoded"));
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    apiKey.toUtf8());
-    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadDocument.toJson());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadDocument.toJson().toBase64());
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
-    downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
+    downloader.doPostDownload(request, orderInfoDownloadManager, payloadDocument.toJson().toBase64(), this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::executeExchangeTask(ExchangeTask *exchangeTask) {
