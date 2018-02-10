@@ -40,7 +40,7 @@ QString Exchange_bitfinex::createNonce() {
   else
     lastNonce = now;
 
-  return QString(lastNonce);
+  return QString::number(lastNonce);
 }
 
 //----------------------------------//
@@ -75,22 +75,23 @@ void Exchange_bitfinex::updateBalances() {
 
 void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double Amount) {
 
-//TODO!!!!!!!!!!!!!!!!!!!!!
-
     // Create JSON payload
     QJsonObject payload;
-    payload.insert("request", "/v1/order/new");
-    payload.insert("nonce", createNonce());
-    payload.insert("symbol", Pair);
-    payload.insert("amount", QJsonValue(Amount));
-    payload.insert("price", Rate);
-    payload.insert("side", Type == 0 ? "buy" : "sell");
-    payload.insert("type", "exchange limit");
+    payload.insert("request",  "/v1/order/new");
+    payload.insert("nonce",    createNonce());
+    payload.insert("symbol",   Pair);
+    payload.insert("amount",   QString::number(Amount));
+    payload.insert("price",    QString::number(Rate));
+    payload.insert("exchange", "bitfinex");
+    payload.insert("side",     Type == 0 ? "buy" : "sell");
+    payload.insert("type",     "exchange limit");
 
     QJsonDocument payloadDocument(payload);
+    QByteArray payloadData   = payloadDocument.toJson(QJsonDocument::Compact);
+    QByteArray payloadData64 = payloadData.toBase64();
 
     // Sign the data
-    QByteArray signature = QMessageAuthenticationCode::hash(payloadDocument.toJson(), apiSecret.toUtf8(), QCryptographicHash::Sha384).toHex();
+    QByteArray signature = QMessageAuthenticationCode::hash(payloadData64, this->apiSecret.toUtf8(), QCryptographicHash::Sha384).toHex();
 
     // Create request
     QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/order/new"));
@@ -98,12 +99,12 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
     // Add headers
     downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/json"));
     downloader.addHeaderToRequest(&request, QByteArray("Accept"),          QByteArray("application/json"));
-    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    apiKey.toUtf8());
-    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadDocument.toJson().toBase64());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    this->apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadData64);
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
-    downloader.doPostDownload(request, createTradeDownloadManager, payloadDocument.toJson().toBase64(), this, SLOT(CreateOrderReply(QNetworkReply*)));
+    downloader.doPostDownload(request, createTradeDownloadManager, payloadData, this, SLOT(CreateOrderReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::cancelOrder(uint orderID) {
@@ -120,29 +121,32 @@ void Exchange_bitfinex::updateActiveOrders(QString pair) {
 
 void Exchange_bitfinex::updateOrderInfo(uint OrderID) {
 
-//TODO!!!!!!!!!!!!!!!!!!!!!
-
+    // Create JSON payload
     QJsonObject payload;
     payload.insert("request", "/v1/order/status");
-    payload.insert("nonce", createNonce());
-    payload.insert("id", QString(OrderID));
+    payload.insert("nonce",   createNonce());
+    payload.insert("id",      QString::number(OrderID));
 
+    // Create the payloads
     QJsonDocument payloadDocument(payload);
+    QByteArray payloadData   = payloadDocument.toJson(QJsonDocument::Compact);
+    QByteArray payloadData64 = payloadData.toBase64();
 
     // Sign the data
-    QByteArray signature = QMessageAuthenticationCode::hash(payloadDocument.toJson(), apiSecret.toUtf8(), QCryptographicHash::Sha384).toHex();
+    QByteArray signature = QMessageAuthenticationCode::hash(payloadData64, this->apiSecret.toUtf8(), QCryptographicHash::Sha384).toHex();
 
     // Create request
     QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/order/status"));
 
     // Add headers
-    downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/x-www-form-urlencoded"));
-    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    apiKey.toUtf8());
-    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadDocument.toJson().toBase64());
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/json"));
+    downloader.addHeaderToRequest(&request, QByteArray("Accept"),          QByteArray("application/json"));
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    this->apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadData64);
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
-    downloader.doPostDownload(request, orderInfoDownloadManager, payloadDocument.toJson().toBase64(), this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
+    downloader.doPostDownload(request, orderInfoDownloadManager, payloadData, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::executeExchangeTask(ExchangeTask *exchangeTask) {
@@ -222,8 +226,6 @@ void Exchange_bitfinex::receiveUpdateOrderInfo(uint orderID, QObject *sender){
 
 void Exchange_bitfinex::UpdateMarketTickerReply(QNetworkReply *reply) {
 
-//TODO!!!!!!!!!!!!!!!!!!!!!
-
     Ticker ticker;
 
     if(!reply->error()) {
@@ -273,7 +275,6 @@ void Exchange_bitfinex::UpdateBalancesReply(QNetworkReply *reply) {
 
 void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
 
-//TODO!!!!!!!!!!!!!!!!!!!!!
     int orderID = -1;
 
     if(!reply->error()) {
@@ -295,7 +296,10 @@ void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
         qDebug() << "Trade error: " ;//<< getRequestErrorMessage(&jsonObj);
       }
     } else {
-      qDebug() << "Trade Packet error";
+      QJsonObject jsonObj;
+      bool result = getObjectFromDocument(reply, &jsonObj);
+      QString errorString = reply->errorString();
+      qDebug() << "Trade Packet error: " << errorString;
     }
 
     // Connect & send order ID to the initiator
@@ -327,7 +331,6 @@ void Exchange_bitfinex::UpdateActiveOrdersReply(QNetworkReply *reply) {
 
 void Exchange_bitfinex::UpdateOrderInfoReply(QNetworkReply *reply) {
 
-//TODO!!!!!!!!!!!!!!!!!!!!!
     int status = -1;
 
     if(!reply->error()) {
@@ -415,34 +418,14 @@ bool Exchange_bitfinex::getObjectFromDocument(QNetworkReply *reply, QJsonObject 
 
 Ticker Exchange_bitfinex::parseRawTickerData(QJsonObject *rawData) {
 
-  //TODO!!!!!!!!!!!!!!!!!!!!!
-
-  //
-  double high = rawData->value("high").toDouble();
-  double low  = rawData->value("low").toDouble();
-  double avg  = rawData->value("avg").toDouble(-1.0);
-  double last = rawData->value("last_price").toDouble();
-  double buy  = rawData->value("bid").toDouble();
-  double sell = rawData->value("ask").toDouble();
-  int    age  = rawData->value("timestamp").toInt();
+  // Values are stored as strings, so first convert to string then further
+  double high = rawData->value("high").toString("-1.0").toDouble();
+  double low  = rawData->value("low").toString("-1.0").toDouble();
+  double avg  = rawData->value("avg").toString("-1.0").toDouble();
+  double last = rawData->value("last_price").toString("-1.0").toDouble();
+  double buy  = rawData->value("bid").toString("-1.0").toDouble();
+  double sell = rawData->value("ask").toString("-1.0").toDouble();
+  int    age  = rawData->value("timestamp").toString("-1").toInt();
 
   return Ticker(high, low, avg, last, buy, sell, age);
-}
-
-bool Exchange_bitfinex::checkSuccess(QJsonObject *object) {
-
-  bool result = false;
-
-  if(!object->contains("success"))
-    return result;
-
-  if(object->value("success").toInt() == 1)
-    result = true;
-
-  return result;
-}
-
-QString Exchange_bitfinex::getRequestErrorMessage(QJsonObject *object) {
-
-  return object->value("error").toString();
 }
