@@ -26,7 +26,7 @@ void MarketHistory::setConfig(Config *C) {
 
 // Loads historical trade data from a set data source
 void MarketHistory::loadDataSince(uint timeStamp) {
-
+  (void) timeStamp;
   // TODO: if cooldown has not yet expired set a timer to when it will be expired
 
   // Create the request to download new data
@@ -39,7 +39,7 @@ void MarketHistory::loadDataSince(uint timeStamp) {
 
 // Appends historical trade data to an existing data set
 void MarketHistory::addTradeDataTo(QList<Trade> *tradeData) {
-
+  (void) tradeData;
   // TODO: check which list is longer to determine fastest way of appending new data
 }
 
@@ -61,10 +61,10 @@ bool MarketHistory::checkCoolDownExpiration(bool reset) {
       c->saveConfigToFile();
     }
 
-    return true;
+    result = true;
   }
 
-  return false;
+  return result;
 }
 
 // Slots

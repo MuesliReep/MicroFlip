@@ -39,7 +39,12 @@ uint MarketData::findClosestBin(uint desiredTime) {
 // Calculates the Exponential Moving Average over a data set
 QList<double> MarketData::runEMA(int weight) {
 
+    (void) weight;
   // TODO: get EMAX from old java project
+
+    QList<double> EMAresult;
+
+    return EMAresult;
 }
 
 // Calculates the Simple Moving Average over a data set
@@ -323,7 +328,7 @@ void MarketData::parseRawDepthData(QJsonObject *rawData) {
 
 // Parses new market ticker data and overwrites current data
 void MarketData::parseRawTickerData(QJsonObject *rawData) {
-
+    (void) rawData;
 }
 
 // Saves the current market data set to a specified file

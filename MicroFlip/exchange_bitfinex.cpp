@@ -293,7 +293,7 @@ void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
         qDebug() << "Trade created successfully, ID: " << orderID;
       }
       else {
-        qDebug() << "Trade error: " ;//<< getRequestErrorMessage(&jsonObj);
+        qDebug() << "Trade error: " ;
       }
     } else {
       QJsonObject jsonObj;

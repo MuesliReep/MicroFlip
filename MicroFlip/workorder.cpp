@@ -122,7 +122,7 @@ void WorkOrder::createSellOrder(double amount) {
   //sellPrice = currentTicker.getLast() + 0.5;
 
   // Match current sell order
-  sellPrice = currentTicker.getBuy();// * 1.19;
+  sellPrice = currentTicker.getBuy() * 1.19;
 
   // Check balance
   // TODO
@@ -202,6 +202,7 @@ void WorkOrder::requestOrderInfo(int orderID) {
 
 void WorkOrder::requestCancelOrder(int orderID) {
 
+    (void) orderID;
 }
 
 //----------------------------------//
@@ -281,6 +282,8 @@ void WorkOrder::orderCreateReply(int orderID) {
         workState    = BUYORDER;
         buyOrderTime = QDateTime::currentDateTime();
         break;
+      default:
+        break;
     }
   } else {
 
@@ -292,6 +295,8 @@ void WorkOrder::orderCreateReply(int orderID) {
       case WAITINGFORBUY:
         buyOrderID = orderID;
         workState  = COMPLETE;
+        break;
+      default:
         break;
     }
   }

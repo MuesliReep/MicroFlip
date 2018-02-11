@@ -56,12 +56,12 @@ void Exchange_btce::updateMarketTicker(QString pair) {
 }
 
 void Exchange_btce::updateMarketDepth(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
 void Exchange_btce::updateMarketTrades(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
@@ -113,12 +113,12 @@ void Exchange_btce::createOrder(QString Pair, int Type, double Rate, double Amou
 }
 
 void Exchange_btce::cancelOrder(uint orderID) {
-
+  (void) orderID;
   // TODO
 }
 
 void Exchange_btce::updateActiveOrders(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
@@ -268,17 +268,17 @@ void Exchange_btce::UpdateMarketTickerReply(QNetworkReply *reply) {
 
 void Exchange_btce::UpdateMarketDepthReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_btce::UpdateMarketTradesReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_btce::UpdateBalancesReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_btce::CreateOrderReply(QNetworkReply *reply) {
@@ -326,12 +326,12 @@ void Exchange_btce::CreateOrderReply(QNetworkReply *reply) {
 
 void Exchange_btce::CancelOrderReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_btce::UpdateActiveOrdersReply(QNetworkReply *reply) {
 
-
+  (void) reply;
 }
 
 void Exchange_btce::UpdateOrderInfoReply(QNetworkReply *reply) {

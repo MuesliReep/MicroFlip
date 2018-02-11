@@ -56,12 +56,12 @@ void Exchange_wex::updateMarketTicker(QString pair) {
 }
 
 void Exchange_wex::updateMarketDepth(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
 void Exchange_wex::updateMarketTrades(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
@@ -88,14 +88,12 @@ void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amoun
     type.append("sell");
 
   QByteArray price("rate=");
-  //QString sPrice; sPrice.setNum(Price,'f',3);
   price.append(QString::number(Rate,'f',3));
 
   QByteArray amount("amount=");
-  //QString sAmount; sAmount.setNum(Amount,'f',8);
   amount.append(QString::number(Amount,'f',8));
 
-  QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount); //qDebug() << "data: " << data;
+  QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount);
 
   // Sign the data
   QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
@@ -113,12 +111,12 @@ void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amoun
 }
 
 void Exchange_wex::cancelOrder(uint orderID) {
-
+  (void) orderID;
   // TODO
 }
 
 void Exchange_wex::updateActiveOrders(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
@@ -133,7 +131,7 @@ void Exchange_wex::updateOrderInfo(uint OrderID) {
   QByteArray orderID("order_id=");
   orderID.append(QString::number(OrderID));
 
-  QByteArray data(method +"&"+ nonce + "&" + orderID);  //qDebug() << "data: " << data;
+  QByteArray data(method +"&"+ nonce + "&" + orderID);
 
   // Sign the data
   QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
@@ -249,18 +247,15 @@ void Exchange_wex::UpdateMarketTickerReply(QNetworkReply *reply) {
     emit sendTicker(ticker);
     disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
 
-    // Send signal to GUI to update
-    //sendTicker(m.getTicker());
   }
-  else
+  else {
     qDebug() << "Ticker Packet error: " << reply->errorString();
+  }
 
   reply->deleteLater();
 
   // Disconnect the download signal and release
   disconnect(tickerDownloadManager, 0, this, 0);
-
-  // tickerDownloadManager->deleteLater();
 
   // Mark this task complete
   currentTask = ExchangeTask();

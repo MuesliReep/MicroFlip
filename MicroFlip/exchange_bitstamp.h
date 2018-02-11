@@ -39,7 +39,6 @@ private:
 
   bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
   Ticker parseRawTickerData(QJsonObject *rawData);
-  QString getRequestErrorMessage(QJsonObject *object);
 
   bool checkSuccess(QJsonObject *object);
   bool checkUpdateOrderInfoSuccess(QJsonObject *object);

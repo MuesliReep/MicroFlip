@@ -146,8 +146,6 @@ public slots:
   virtual void receiveUpdateActiveOrders(QString pair, QObject *sender) = 0;
   virtual void receiveUpdateOrderInfo(uint orderID, QObject *sender) = 0;
 
-  void checkBalance(int currency, double amount, bool *result);
-
 private slots:
   virtual void updateTick()  = 0;
   virtual void updateTick2() = 0;

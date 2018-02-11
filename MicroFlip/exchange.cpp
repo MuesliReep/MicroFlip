@@ -15,11 +15,6 @@ double Exchange::getFee()
   return fee;
 }
 
-void Exchange::checkBalance(int currency, double amount, bool *result)
-{
-
-}
-
 ExchangeTask::ExchangeTask(int Task) {
  this->task = Task;
 }

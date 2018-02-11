@@ -61,12 +61,12 @@ void Exchange_bitstamp::updateMarketTicker(QString pair) {
 }
 
 void Exchange_bitstamp::updateMarketDepth(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
 void Exchange_bitstamp::updateMarketTrades(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
@@ -122,12 +122,12 @@ void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double 
 }
 
 void Exchange_bitstamp::cancelOrder(uint orderID) {
-
+  (void) orderID;
   // TODO
 }
 
 void Exchange_bitstamp::updateActiveOrders(QString pair) {
-
+  (void) pair;
   // TODO
 }
 
@@ -160,8 +160,6 @@ void Exchange_bitstamp::updateOrderInfo(uint OrderID) {
 
     // Add headers
     downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
-    //downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
-    //downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
     // Execute the download
     downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
@@ -266,8 +264,6 @@ void Exchange_bitstamp::UpdateMarketTickerReply(QNetworkReply *reply) {
       emit sendTicker(ticker);
       disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
 
-      // Send signal to GUI to update
-      //sendTicker(m.getTicker());
   }
   else {
     qDebug() << "Ticker Packet error: " << reply->errorString();
@@ -277,8 +273,6 @@ void Exchange_bitstamp::UpdateMarketTickerReply(QNetworkReply *reply) {
 
   // Disconnect the download signal and release
   disconnect(tickerDownloadManager, 0, this, 0);
-
-  // tickerDownloadManager->deleteLater();
 
   // Mark this task complete
   currentTask = ExchangeTask();
@@ -385,7 +379,7 @@ void Exchange_bitstamp::UpdateOrderInfoReply(QNetworkReply *reply) {
 
       }
       else {
-        //TODO: qDebug() << "OrderInfo error: " << getRequestErrorMessage(&jsonObj);
+        qDebug() << "OrderInfo error: ";
       }
     } else {
       qDebug() << "OrderInfo Packet error";
@@ -510,9 +504,4 @@ bool Exchange_bitstamp::checkCreateOrderSucces(QJsonObject *object) {
     }
 
     return result;
-}
-
-QString Exchange_bitstamp::getRequestErrorMessage(QJsonObject *object) {
-
-  return object->value("error").toString();
 }
