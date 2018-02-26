@@ -107,7 +107,7 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
     downloader.doPostDownload(request, createTradeDownloadManager, payloadData, this, SLOT(CreateOrderReply(QNetworkReply*)));
 }
 
-void Exchange_bitfinex::cancelOrder(uint orderID) {
+void Exchange_bitfinex::cancelOrder(quint64 orderID) {
 
     (void) orderID;
   // TODO
@@ -119,13 +119,15 @@ void Exchange_bitfinex::updateActiveOrders(QString pair) {
   // TODO
 }
 
-void Exchange_bitfinex::updateOrderInfo(uint OrderID) {
+void Exchange_bitfinex::updateOrderInfo(quint64 OrderID) {
+
+    double orderIDd = OrderID;
 
     // Create JSON payload
     QJsonObject payload;
-    payload.insert("request", "/v1/order/status");
-    payload.insert("nonce",   createNonce());
-    payload.insert("id",      QString::number(OrderID));
+    payload.insert("request",  "/v1/order/status");
+    payload.insert("nonce",    createNonce());
+    payload.insert("order_id", orderIDd);
 
     // Create the payloads
     QJsonDocument payloadDocument(payload);
@@ -165,7 +167,7 @@ void Exchange_bitfinex::executeExchangeTask(ExchangeTask *exchangeTask) {
       break;
     case 5: cancelOrder(exchangeTask->getAttributes().at(0).toUInt()); break;
     case 6: updateActiveOrders(exchangeTask->getAttributes().at(0));   break;
-    case 7: updateOrderInfo(exchangeTask->getAttributes().at(0).toUInt()); break;
+    case 7: updateOrderInfo((quint64)exchangeTask->getAttributes().at(0).toDouble()); break;
     default: qDebug() << "Bad exchange task received: " << exchangeTask->getTask(); break;
   }
 }
@@ -196,7 +198,7 @@ void Exchange_bitfinex::receiveCreateOrder(QString pair, int type, double rate, 
   attr.append(QString(QString::number(amount)));
   exchangeTasks.append(ExchangeTask(4, sender, attr));
 }
-void Exchange_bitfinex::receiveCancelOrder(uint orderID, QObject *sender){
+void Exchange_bitfinex::receiveCancelOrder(quint64 orderID, QObject *sender){
   QList<QString> attr; attr.append(QString::number(orderID));
   exchangeTasks.append(ExchangeTask(5, sender, attr));
 }
@@ -204,7 +206,7 @@ void Exchange_bitfinex::receiveUpdateActiveOrders(QString pair, QObject *sender)
   QList<QString> attr; attr.append(QString(pair));
   exchangeTasks.append(ExchangeTask(6, sender, attr));
 }
-void Exchange_bitfinex::receiveUpdateOrderInfo(uint orderID, QObject *sender){
+void Exchange_bitfinex::receiveUpdateOrderInfo(quint64 orderID, QObject *sender){
 
   // TODO: beter way of doing this
   // Check if task already exists in list
@@ -275,7 +277,7 @@ void Exchange_bitfinex::UpdateBalancesReply(QNetworkReply *reply) {
 
 void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
 
-    int orderID = -1;
+    quint64 orderID = -1;
 
     if(!reply->error()) {
 
@@ -288,7 +290,8 @@ void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
       if(jsonObj.contains("order_id")) {
 
         // Parse new data
-        orderID = jsonObj.value("order_id").toInt(-1);
+        double orderIDd = jsonObj.value("order_id").toDouble(-1.0);
+        orderID = orderIDd;
 
         qDebug() << "Trade created successfully, ID: " << orderID;
       }
@@ -300,12 +303,13 @@ void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
       bool result = getObjectFromDocument(reply, &jsonObj);
       QString errorString = reply->errorString();
       qDebug() << "Trade Packet error: " << errorString;
+      (void) result;
     }
 
     // Connect & send order ID to the initiator
-    connect(this, SIGNAL(sendOrderID(int)), currentTask.getSender(), SLOT(orderCreateReply(int)));
+    connect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
     emit sendOrderID(orderID);
-    disconnect(this, SIGNAL(sendOrderID(int)), currentTask.getSender(), SLOT(orderCreateReply(int)));
+    disconnect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
 
     reply->deleteLater();
 
@@ -346,15 +350,25 @@ void Exchange_bitfinex::UpdateOrderInfoReply(QNetworkReply *reply) {
             bool statusBool = jsonObj.value("is_live").toBool();
 
             if(statusBool) {
-                status = 0;
-            } else {
-                status = 1;
+                status = 0; // In process
+            } else { // Order is no longer active
+
+                // Check if the order was cancelled
+                double remainingAmount = jsonObj.value("remaining_amount").toString("0.0").toDouble();
+                if(remainingAmount > 0.0) {
+                    status = -2;
+                } else { // Else the order was completed!
+                    status = 1; //
+                }
             }
         } else {
             status = -2;
         }
 
     } else {
+        QJsonObject jsonObj;
+        bool result = getObjectFromDocument(reply, &jsonObj);
+        QString errorString = reply->errorString();
         qDebug() << "OrderInfo Packet error";
         status = -2;
     }

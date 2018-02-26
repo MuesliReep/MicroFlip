@@ -107,9 +107,9 @@ private:
 
   virtual void updateBalances() = 0;
   virtual void createOrder(QString pair, int type, double rate, double amount) = 0;
-  virtual void cancelOrder(uint orderID) = 0;
+  virtual void cancelOrder(quint64 orderID) = 0;
   virtual void updateActiveOrders(QString pair) = 0;
-  virtual void updateOrderInfo(uint orderID) = 0;
+  virtual void updateOrderInfo(quint64 orderID) = 0;
 
   virtual void executeExchangeTask(ExchangeTask *exchangeTask) = 0;
 
@@ -142,9 +142,9 @@ public slots:
   virtual void receiveUpdateMarketTrades(QString pair, QObject *sender) = 0;
   virtual void receiveUpdateBalances(QObject *sender) = 0;
   virtual void receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender) = 0;
-  virtual void receiveCancelOrder(uint orderID, QObject *sender) = 0;
+  virtual void receiveCancelOrder(quint64 orderID, QObject *sender) = 0;
   virtual void receiveUpdateActiveOrders(QString pair, QObject *sender) = 0;
-  virtual void receiveUpdateOrderInfo(uint orderID, QObject *sender) = 0;
+  virtual void receiveUpdateOrderInfo(quint64 orderID, QObject *sender) = 0;
 
 private slots:
   virtual void updateTick()  = 0;

@@ -31,9 +31,9 @@ private:
 
   void updateBalances();
   void createOrder(QString Pair, int Type, double Rate, double Amount);
-  void cancelOrder(uint orderID);
+  void cancelOrder(quint64 orderID);
   void updateActiveOrders(QString pair);
-  void updateOrderInfo(uint OrderID);
+  void updateOrderInfo(quint64 OrderID);
 
   void executeExchangeTask(ExchangeTask *exchangeTask);
 
@@ -48,9 +48,9 @@ public slots:
   void receiveUpdateMarketTrades(QString pair, QObject *sender);
   void receiveUpdateBalances(QObject *sender);
   void receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender);
-  void receiveCancelOrder(uint orderID, QObject *sender);
+  void receiveCancelOrder(quint64 orderID, QObject *sender);
   void receiveUpdateActiveOrders(QString pair, QObject *sender);
-  void receiveUpdateOrderInfo(uint orderID, QObject *sender);
+  void receiveUpdateOrderInfo(quint64 orderID, QObject *sender);
 
   void UpdateMarketTickerReply (QNetworkReply *reply);
   void UpdateMarketDepthReply  (QNetworkReply *reply);
@@ -67,7 +67,7 @@ private slots:
 
 signals:
   void sendTicker(Ticker ticker);
-  void sendOrderID(int orderID);
+  void sendOrderID(quint64 orderID);
   void sendOrderStatus(int status);
 
 };

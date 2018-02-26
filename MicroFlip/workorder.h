@@ -39,8 +39,8 @@ private:
   QTimer   *timer;
   QThread  *workThread;
 
-  int sellOrderID;
-  int buyOrderID;
+  quint64 sellOrderID;
+  quint64 buyOrderID;
   int workID;
 
   double  maxAmount;
@@ -71,8 +71,8 @@ private:
 
   void requestUpdateMarketTicker();
   void requestCreateOrder(int type, double rate, double amount);
-  void requestOrderInfo(int orderID);  
-  void requestCancelOrder(int orderID);
+  void requestOrderInfo(quint64 orderID);
+  void requestCancelOrder(quint64 orderID);
 
 private slots:
   void updateTick();
@@ -80,7 +80,7 @@ private slots:
 public slots:
   void UpdateMarketTickerReply(Ticker ticker);
 
-  void orderCreateReply(int orderID);
+  void orderCreateReply(quint64 orderID);
   void orderInfoReply(int status);
   void orderCancelReply(bool succes);
 
@@ -89,7 +89,7 @@ public slots:
 signals:
   void sendUpdateMarketTicker(QString pair, QObject *sender);
   void sendCreateOrder(QString pair, int type, double price, double amount, QObject *sender);
-  void sendUpdateOrderInfo(uint orderID, QObject *sender);
+  void sendUpdateOrderInfo(quint64 orderID, QObject *sender);
 
   void updateLog(int workID, QString log);
   void updateState(int workID, QString state);

@@ -122,7 +122,7 @@ void WorkOrder::createSellOrder(double amount) {
   //sellPrice = currentTicker.getLast() + 0.5;
 
   // Match current sell order
-  sellPrice = currentTicker.getBuy() * 1.19;
+  sellPrice = currentTicker.getBuy();// * 1.19;
 
   // Check balance
   // TODO
@@ -193,14 +193,14 @@ void WorkOrder::requestCreateOrder(int type, double rate, double amount) {
   disconnect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
 }
 
-void WorkOrder::requestOrderInfo(int orderID) {
+void WorkOrder::requestOrderInfo(quint64 orderID) {
 
-  connect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
-  emit sendUpdateOrderInfo((uint)orderID, this);
-  disconnect(this, SIGNAL(sendUpdateOrderInfo(uint,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(uint,QObject*)));
+  connect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*)));
+  emit sendUpdateOrderInfo((quint64)orderID, this);
+  disconnect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*)));
 }
 
-void WorkOrder::requestCancelOrder(int orderID) {
+void WorkOrder::requestCancelOrder(quint64 orderID) {
 
     (void) orderID;
 }
@@ -253,7 +253,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
     workState = CREATESELL;
 }
 
-void WorkOrder::orderCreateReply(int orderID) {
+void WorkOrder::orderCreateReply(quint64 orderID) {
 
   // Check if this is not an old create reply
   if(workState != WAITINGFORSELL) {
