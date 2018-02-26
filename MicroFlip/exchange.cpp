@@ -12,7 +12,26 @@ void Exchange::setConfig(Config *C)
 
 double Exchange::getFee()
 {
-  return fee;
+    return fee;
+}
+
+QList<Balance> Exchange::getBalances()
+{
+    return balances;
+}
+
+double Exchange::getBalance(QString currency)
+{
+    double amount = -1.0;
+
+    for(int i = 0; i < balances.length(); i++) {
+
+        if(QString::compare(balances.at(i).getCurrency(), currency,Qt::CaseInsensitive) == 0){
+            amount = balances.at(i).getAmount();
+        }
+    }
+
+    return amount;
 }
 
 ExchangeTask::ExchangeTask(int Task) {

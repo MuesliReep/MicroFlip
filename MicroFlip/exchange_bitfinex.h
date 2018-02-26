@@ -18,6 +18,7 @@ private:
   QString apiSecret;
 
   QNetworkAccessManager* tickerDownloadManager;
+  QNetworkAccessManager* updateBalancesDownloadManager;
   QNetworkAccessManager* createTradeDownloadManager;
   QNetworkAccessManager* orderInfoDownloadManager;
   QNetworkAccessManager* cancelOrderDownloadManager;
@@ -38,6 +39,7 @@ private:
   void executeExchangeTask(ExchangeTask *exchangeTask);
 
   bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
+  bool getArrayFromDocument (QNetworkReply *reply, QJsonArray *array);
   Ticker parseRawTickerData(QJsonObject *rawData);
   bool checkSuccess(QJsonObject *object);
   QString getRequestErrorMessage(QJsonObject *object);

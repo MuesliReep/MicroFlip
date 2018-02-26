@@ -17,6 +17,9 @@
 #include "config.h"
 #include "order.h"
 
+///
+/// \brief The ExchangeTask class
+///
 class ExchangeTask {
 public:
   ExchangeTask(int Task = -1);
@@ -33,12 +36,16 @@ private:
   QList<QString> attributes;
 };
 
+///
+/// \brief The Balance class
+///
 class Balance {
 
 public:
   Balance(QString Currency, double Amount) { currency = Currency; amount = Amount; }
   QString getCurrency() { return currency; }
   double getAmount() { return amount; }
+  void   setAmount(double Amount) { amount = Amount; }
 private:
   QString currency;
   double amount;
@@ -99,6 +106,8 @@ public:
   void setConfig(Config *C);
 
   double getFee();
+  QList<Balance> getBalances();
+  double getBalance(QString currency);
 
 private:
   virtual void updateMarketTicker(QString pair) = 0;

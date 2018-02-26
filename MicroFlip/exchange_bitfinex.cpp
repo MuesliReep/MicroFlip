@@ -70,7 +70,30 @@ void Exchange_bitfinex::updateMarketTrades(QString pair) {
 
 void Exchange_bitfinex::updateBalances() {
 
-  // TODO
+    // Create JSON payload
+    QJsonObject payload;
+    payload.insert("request", "/v1/balances");
+    payload.insert("nonce",   createNonce());
+
+    QJsonDocument payloadDocument(payload);
+    QByteArray payloadData   = payloadDocument.toJson(QJsonDocument::Compact);
+    QByteArray payloadData64 = payloadData.toBase64();
+
+    // Sign the data
+    QByteArray signature = QMessageAuthenticationCode::hash(payloadData64, this->apiSecret.toUtf8(), QCryptographicHash::Sha384).toHex();
+
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/order/new"));
+
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"),    QByteArray("application/json"));
+    downloader.addHeaderToRequest(&request, QByteArray("Accept"),          QByteArray("application/json"));
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-APIKEY"),    this->apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-PAYLOAD"),   payloadData64);
+    downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
+
+    // Execute the download
+    downloader.doPostDownload(request, updateBalancesDownloadManager, payloadData, this, SLOT(UpdateBalancesReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double Amount) {
@@ -272,7 +295,17 @@ void Exchange_bitfinex::UpdateMarketTradesReply(QNetworkReply *reply) {
 
 void Exchange_bitfinex::UpdateBalancesReply(QNetworkReply *reply) {
 
-  (void) reply;
+  if(!reply->error()) {
+
+      QJsonObject jsonObj;
+
+      // Extract JSON object from network reply
+      getObjectFromDocument(reply, &jsonObj);
+QJsonArray
+
+  } else {
+
+  }
 }
 
 void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
@@ -417,8 +450,12 @@ void Exchange_bitfinex::updateTick2() {
 //             Parsers              //
 //----------------------------------//
 
-// Grabs a JSON object from a Network reply
-// Returns true if succesfull
+///
+/// \brief Exchange_bitfinex::getObjectFromDocument Grabs a JSON object from a Network reply
+/// \param reply
+/// \param object
+/// \return Returns true if succesfull
+///
 bool Exchange_bitfinex::getObjectFromDocument(QNetworkReply *reply, QJsonObject *object) {
 
   QJsonDocument   jsonDoc;
@@ -426,6 +463,23 @@ bool Exchange_bitfinex::getObjectFromDocument(QNetworkReply *reply, QJsonObject 
 
   jsonDoc = QJsonDocument().fromJson(reply->readAll(), &error);
   *object = jsonDoc.object();
+
+  return true; // TODO: check json validity
+}
+
+///
+/// \brief Exchange_bitfinex::getArrayFromDocument Grabs a JSON array from a Network reply
+/// \param reply
+/// \param array
+/// \return Returns true if succesfull
+///
+bool Exchange_bitfinex::getArrayFromDocument(QNetworkReply *reply, QJsonArray *array) {
+
+  QJsonDocument   jsonDoc;
+  QJsonParseError error;
+
+  jsonDoc = QJsonDocument().fromJson(reply->readAll(), &error);
+  *array  = jsonDoc.array();
 
   return true; // TODO: check json validity
 }
