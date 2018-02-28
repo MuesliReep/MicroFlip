@@ -7,9 +7,11 @@ Exchange_bitfinex::Exchange_bitfinex() {
   fee = 0.2;
 
   // Initiate download managers
-  tickerDownloadManager      = new QNetworkAccessManager(this);
-  createTradeDownloadManager = new QNetworkAccessManager(this);
-  orderInfoDownloadManager   = new QNetworkAccessManager(this);
+  tickerDownloadManager             = new QNetworkAccessManager(this);
+  createTradeDownloadManager        = new QNetworkAccessManager(this);
+  orderInfoDownloadManager          = new QNetworkAccessManager(this);
+  updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
+  updateBalancesDownloadManager     = new QNetworkAccessManager(this);
 
   // Start the interval timers
   timer  = new QTimer(this);
@@ -64,8 +66,13 @@ void Exchange_bitfinex::updateMarketDepth(QString pair) {
 
 void Exchange_bitfinex::updateMarketTrades(QString pair) {
 
-    (void) pair;
-  // TODO
+  // Create the request to download new data
+  // API v2 pair is in upper case and is preceded by a "t"
+  //QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v2/trades/t" + pair.toUpper() + "/hist?limit=999"));
+  QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/trades/" + pair));
+
+  // Execute the download
+  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(UpdateMarketTradesReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::updateBalances() {
@@ -180,7 +187,7 @@ void Exchange_bitfinex::executeExchangeTask(ExchangeTask *exchangeTask) {
 
     case 0: updateMarketTicker(exchangeTask->getAttributes().at(0)); break;
     case 1: updateMarketDepth(exchangeTask->getAttributes().at(0));  break;
-    case 2: updateMarketDepth(exchangeTask->getAttributes().at(0));  break;
+    case 2: updateMarketTrades(exchangeTask->getAttributes().at(0));  break;
     case 3: updateBalances(); break;
     case 4:
       createOrder(exchangeTask->getAttributes().at(0),
@@ -290,7 +297,31 @@ void Exchange_bitfinex::UpdateMarketDepthReply(QNetworkReply *reply) {
 
 void Exchange_bitfinex::UpdateMarketTradesReply(QNetworkReply *reply) {
 
-  (void) reply;
+    if(!reply->error()) {
+
+        QJsonObject jsonObj;
+
+        // Extract JSON object from network reply
+        getObjectFromDocument(reply, &jsonObj);
+
+        // Parse the data
+    qDebug() << "New Data!";
+
+    } else {
+        QJsonObject jsonObj;
+        bool result = getObjectFromDocument(reply, &jsonObj);
+        QString errorString = reply->errorString();
+        qDebug() << "Market Trades Packet error: " << errorString;
+        (void) result;
+    }
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(updateMarketTradesDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
 }
 
 void Exchange_bitfinex::UpdateBalancesReply(QNetworkReply *reply) {
@@ -301,7 +332,7 @@ void Exchange_bitfinex::UpdateBalancesReply(QNetworkReply *reply) {
 
       // Extract JSON object from network reply
       getObjectFromDocument(reply, &jsonObj);
-QJsonArray
+//QJsonArray
 
   } else {
 

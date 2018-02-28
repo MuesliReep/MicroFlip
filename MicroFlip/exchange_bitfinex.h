@@ -18,6 +18,7 @@ private:
   QString apiSecret;
 
   QNetworkAccessManager* tickerDownloadManager;
+  QNetworkAccessManager* updateMarketTradesDownloadManager;
   QNetworkAccessManager* updateBalancesDownloadManager;
   QNetworkAccessManager* createTradeDownloadManager;
   QNetworkAccessManager* orderInfoDownloadManager;

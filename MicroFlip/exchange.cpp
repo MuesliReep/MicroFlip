@@ -23,14 +23,15 @@ QList<Balance> Exchange::getBalances()
 double Exchange::getBalance(QString currency)
 {
     double amount = -1.0;
+    /*
 
-    for(int i = 0; i < balances.length(); i++) {
+    for(int i = 0; i < this->balances.length(); i++) {
 
-        if(QString::compare(balances.at(i).getCurrency(), currency,Qt::CaseInsensitive) == 0){
-            amount = balances.at(i).getAmount();
+        if(QString::compare(this->balances.at(i).getCurrency(), currency,Qt::CaseInsensitive) == 0){
+            amount = this->balances.at(i).getAmount();
         }
     }
-
+    */
     return amount;
 }
 
