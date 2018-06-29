@@ -71,7 +71,7 @@ private:
 
   void requestUpdateMarketTicker();
   void requestCreateOrder(int type, double rate, double amount);
-  void requestOrderInfo(quint64 orderID);
+  void requestOrderInfo  (quint64 orderID);
   void requestCancelOrder(quint64 orderID);
 
 private slots:
@@ -81,15 +81,15 @@ public slots:
   void UpdateMarketTickerReply(Ticker ticker);
 
   void orderCreateReply(quint64 orderID);
-  void orderInfoReply(int status);
+  void orderInfoReply  (int status);
   void orderCancelReply(bool succes);
 
   void startOrder();
 
 signals:
   void sendUpdateMarketTicker(QString pair, QObject *sender, int senderID);
-  void sendCreateOrder(QString pair, int type, double price, double amount, QObject *sender, int senderID);
-  void sendUpdateOrderInfo(quint64 orderID, QObject *sender, int senderID);
+  void sendCreateOrder       (QString pair, int type, double price, double amount, QObject *sender, int senderID);
+  void sendUpdateOrderInfo   (quint64 orderID, QObject *sender, int senderID);
 
   void updateLog(int workID, QString log);
   void updateState(int workID, QString state);

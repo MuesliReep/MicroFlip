@@ -30,28 +30,26 @@ class Exchange_wex : public Exchange
     void updateMarketDepth (QString pair) ;
     void updateMarketTrades(QString pair);
 
-    void updateBalances();
-    void createOrder(QString Pair, int Type, double Rate, double Amount);
-    void cancelOrder(quint64 orderID);
+    void updateBalances    ();
+    void createOrder       (QString Pair, int Type, double Rate, double Amount);
+    void cancelOrder       (quint64 orderID);
     void updateActiveOrders(QString pair);
-    void updateOrderInfo(quint64 OrderID);
+    void updateOrderInfo   (quint64 OrderID);
 
-    void executeExchangeTask(ExchangeTask *exchangeTask);
-
-    bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
-    Ticker parseRawTickerData(QJsonObject *rawData);
-    bool checkSuccess(QJsonObject *object);
+    bool    getObjectFromDocument (QNetworkReply *reply, QJsonObject *object);
+    Ticker  parseRawTickerData    (QJsonObject *rawData);
+    bool    checkSuccess          (QJsonObject *object);
     QString getRequestErrorMessage(QJsonObject *object);
 
   public slots:
     void receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID);
-    void receiveUpdateMarketDepth(QString pair, QObject *sender, int SenderID) ;
+    void receiveUpdateMarketDepth (QString pair, QObject *sender, int SenderID) ;
     void receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID);
-    void receiveUpdateBalances(QObject *sender, int SenderID);
-    void receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID);
-    void receiveCancelOrder(quint64 orderID, QObject *sender, int SenderID);
+    void receiveUpdateBalances    (QObject *sender, int SenderID);
+    void receiveCreateOrder       (QString pair, int type, double rate, double amount, QObject *sender, int SenderID);
+    void receiveCancelOrder       (quint64 orderID, QObject *sender, int SenderID);
     void receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID);
-    void receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int SenderID);
+    void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID);
 
     void UpdateMarketTickerReply (QNetworkReply *reply);
     void UpdateMarketDepthReply  (QNetworkReply *reply);
@@ -62,13 +60,9 @@ class Exchange_wex : public Exchange
     void UpdateActiveOrdersReply (QNetworkReply *reply);
     void UpdateOrderInfoReply    (QNetworkReply *reply);
 
-  private slots:
-    void updateTick();
-    void updateTick2();
-
   signals:
-    void sendTicker(Ticker ticker);
-    void sendOrderID(int orderID);
+    void sendTicker     (Ticker ticker);
+    void sendOrderID    (int orderID);
     void sendOrderStatus(int status);
 
   };

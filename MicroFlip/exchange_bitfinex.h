@@ -37,8 +37,6 @@ private:
   void updateActiveOrders(QString pair);
   void updateOrderInfo(quint64 OrderID);
 
-  void executeExchangeTask(ExchangeTask *exchangeTask);
-
   bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
   bool getArrayFromDocument (QNetworkReply *reply, QJsonArray *array);
   Ticker parseRawTickerData(QJsonObject *rawData);
@@ -63,10 +61,6 @@ public slots:
   void CancelOrderReply        (QNetworkReply *reply);
   void UpdateActiveOrdersReply (QNetworkReply *reply);
   void UpdateOrderInfoReply    (QNetworkReply *reply);
-
-private slots:
-  void updateTick();
-  void updateTick2();
 
 signals:
   void sendTicker(Ticker ticker);

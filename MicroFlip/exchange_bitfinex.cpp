@@ -183,27 +183,6 @@ void Exchange_bitfinex::updateOrderInfo(quint64 OrderID) {
     downloader.doPostDownload(request, orderInfoDownloadManager, payloadData, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
 }
 
-void Exchange_bitfinex::executeExchangeTask(ExchangeTask *exchangeTask) {
-
-  switch(exchangeTask->getTask()) {
-
-    case 0: updateMarketTicker(exchangeTask->getAttributes().at(0)); break;
-    case 1: updateMarketDepth(exchangeTask->getAttributes().at(0));  break;
-    case 2: updateMarketTrades(exchangeTask->getAttributes().at(0));  break;
-    case 3: updateBalances(); break;
-    case 4:
-      createOrder(exchangeTask->getAttributes().at(0),
-                  exchangeTask->getAttributes().at(1).toInt(),
-                  exchangeTask->getAttributes().at(2).toDouble(),
-                  exchangeTask->getAttributes().at(3).toDouble());
-      break;
-    case 5: cancelOrder(exchangeTask->getAttributes().at(0).toUInt()); break;
-    case 6: updateActiveOrders(exchangeTask->getAttributes().at(0));   break;
-    case 7: updateOrderInfo((quint64)exchangeTask->getAttributes().at(0).toDouble()); break;
-    default: qDebug() << "Bad exchange task received: " << exchangeTask->getTask(); break;
-  }
-}
-
 //----------------------------------//
 //          Public Slots            //
 //----------------------------------//
@@ -450,33 +429,6 @@ void Exchange_bitfinex::UpdateOrderInfoReply(QNetworkReply *reply) {
 
     // Mark this task complete
     currentTask = ExchangeTask();
-}
-
-
-//----------------------------------//
-//          Private Slots           //
-//----------------------------------//
-
-void Exchange_bitfinex::updateTick() {
-
-  // While currentTask is not complete, do nothing
-  if(currentTask.getTask() != -1)
-    return;
-
-  // Get a new task and execute it
-  if(exchangeTasks.size() > 0) {
-
-    // Get a task and remove it from the list
-    currentTask = exchangeTasks.takeFirst();
-
-    // Execute the task
-    executeExchangeTask(&currentTask);
-  }
-}
-
-void Exchange_bitfinex::updateTick2() {
-
-  // While currentTask is not complete, do nothing
 }
 
 //----------------------------------//

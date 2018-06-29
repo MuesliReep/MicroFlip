@@ -22,9 +22,9 @@
 ///
 class ExchangeTask {
 public:
-  ExchangeTask(int Task = -1, int SenderID = 0);
-  ExchangeTask(int Task, QObject *Sender, int SenderID);
-  ExchangeTask(int Task, QObject *Sender, int SenderID, QList<QString> Attributes);
+  ExchangeTask(int Task = -1, int senderID = 0);
+  ExchangeTask(int Task, QObject *Sender, int senderID);
+  ExchangeTask(int Task, QObject *Sender, int senderID, QList<QString> Attributes);
 
   QObject *getSender() const;
   int getSenderID();
@@ -46,8 +46,8 @@ class Balance {
 public:
   Balance(QString Currency, double Amount) { currency = Currency; amount = Amount; }
   QString getCurrency() { return currency; }
-  double getAmount() { return amount; }
-  void   setAmount(double Amount) { amount = Amount; }
+  double  getAmount()   { return amount;   }
+  void    setAmount(double Amount) { amount = Amount; }
 private:
   QString currency;
   double amount;
@@ -105,24 +105,22 @@ public:
 
   virtual void startWork() = 0;
 
-  void setConfig(Config *C);
+  void setConfig(Config *config);
 
   double getFee();
   QList<Balance> getBalances();
   double getBalance(QString currency);
 
 private:
-  virtual void updateMarketTicker(QString pair) = 0;
-  virtual void updateMarketDepth (QString pair) = 0;
-  virtual void updateMarketTrades(QString pair) = 0;
+  virtual void updateMarketTicker(QString pair)    = 0;
+  virtual void updateMarketDepth (QString pair)    = 0;
+  virtual void updateMarketTrades(QString pair)    = 0;
 
-  virtual void updateBalances() = 0;
-  virtual void createOrder(QString pair, int type, double rate, double amount) = 0;
-  virtual void cancelOrder(quint64 orderID) = 0;
-  virtual void updateActiveOrders(QString pair) = 0;
-  virtual void updateOrderInfo(quint64 orderID) = 0;
-
-  virtual void executeExchangeTask(ExchangeTask *exchangeTask) = 0;
+  virtual void updateBalances    ()                = 0;
+  virtual void createOrder       (QString pair, int type, double rate, double amount) = 0;
+  virtual void cancelOrder       (quint64 orderID) = 0;
+  virtual void updateActiveOrders(QString pair)    = 0;
+  virtual void updateOrderInfo(quint64 orderID)    = 0;
 
 protected:
   Config *c;
@@ -135,32 +133,34 @@ protected:
 
   double fee;
 
-  QList<Order>    activeOrders;
-  QList<Balance>  balances;
+  QList<Order>        activeOrders;
+  QList<Balance>      balances;
   QList<ExchangeTask> exchangeTasks;
 
-  void createNonce(QByteArray *nonce);
+  void createNonce     (QByteArray *nonce);
   void createMilliNonce(QByteArray *nonce);
 
   bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
   bool checkCoolDownExpiration(bool reset);
 
+  void executeExchangeTask(ExchangeTask *exchangeTask);
+
 signals:
   void updateLog(int workID, QString log);
 
 public slots:
-  virtual void receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID) = 0;
-  virtual void receiveUpdateMarketDepth( QString pair, QObject *sender, int SenderID) = 0;
-  virtual void receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID) = 0;
-  virtual void receiveUpdateBalances(QObject *sender, int SenderID) = 0;
-  virtual void receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID) = 0;
-  virtual void receiveCancelOrder(quint64 orderID,     QObject *sender, int SenderID) = 0;
-  virtual void receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID) = 0;
-  virtual void receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int SenderID) = 0;
+  virtual void receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID)        = 0;
+  virtual void receiveUpdateMarketDepth (QString pair, QObject *sender, int SenderID)        = 0;
+  virtual void receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID)        = 0;
+  virtual void receiveUpdateBalances    (QObject *sender, int SenderID)                      = 0;
+  virtual void receiveCreateOrder       (QString pair, int type, double rate, double amount, QObject *sender, int SenderID) = 0;
+  virtual void receiveCancelOrder       (quint64 orderID,     QObject *sender, int SenderID) = 0;
+  virtual void receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID)        = 0;
+  virtual void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID)     = 0;
 
-private slots:
-  virtual void updateTick()  = 0;
-  virtual void updateTick2() = 0;
+protected slots:
+  void updateTick() ;
+  void updateTick2();
 
 signals:
   void sendNewMarketTicker(Ticker ticker);

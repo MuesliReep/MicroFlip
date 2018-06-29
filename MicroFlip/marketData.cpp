@@ -138,10 +138,10 @@ void MarketData::binTradeData() {
 
     // If no trades took place or no data is available for this time interval(bin)
     // use the previous value. If no previous value is available use zero.
-    if(!intervalTrades.size()>0) {
+    if(!(intervalTrades.size()>0)) {
 
       // Check if there is a previous value to use
-      if(!binnedTradeData.size()>0) {
+      if(!(binnedTradeData.size()>0)) {
 
         binnedTradeData.prepend(DataPoint(maxIntervalStamp,0,0,0,0,0,0)); // The list is empty, create a zero value datapoint
       } else { // Use the previous value
@@ -202,7 +202,7 @@ void MarketData::parseRawTradeData(QJsonArray *rawData) {
   // Retrieve array form JSON object
   // jTrades = rawData->value("btc_usd").toArray();
 
-  if(!rawData->size()>0)
+  if(!(rawData->size()>0))
     return;
 
   // Append new trades to the beginning of the trades list
@@ -406,7 +406,7 @@ bool MarketData::loadTradeDataFromFile(uint maxAge) {
 // Loads a market data set from a specified file
 void MarketData::saveTradeDataToFile() {
 
-    if(!tradeData.size()>0)
+    if(!(tradeData.size()>0))
         return;
 
   QJsonObject object;
@@ -441,7 +441,7 @@ void MarketData::saveTradeDataToFile() {
 // Returns the oldest stored trade
 uint MarketData::getOldestTrade() {
 
-  if(!tradeData.size()>0)
+  if(!(tradeData.size()>0))
     return 0;
 
   return tradeData[tradeData.size()-1].getTimeStamp();
