@@ -12,26 +12,27 @@
 /// \param buyTTL Time in minutes a Buy order may live
 /// \param highSpeed
 ///
-WorkOrder::WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount,
-                     double profitTarget, double minSellPrice, int sellTTL,
-                     int buyTTL, bool highSpeed) {
+WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
+                     double maxAmount,    double profitTarget, int shortInterval,
+                     int longInterval,    double minSellPrice, int sellTTL,
+                     int buyTTL,          bool highSpeed) {
 
-  this->exchange     = exchange;
-  this->workID       = workID;
-  this->maxAmount    = maxAmount;
-  this->profitTarget = profitTarget;
-  this->pair         = pair;
-  this->minSellPrice = minSellPrice;
-  this->sellTTL      = sellTTL;
-  this->buyTTL       = buyTTL;
-  this->highSpeed    = highSpeed;
+  this->exchange      = exchange;
+  this->workID        = workID;
+  this->maxAmount     = maxAmount;
+  this->profitTarget  = profitTarget;
+  this->pair          = pair;
+  this->minSellPrice  = minSellPrice;
+  this->sellTTL       = sellTTL;
+  this->buyTTL        = buyTTL;
+  this->highSpeed     = highSpeed;
+  this->intervalShort = shortInterval;
+  this->intervalLong  = longInterval;
 
   dynamicMinSell = this->minSellPrice < 0 ? true : false;
 
   workState = START;
 
-  intervalShort       = 10 * 1000;     // 10 seconds
-  intervalLong        = 5 * 60 * 1000; // 5 minutes
   stdInterval         = true;
   longIntervalRequest = false;
 }
@@ -101,8 +102,6 @@ void WorkOrder::updateTick() {
     case COMPLETE:
       emit updateState(workID, "COMPLETE");
 
-//      this->sleep(10*60); // Wait 10 min
-      //timer->setInterval(intervalLong);
       stdInterval         = false;
       longIntervalRequest = true;
 
@@ -237,13 +236,22 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
     updateLog(workID, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice));
   }
 
+//  // return to START state if buy price is too low
+//  if(currentTicker.getBuy() <= minSellPrice) {
+//    updateLog(workID, "Price " + QString::number(currentTicker.getBuy()) + " lower than minimum: " + QString::number(minSellPrice) + ". Reverting state!");
+//    workState = START;
+
+//    // Pause workorder for 5 minutes
+//    stdInterval         = false;
+//    longIntervalRequest = true;
+//  }
+
   // return to START state if buy price is too low
-  if(currentTicker.getBuy() <= minSellPrice) {
-    updateLog(workID, "Price " + QString::number(currentTicker.getBuy()) + " lower than minimum: " + QString::number(minSellPrice) + ". Reverting state!");
+  if(currentTicker.getSell() <= minSellPrice) {
+    updateLog(workID, "Price " + QString::number(currentTicker.getSell()) + " lower than minimum: " + QString::number(minSellPrice) + ". Reverting state!");
     workState = START;
 
     // Pause workorder for 5 minutes
-
     stdInterval         = false;
     longIntervalRequest = true;
   }

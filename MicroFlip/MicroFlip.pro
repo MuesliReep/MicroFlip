@@ -24,13 +24,13 @@ SOURCES += main.cpp\
     workorder.cpp \
     downloader.cpp \
     marketData.cpp \
-    marketHistory.cpp \
+#    marketHistory.cpp \
     config.cpp \
     order.cpp \
     trade.cpp \
     display.cpp \
     exchange.cpp \
-    exchange_btce.cpp \
+#    exchange_btce.cpp \
     control.cpp \
 #    exchange_okcoin.cpp \
     exchange_wex.cpp \
@@ -42,13 +42,13 @@ HEADERS  += program.h \
     workorder.h \
     downloader.h \
     marketData.h \
-    marketHistory.h \
+#    marketHistory.h \
     config.h \
     order.h \
     trade.h \
     display.h \
     exchange.h \
-    exchange_btce.h \
+#    exchange_btce.h \
     control.h \
 #    exchange_okcoin.h \
     exchange_wex.h \

@@ -25,7 +25,7 @@ void Exchange_btce::startWork() {
   apiKey = c->getApiKey();
   apiSecret = c->getApiSecret();
 
-  timer->start(c->getCoolDownTime()*1100);
+  timer->start(2*1100);
   //timer2->start(1*1100); // TODO: determine correct amount
 }
 

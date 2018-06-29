@@ -1,5 +1,10 @@
 #include "display.h"
 
+#include <sys/ioctl.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <iostream>
+
 Display::Display()
 {
     getTerminalSize();
@@ -20,7 +25,7 @@ void Display::getTerminalSize() {
   lines   = (int)w.ws_row;
 
   // Minus 1 so there is room for 1 qDebug line
-  lines--;
+  lines-=2;
 }
 
 void Display::updateScreen()

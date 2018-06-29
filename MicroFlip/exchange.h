@@ -22,11 +22,12 @@
 ///
 class ExchangeTask {
 public:
-  ExchangeTask(int Task = -1);
-  ExchangeTask(int Task, QObject *Sender);
-  ExchangeTask(int Task, QObject *Sender, QList<QString> Attributes);
+  ExchangeTask(int Task = -1, int SenderID = 0);
+  ExchangeTask(int Task, QObject *Sender, int SenderID);
+  ExchangeTask(int Task, QObject *Sender, int SenderID, QList<QString> Attributes);
 
   QObject *getSender() const;
+  int getSenderID();
   int getTask() const;
   QList<QString> getAttributes() const;
 
@@ -34,6 +35,7 @@ private:
   QObject *sender;
   int task;
   QList<QString> attributes;
+  int senderID;
 };
 
 ///
@@ -144,16 +146,17 @@ protected:
   bool checkCoolDownExpiration(bool reset);
 
 signals:
+  void updateLog(int workID, QString log);
 
 public slots:
-  virtual void receiveUpdateMarketTicker(QString pair, QObject *sender) = 0;
-  virtual void receiveUpdateMarketDepth(QString pair, QObject *sender)  = 0;
-  virtual void receiveUpdateMarketTrades(QString pair, QObject *sender) = 0;
-  virtual void receiveUpdateBalances(QObject *sender) = 0;
-  virtual void receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender) = 0;
-  virtual void receiveCancelOrder(quint64 orderID, QObject *sender) = 0;
-  virtual void receiveUpdateActiveOrders(QString pair, QObject *sender) = 0;
-  virtual void receiveUpdateOrderInfo(quint64 orderID, QObject *sender) = 0;
+  virtual void receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID) = 0;
+  virtual void receiveUpdateMarketDepth( QString pair, QObject *sender, int SenderID) = 0;
+  virtual void receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID) = 0;
+  virtual void receiveUpdateBalances(QObject *sender, int SenderID) = 0;
+  virtual void receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID) = 0;
+  virtual void receiveCancelOrder(quint64 orderID,     QObject *sender, int SenderID) = 0;
+  virtual void receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID) = 0;
+  virtual void receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int SenderID) = 0;
 
 private slots:
   virtual void updateTick()  = 0;

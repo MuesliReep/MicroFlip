@@ -1,5 +1,8 @@
 #include "marketData.h"
 
+#include <QDebug>
+#include <QDateTime>
+
 MarketData::MarketData() {
 
   tradeDataFileName = "btce_USD-BTC.json";

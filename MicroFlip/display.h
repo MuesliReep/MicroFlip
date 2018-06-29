@@ -1,11 +1,6 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <iostream>
-
 #include <QObject>
 #include <QList>
 #include <QDateTime>

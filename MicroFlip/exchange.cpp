@@ -35,26 +35,35 @@ double Exchange::getBalance(QString currency)
     return amount;
 }
 
-ExchangeTask::ExchangeTask(int Task) {
- this->task = Task;
+ExchangeTask::ExchangeTask(int Task, int SenderID) {
+
+  this->task = Task;
+  this->senderID;
 }
 
-ExchangeTask::ExchangeTask(int Task, QObject *Sender) {
+ExchangeTask::ExchangeTask(int Task, QObject *Sender, int SenderID) {
 
-  this->task   = Task;
-  this->sender = Sender;
+  this->task     = Task;
+  this->sender   = Sender;
+  this->senderID = SenderID;
 }
 
-ExchangeTask::ExchangeTask(int Task, QObject *Sender, QList<QString> Attributes) {
+ExchangeTask::ExchangeTask(int Task, QObject *Sender, int SenderID, QList<QString> Attributes) {
 
   this->task       = Task;
   this->sender     = Sender;
+  this->senderID   = SenderID;
   this->attributes = Attributes;
 }
 
 QObject *ExchangeTask::getSender() const
 {
-  return sender;
+    return sender;
+}
+
+int ExchangeTask::getSenderID()
+{
+    return senderID;
 }
 int ExchangeTask::getTask() const
 {

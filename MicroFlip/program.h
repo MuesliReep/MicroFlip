@@ -21,7 +21,7 @@ private:
   Display *display;
   QList<WorkOrder*> workOrders;
 
-  bool addWorkOrder(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, double minSell = -1.0);
+  bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, double minSell = -1.0);
 
 signals:
   void updateLog(int workID, QString log);

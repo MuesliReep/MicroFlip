@@ -1,160 +1,143 @@
 #include "config.h"
 
+#include <QSettings>
+#include <QFile>
+
 Config::Config() {
 
-  fileName = "config.json";
-  lastLoadedTimeStamp = 0;
-  coolDownTime = 2;
 }
 
 Config::~Config() {
 
 }
 
-// Loads a configuration from a given file, overwriting the running config
-bool Config::loadConfigFromFile() {
+bool Config::loadConfigFromFile(QString fileName) {
 
-  bool result = false;
+    static const QString DEFAULT_API_KEY     = "";
+    static const QString DEFAULT_API_SECRET  = "";
+    static const QString DEFAULT_CUSTOMER_ID = "";
 
-  QFile file(fileName);
-  QJsonDocument json;
+    static const double  DEFAULT_AMOUNT  = 0;
+    static const double  DEFAULT_PROFIT  = 0;
+    static const double  DEFAULT_MINSELL = 0;
+    static const int     DEFAULT_WORKERS = 0;
+    static const QString DEFAULT_PAIR    = "btc_usd";
 
-  if(file.open(QFile::ReadOnly)) {
+    static const int     DEFAULT_INTERVAL_SHORT = 10000;
+    static const int     DEFAULT_INTERVAL_LONG  = 60*1*1000;
 
-    QJsonParseError error;
+    bool result = false;
 
-    json = QJsonDocument().fromJson(file.readAll(), &error);
+    QFile file(fileName);
 
-    // Check if JSON was correctly parsed
-    if (error.error == QJsonParseError::NoError)
-      result = true;
-    else {
+    // If config file does not exist, create a default file and exit
+    if(!file.exists()) {
+        // TODO: log line instead of qdebug
 
-      qDebug() << error.errorString();
-      return result;
+        // Create file
+        QSettings settings(fileName, QSettings::IniFormat);
+
+        // Set default values
+        settings.setValue("Exchange/ApiKey",        DEFAULT_API_KEY);
+        settings.setValue("Exchange/ApiSecret",     DEFAULT_API_SECRET);
+        settings.setValue("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID);
+
+        settings.setValue("Worker/Amount",          DEFAULT_AMOUNT);
+        settings.setValue("Worker/Profit",          DEFAULT_PROFIT);
+        settings.setValue("Worker/MinimumSell",     DEFAULT_MINSELL);
+        settings.setValue("Worker/NumberOfWorkers", DEFAULT_WORKERS);
+        settings.setValue("Worker/CurrencyPair",    DEFAULT_PAIR);
+
+        settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT);
+        settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG);
+
+        // Save settings
+        settings.sync();
+
+        return result;
     }
 
-    // Read JSON values
-    QJsonObject object  = json.object();
-    lastLoadedTimeStamp = (uint)object.value("lastLoadedTimeStamp").toInt();
-    coolDownTime        = (uint)object.value("coolDownTime").toInt();
-    apiKey              = object.value("apiKey").toString();
-    apiSecret           = object.value("apiSecret").toString();
-    customerID          = object.value("customerID").toString();
+    QSettings settings(fileName, QSettings::IniFormat);
 
-    // Read history values
-    QJsonObject historyObject = object.value("historySources").toObject();
-    historySourceID           = historyObject.value("historySourceID").toInt();
-    QJsonArray  historyArray  = historyObject.value("sourcesList").toArray();
+    this->apiKey        = settings.value("Exchange/ApiKey",        DEFAULT_API_KEY        ).toString();
+    this->apiSecret     = settings.value("Exchange/ApiSecret",     DEFAULT_API_SECRET     ).toString();
+    this->customerID    = settings.value("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID    ).toString();
 
-    // Read history source object from array and add it to the sources list
-    historySources.clear();
+    this->amount        = settings.value("Worker/Amount",          DEFAULT_AMOUNT         ).toDouble();
+    this->profit        = settings.value("Worker/Profit",          DEFAULT_PROFIT         ).toDouble();
+    this->minSell       = settings.value("Worker/MinimumSell",     DEFAULT_MINSELL        ).toDouble();
+    this->numWorkers    = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS        ).toInt();
+    this->pair          = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR           ).toString();
 
-    for(int i=0;i<historyArray.size();i++) {    //TODO: throw error if list empty
+    this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt();;
+    this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt();;
 
-      QJsonObject sourceObject = historyArray[i].toObject();
+    result = true;
 
-      HistorySource source( sourceObject.value("sourceID").toInt(),
-                            (uint)sourceObject.value("historyCoolDownTime").toInt(),
-                            (uint)sourceObject.value("historyLastLoadedTimeStamp").toInt() );
-
-      historySources.append(source);
-    }
-
-    // Set the current history cooldown and timestamp values
-    if(historySources.size() > 0) {
-      historyCoolDownTime         = historySources[historySourceID].getHistoryLastLoadedTimeStamp();
-      historyLastLoadedTimeStamp  = historySources[historySourceID].getHistoryCoolDownTime();
-    }
-  }
-
-  return result;
+    return result;
 }
 
-// Saves the running config to file
-void Config::saveConfigToFile() {
+void Config::saveConfigToFile(QString fileName) {
 
-  // Create JSON object from current configuration
-  QJsonObject object;
+    QSettings settings(fileName, QSettings::IniFormat);
 
-  // Add generic values
-  object.insert("lastLoadedTimeStamp", QJsonValue((int)lastLoadedTimeStamp));
-  object.insert("coolDownTime", QJsonValue((int)coolDownTime));
-  object.insert("apiKey", QJsonValue(apiKey));
-  object.insert("apiSecret", QJsonValue(apiSecret));
-  object.insert("customerID", QJsonValue(customerID));
+    settings.setValue("Exchange/ApiKey",        this->apiKey        );
+    settings.setValue("Exchange/ApiSecret",     this->apiSecret     );
+    settings.setValue("Exchange/CustomerID",    this->customerID    );
 
-  // Add history values to history object
-  QJsonObject historyObject;
-  QJsonArray  historyArray;
+    settings.setValue("Worker/Amount",          this->amount        );
+    settings.setValue("Worker/Profit",          this->profit        );
+    settings.setValue("Worker/MinimumSell",     this->minSell       );
+    settings.setValue("Worker/NumberOfWorkers", this->numWorkers    );
+    settings.setValue("Worker/CurrencyPair",    this->pair          );
 
-  historyObject.insert("historySourceID", QJsonValue(historySourceID));
+    settings.setValue("Worker/Interval/Short",  this->shortInterval );
+    settings.setValue("Worker/Interval/Long",   this->longInterval  );
 
-  // Create an array for the historical data sources
-  for(int i=0;i<historySources.size();i++) {
-
-    QJsonObject source;
-
-    source.insert("sourceID", QJsonValue(historySources[i].getSourceID()));
-    source.insert("historyCoolDownTime", QJsonValue((int)historySources[i].getHistoryCoolDownTime()));
-    source.insert("historyLastLoadedTimeStamp", QJsonValue((int)historySources[i].getHistoryLastLoadedTimeStamp()));
-
-    historyArray.append(QJsonValue(source));
-  }
-
-  // Add the sources array to the history object
-  historyObject.insert("sourcesList", QJsonValue(historyArray));
-
-  // Add the history object to the JSON object
-  object.insert("historySources", QJsonValue(historyObject));
-
-  // Create a JSON document from the newly created JSON object
-  QJsonDocument document(object);
-
-  // Save the JSON document to file
-  QFile file(fileName);
-  file.open(QFile::WriteOnly);
-  file.write(document.toJson(QJsonDocument::Indented));
+    settings.sync();
 }
-
-void Config::setCoolDownTime(uint CoolDownTime) { coolDownTime = CoolDownTime; }
-uint Config::getCoolDownTime() { return coolDownTime; }
-
-uint Config::getLastLoadedTimeStamp() { return lastLoadedTimeStamp; }
-void Config::setLastLoadedTimeStamp(uint LastLoadedTimeStamp) { lastLoadedTimeStamp = LastLoadedTimeStamp; }
 
 QString Config::getApiKey() { return apiKey; }
 QString Config::getApiSecret() { return apiSecret; }
 QString Config::getCustomerID() { return customerID; }
-void    Config::setApiKey(QString ApiKey){ apiKey = ApiKey; }
-void    Config::setApiSecret(QString ApiSecret){ apiSecret = ApiSecret; }
-void    Config::setCustomerID(QString CustomerID){ customerID = CustomerID; }
 
-int  Config::getHistorySource() { return historySourceID; }
-uint Config::getHistoryCoolDownTime() { return historyCoolDownTime; }
-void Config::setHistoryLastLoadedTimeStamp(uint timeStamp) { historyLastLoadedTimeStamp = timeStamp; }
-uint Config::getHistoryLastLoadedTimeStamp() { return historyLastLoadedTimeStamp; }
-
-// Sets the current time as the timeStamp for the same overloaded function
-void Config::setLastLoadedTimeStamp() {
-
-  QDateTime time(QDateTime::currentDateTime());
-  setLastLoadedTimeStamp(time.toTime_t());
+double Config::getAmount() const
+{
+    return amount;
 }
 
-//
-HistorySource::HistorySource(int SourceID, uint HistoryCoolDownTime, uint HistoryLastLoadedTimeStamp) {
-    sourceID                    = SourceID;
-    historyCoolDownTime         = HistoryCoolDownTime;
-    historyLastLoadedTimeStamp  = HistoryLastLoadedTimeStamp;
+double Config::getProfit() const
+{
+    return profit;
 }
-uint HistorySource::getHistoryCoolDownTime() { return historyCoolDownTime; }
-void HistorySource::setHistoryLastLoadedTimeStamp(int timeStamp) { historyLastLoadedTimeStamp = timeStamp; }
-uint HistorySource::getHistoryLastLoadedTimeStamp() { return historyLastLoadedTimeStamp; }
-int  HistorySource::getSourceID() { return sourceID; }
+
+double Config::getMinSell() const
+{
+    return minSell;
+}
+
+QString Config::getPair() const
+{
+    return pair;
+}
+
+int Config::getNumWorkers() const
+{
+    return numWorkers;
+}
+
+int Config::getShortInterval() const
+{
+    return shortInterval;
+}
+
+int Config::getLongInterval() const
+{
+    return longInterval;
+}
 
 /* Example:
-
+  
 {
     "apiKey": "QN1M3IS6-1KVW0SKR-NY3VAY9J-S4O1OL7T-70370K8I",
     "apiSecret": "a1e313937830a75a810b4409e707f0ee7eda016177a608f4c7f3b6c3c0508f6c",
