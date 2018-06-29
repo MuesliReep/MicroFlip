@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core #gui
+QT       += core
 QT       -= gui
 QT       += network
 
@@ -19,7 +19,6 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-       # mainwindow.cpp \
     program.cpp \
     workorder.cpp \
     downloader.cpp \
@@ -38,7 +37,6 @@ SOURCES += main.cpp\
     exchange_bitfinex.cpp
 
 HEADERS  += program.h \
-    #mainwindow.h \
     workorder.h \
     downloader.h \
     marketData.h \
@@ -54,8 +52,6 @@ HEADERS  += program.h \
     exchange_wex.h \
     exchange_bitstamp.h \
     exchange_bitfinex.h
-
-#FORMS    += mainwindow.ui
 
 CONFIG += console
 
