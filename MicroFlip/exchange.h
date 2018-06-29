@@ -113,7 +113,7 @@ public:
 
 private:
   virtual void updateMarketTicker(QString pair) = 0;
-  virtual void updateMarketDepth(QString pair)  = 0;
+  virtual void updateMarketDepth (QString pair) = 0;
   virtual void updateMarketTrades(QString pair) = 0;
 
   virtual void updateBalances() = 0;

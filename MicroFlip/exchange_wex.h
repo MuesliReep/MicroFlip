@@ -32,9 +32,9 @@ class Exchange_wex : public Exchange
 
     void updateBalances();
     void createOrder(QString Pair, int Type, double Rate, double Amount);
-    void cancelOrder(uint orderID);
+    void cancelOrder(quint64 orderID);
     void updateActiveOrders(QString pair);
-    void updateOrderInfo(uint OrderID);
+    void updateOrderInfo(quint64 OrderID);
 
     void executeExchangeTask(ExchangeTask *exchangeTask);
 
@@ -49,9 +49,9 @@ class Exchange_wex : public Exchange
     void receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID);
     void receiveUpdateBalances(QObject *sender, int SenderID);
     void receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID);
-    void receiveCancelOrder(uint orderID, QObject *sender, int SenderID);
+    void receiveCancelOrder(quint64 orderID, QObject *sender, int SenderID);
     void receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID);
-    void receiveUpdateOrderInfo(uint orderID, QObject *sender, int SenderID);
+    void receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int SenderID);
 
     void UpdateMarketTickerReply (QNetworkReply *reply);
     void UpdateMarketDepthReply  (QNetworkReply *reply);

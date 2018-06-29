@@ -119,7 +119,7 @@ void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amoun
   downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
 }
 
-void Exchange_wex::cancelOrder(uint orderID) {
+void Exchange_wex::cancelOrder(quint64 orderID) {
   (void) orderID;
   // TODO
 }
@@ -129,7 +129,7 @@ void Exchange_wex::updateActiveOrders(QString pair) {
   // TODO
 }
 
-void Exchange_wex::updateOrderInfo(uint OrderID) {
+void Exchange_wex::updateOrderInfo(quint64 OrderID) {
 
   // Create POST data from method and nonce
   QByteArray method("method=OrderInfo");
@@ -204,7 +204,7 @@ void Exchange_wex::receiveCreateOrder(QString pair, int type, double rate, doubl
   attr.append(QString(QString::number(amount)));
   exchangeTasks.append(ExchangeTask(4, sender, SenderID, attr));
 }
-void Exchange_wex::receiveCancelOrder(uint orderID, QObject *sender, int SenderID){
+void Exchange_wex::receiveCancelOrder(quint64 orderID, QObject *sender, int SenderID){
   QList<QString> attr; attr.append(QString::number(orderID));
   exchangeTasks.append(ExchangeTask(5, sender, SenderID, attr));
 }
@@ -212,7 +212,7 @@ void Exchange_wex::receiveUpdateActiveOrders(QString pair, QObject *sender, int 
   QList<QString> attr; attr.append(QString(pair));
   exchangeTasks.append(ExchangeTask(6, sender, SenderID, attr));
 }
-void Exchange_wex::receiveUpdateOrderInfo(uint orderID, QObject *sender, int SenderID){
+void Exchange_wex::receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int SenderID){
 
   // TODO: beter way of doing this
   // Check if task already exists in list
