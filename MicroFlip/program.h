@@ -8,6 +8,7 @@
 #include <QThread>
 
 #include "display.h"
+#include "config.h"
 #include "workorder.h"
 #include "exchange.h"
 
@@ -19,6 +20,7 @@ public:
 
 private:
   Display *display;
+  Config  *config;
   QList<WorkOrder*> workOrders;
 
   bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, double minSell = -1.0);

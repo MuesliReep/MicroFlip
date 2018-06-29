@@ -1,7 +1,5 @@
 #include "program.h"
 
-#include "config.h"
-
 //#include "exchange_btce.h"
 //#include "exchange_okcoin.h"
 #include "exchange_wex.h"
@@ -11,20 +9,20 @@
 Program::Program(QObject *parent) : QObject(parent) {
 
   // Load configuration from file (if any)
-  Config c;
-  c.loadConfigFromFile();
+  config = new Config();
+  config->loadConfigFromFile();
 
   // Create an exchange interface
   Exchange *exchange = new Exchange_wex();
   //Exchange *exchange = new Exchange_bitfinex();
-  exchange->setConfig(&c);
+  exchange->setConfig(config);
   exchange->startWork();
 
   display = new Display();
   connect(this, SIGNAL(updateLog(int,QString)), display, SLOT(logUpdate(int,QString)));
 
   // Create work orders
-  workOrderFactory(c.getNumWorkers(), exchange, c.getAmount(), c.getProfit(), c.getPair(), c.getShortInterval(), c.getLongInterval(), c.getMinSell());
+  workOrderFactory(config->getNumWorkers(), exchange, config->getAmount(), config->getProfit(), config->getPair(), config->getShortInterval(), config->getLongInterval(), config->getMinSell());
 }
 
 ///

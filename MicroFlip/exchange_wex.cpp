@@ -333,9 +333,9 @@ void Exchange_wex::CreateOrderReply(QNetworkReply *reply) {
   }
 
   // Connect & send order ID to the initiator
-  connect(this, SIGNAL(sendOrderID(int)), currentTask.getSender(), SLOT(orderCreateReply(int)));
-  emit sendOrderID(orderID);
-  disconnect(this, SIGNAL(sendOrderID(int)), currentTask.getSender(), SLOT(orderCreateReply(int)));
+  connect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+  emit sendOrderID((quint64)orderID);
+  disconnect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
 
   reply->deleteLater();
 
