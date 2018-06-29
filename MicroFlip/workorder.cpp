@@ -180,23 +180,23 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
 
 void WorkOrder::requestUpdateMarketTicker() {
 
-  connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
-  emit sendUpdateMarketTicker(pair, this);
-  disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*)));
+  connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*,int)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*,int)));
+  emit sendUpdateMarketTicker(pair, this, this->workID);
+  disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*,int)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*,int)));
 }
 
 void WorkOrder::requestCreateOrder(int type, double rate, double amount) {
 
-  connect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
-  emit sendCreateOrder(pair, type, rate, amount, this);
-  disconnect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*)));
+  connect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*,int)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*,int)));
+  emit sendCreateOrder(pair, type, rate, amount, this, this->workID);
+  disconnect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*,int)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*,int)));
 }
 
 void WorkOrder::requestOrderInfo(quint64 orderID) {
 
-  connect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*)));
-  emit sendUpdateOrderInfo((quint64)orderID, this);
-  disconnect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*)));
+  connect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*,int)));
+  emit sendUpdateOrderInfo((quint64)orderID, this, this->workID);
+  disconnect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*,int)));
 }
 
 void WorkOrder::requestCancelOrder(quint64 orderID) {

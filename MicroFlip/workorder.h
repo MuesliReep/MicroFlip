@@ -87,9 +87,9 @@ public slots:
   void startOrder();
 
 signals:
-  void sendUpdateMarketTicker(QString pair, QObject *sender);
-  void sendCreateOrder(QString pair, int type, double price, double amount, QObject *sender);
-  void sendUpdateOrderInfo(quint64 orderID, QObject *sender);
+  void sendUpdateMarketTicker(QString pair, QObject *sender, int senderID);
+  void sendCreateOrder(QString pair, int type, double price, double amount, QObject *sender, int senderID);
+  void sendUpdateOrderInfo(quint64 orderID, QObject *sender, int senderID);
 
   void updateLog(int workID, QString log);
   void updateState(int workID, QString state);
