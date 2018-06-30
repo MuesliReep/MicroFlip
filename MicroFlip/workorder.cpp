@@ -203,8 +203,9 @@ void WorkOrder::requestOrderInfo(quint64 orderID) {
 }
 
 void WorkOrder::requestCancelOrder(quint64 orderID) {
-
-    (void) orderID;
+  connect(this, SIGNAL(sendCancelOrder(quint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(quint64,QObject*,int)));
+  emit sendCancelOrder(orderID, this, this->workID);
+  disconnect(this, SIGNAL(sendCancelOrder(quint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(quint64,QObject*,int)));
 }
 
 //----------------------------------//
@@ -349,9 +350,16 @@ void WorkOrder::orderInfoReply(int status) {
   }
 }
 
-void WorkOrder::orderCancelReply(bool succes)
-{
-    (void) succes;
+void WorkOrder::orderCancelReply(bool succes) {
+
+    if(!succes) {
+        workState = ERROR;
+        updateLog(workID, "Failed to cancel order!");
+        return;
+    }
+
+    workState = START;
+    updateLog(workID, "Order cancelled");
 }
 
 void WorkOrder::startOrder() {
