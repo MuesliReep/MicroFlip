@@ -169,9 +169,12 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
   *buyTotal = sellNetto;
   *buyPrice = *buyTotal / *buyAmount;
 
-  emit updateLog(workID, "\t Buy Amount: \t" + QString::number(*buyAmount) + "\t BTC");
-  emit updateLog(workID, "\t Buy Price: \t" + QString::number(*buyPrice) + "\t USD");
-  emit updateLog(workID, "\t Buy Total: \t" + QString::number(*buyTotal) + "\t USD");
+  QString pair1 = pair.mid(0,3).toUpper();
+  QString pair2 = pair.mid(pair.length()-3-1,3).toUpper();
+
+  emit updateLog(workID, "Buying "   + QString::number(*buyAmount) + " " + pair1 +
+                         " @ "       + QString::number(*buyPrice)  + " " + pair2 + "/" + pair1 +
+                         ". Total: " + QString::number(*buyTotal)  + " " + pair2);
 }
 
 //----------------------------------//
