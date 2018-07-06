@@ -3,8 +3,10 @@
 //#include "exchange_btce.h"
 //#include "exchange_okcoin.h"
 #include "exchange_wex.h"
+#include "exchange_binance.h"
 #include "exchange_bitstamp.h"
 #include "exchange_bitfinex.h"
+#include "exchange_sim.h"
 
 Program::Program(QObject *parent) : QObject(parent) {
 
@@ -13,8 +15,9 @@ Program::Program(QObject *parent) : QObject(parent) {
   config->loadConfigFromFile();
 
   // Create an exchange interface
-  Exchange *exchange = new Exchange_wex();
+  //Exchange *exchange = new Exchange_wex();
   //Exchange *exchange = new Exchange_bitfinex();
+  Exchange *exchange = new Exchange_Sim();
   exchange->setConfig(config);
   exchange->startWork();
 

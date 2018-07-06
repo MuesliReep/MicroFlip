@@ -34,7 +34,9 @@ SOURCES += main.cpp\
 #    exchange_okcoin.cpp \
     exchange_wex.cpp \
     exchange_bitstamp.cpp \
-    exchange_bitfinex.cpp
+    exchange_bitfinex.cpp \
+    exchange_sim.cpp \
+    exchange_binance.cpp
 
 HEADERS  += program.h \
     workorder.h \
@@ -51,7 +53,9 @@ HEADERS  += program.h \
 #    exchange_okcoin.h \
     exchange_wex.h \
     exchange_bitstamp.h \
-    exchange_bitfinex.h
+    exchange_bitfinex.h \
+    exchange_sim.h \
+    exchange_binance.h
 
 CONFIG += console
 
