@@ -42,15 +42,6 @@ class Exchange_wex : public Exchange
     QString getRequestErrorMessage(QJsonObject *object);
 
   public slots:
-    void receiveUpdateMarketTicker(QString pair,    QObject *sender, int SenderID);
-    void receiveUpdateMarketDepth (QString pair,    QObject *sender, int SenderID) ;
-    void receiveUpdateMarketTrades(QString pair,    QObject *sender, int SenderID);
-    void receiveUpdateBalances    (QObject *sender, int SenderID);
-    void receiveCreateOrder       (QString pair,    int type,        double rate, double amount, QObject *sender, int SenderID);
-    void receiveCancelOrder       (quint64 orderID, QObject *sender, int SenderID);
-    void receiveUpdateActiveOrders(QString pair,    QObject *sender, int SenderID);
-    void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID);
-
     void UpdateMarketTickerReply (QNetworkReply *reply);
     void UpdateMarketDepthReply  (QNetworkReply *reply);
     void UpdateMarketTradesReply (QNetworkReply *reply);

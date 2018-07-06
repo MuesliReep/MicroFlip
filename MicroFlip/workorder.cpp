@@ -203,6 +203,7 @@ void WorkOrder::requestOrderInfo(quint64 orderID) {
 }
 
 void WorkOrder::requestCancelOrder(quint64 orderID) {
+
   connect(this, SIGNAL(sendCancelOrder(quint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(quint64,QObject*,int)));
   emit sendCancelOrder(orderID, this, this->workID);
   disconnect(this, SIGNAL(sendCancelOrder(quint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(quint64,QObject*,int)));

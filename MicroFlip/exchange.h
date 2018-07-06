@@ -145,18 +145,15 @@ protected:
 
   void executeExchangeTask(ExchangeTask *exchangeTask);
 
-signals:
-  void updateLog(int workID, QString log);
-
 public slots:
-  virtual void receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID)        = 0;
-  virtual void receiveUpdateMarketDepth (QString pair, QObject *sender, int SenderID)        = 0;
-  virtual void receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID)        = 0;
-  virtual void receiveUpdateBalances    (QObject *sender, int SenderID)                      = 0;
-  virtual void receiveCreateOrder       (QString pair, int type, double rate, double amount, QObject *sender, int SenderID) = 0;
-  virtual void receiveCancelOrder       (quint64 orderID,     QObject *sender, int SenderID) = 0;
-  virtual void receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID)        = 0;
-  virtual void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID)     = 0;
+  void receiveUpdateMarketTicker(QString pair,    QObject *sender, int SenderID);
+  void receiveUpdateMarketDepth (QString pair,    QObject *sender, int SenderID);
+  void receiveUpdateMarketTrades(QString pair,    QObject *sender, int SenderID);
+  void receiveUpdateBalances    (QObject *sender, int SenderID);
+  void receiveCreateOrder       (QString pair,    int type, double rate, double amount, QObject *sender, int SenderID);
+  void receiveCancelOrder       (quint64 orderID, QObject *sender, int SenderID);
+  void receiveUpdateActiveOrders(QString pair,    QObject *sender, int SenderID);
+  void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID);
 
 protected slots:
   void updateTick() ;
@@ -171,6 +168,8 @@ signals:
   void sendNewCancelOrder();
   void sendNewActiveOrders();
   void sendNewOrderInfo();
+
+  void updateLog(int workID, QString log);
 };
 
 #endif // EXCHANGE_H

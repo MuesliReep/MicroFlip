@@ -158,56 +158,6 @@ void Exchange_wex::updateOrderInfo(quint64 OrderID) {
 }
 
 //----------------------------------//
-//          Public Slots            //
-//----------------------------------//
-
-void Exchange_wex::receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(0, sender, SenderID, attr));
-}
-void Exchange_wex::receiveUpdateMarketDepth(QString pair, QObject *sender, int SenderID) {
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(1, sender, SenderID, attr));
-}
-void Exchange_wex::receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(2, sender, SenderID, attr));
-}
-void Exchange_wex::receiveUpdateBalances(QObject *sender, int SenderID){
-  exchangeTasks.append(ExchangeTask(3, sender, SenderID));
-}
-void Exchange_wex::receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  attr.append(QString(QString::number(type)));
-  attr.append(QString(QString::number(rate)));
-  attr.append(QString(QString::number(amount)));
-  exchangeTasks.append(ExchangeTask(4, sender, SenderID, attr));
-}
-void Exchange_wex::receiveCancelOrder(quint64 orderID, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString::number(orderID));
-  exchangeTasks.append(ExchangeTask(5, sender, SenderID, attr));
-}
-void Exchange_wex::receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(6, sender, SenderID, attr));
-}
-void Exchange_wex::receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int SenderID){
-
-  // TODO: beter way of doing this
-  // Check if task already exists in list
-  for(int i = 0; i < exchangeTasks.size(); i++) {
-    ExchangeTask task = exchangeTasks.at(i);
-    if(task.getTask() == 7) {
-      if(sender == task.getSender())
-        return;
-    }
-  }
-
-  QList<QString> attr; attr.append(QString::number(orderID));
-  exchangeTasks.append(ExchangeTask(7, sender, SenderID, attr));
-}
-
-//----------------------------------//
 //           Task Replies           //
 //----------------------------------//
 
