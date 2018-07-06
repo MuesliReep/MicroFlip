@@ -21,21 +21,23 @@
 /// \brief The ExchangeTask class
 ///
 class ExchangeTask {
+
 public:
   ExchangeTask(int Task = -1, int senderID = 0);
   ExchangeTask(int Task, QObject *Sender, int senderID);
   ExchangeTask(int Task, QObject *Sender, int senderID, QList<QString> Attributes);
 
-  QObject *getSender() const;
-  int getSenderID();
-  int getTask() const;
+  QObject       *getSender    () const;
+  int            getSenderID  () const;
+  int            getTask      () const;
   QList<QString> getAttributes() const;
 
 private:
-  QObject *sender;
-  int task;
+  QObject       *sender;
+  int            senderID;
+  int            task;
   QList<QString> attributes;
-  int senderID;
+
 };
 
 ///
@@ -45,12 +47,14 @@ class Balance {
 
 public:
   Balance(QString Currency, double Amount) { currency = Currency; amount = Amount; }
-  QString getCurrency() { return currency; }
-  double  getAmount()   { return amount;   }
-  void    setAmount(double Amount) { amount = Amount; }
+
+  QString getCurrency()              { return currency; }
+  double  getAmount  ()              { return amount;   }
+  void    setAmount  (double Amount) { amount = Amount; }
+
 private:
   QString currency;
-  double amount;
+  double  amount;
 };
 
 ///
@@ -77,13 +81,15 @@ public:
     this->sell = sell;
     this->age  = age;
   }
+
   double getHigh() { return high; }
-  double getLow()  { return low;  }
-  double getAvg()  { return avg;  }
+  double getLow () { return low;  }
+  double getAvg () { return avg;  }
   double getLast() { return last; }
-  double getBuy()  { return buy;  }
+  double getBuy () { return buy;  }
   double getSell() { return sell; }
-  int    getAge()  { return age;  }
+  int    getAge () { return age;  }
+
 private:
   double high;
   double low;
@@ -107,9 +113,9 @@ public:
 
   void setConfig(Config *config);
 
-  double getFee();
-  QList<Balance> getBalances();
-  double getBalance(QString currency);
+  double         getFee     ()                 const;
+  QList<Balance> getBalances()                 const;
+  double         getBalance (QString currency) const;
 
 private:
   virtual void updateMarketTicker(QString pair)    = 0;
@@ -123,12 +129,11 @@ private:
   virtual void updateOrderInfo(quint64 orderID)    = 0;
 
 protected:
-  Config *c;
+  Config *config;
 
   QTimer *timer;
   QTimer *timer2;
 
-  uint lastNonce;
   ExchangeTask currentTask;
 
   double fee;
@@ -136,12 +141,6 @@ protected:
   QList<Order>        activeOrders;
   QList<Balance>      balances;
   QList<ExchangeTask> exchangeTasks;
-
-  void createNonce     (QByteArray *nonce);
-  void createMilliNonce(QByteArray *nonce);
-
-  bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
-  bool checkCoolDownExpiration(bool reset);
 
   void executeExchangeTask(ExchangeTask *exchangeTask);
 
@@ -156,18 +155,18 @@ public slots:
   void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID);
 
 protected slots:
-  void updateTick() ;
+  void updateTick ();
   void updateTick2();
 
 signals:
   void sendNewMarketTicker(Ticker ticker);
-  void sendNewMarketDepth();
+  void sendNewMarketDepth ();
   void sendNewMarketTrades();
-  void sendNewBalances();
-  void sendNewCreateOrder();
-  void sendNewCancelOrder();
+  void sendNewBalances    ();
+  void sendNewCreateOrder ();
+  void sendNewCancelOrder ();
   void sendNewActiveOrders();
-  void sendNewOrderInfo();
+  void sendNewOrderInfo   ();
 
   void updateLog(int workID, QString log);
 };

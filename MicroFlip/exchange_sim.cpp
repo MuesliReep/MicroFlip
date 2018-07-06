@@ -16,8 +16,8 @@ Exchange_Sim::Exchange_Sim()
 
 void Exchange_Sim::startWork()
 {
-    this->apiKey    = c->getApiKey();
-    this->apiSecret = c->getApiSecret();
+    this->apiKey    = config->getApiKey();
+    this->apiSecret = config->getApiSecret();
 
     timer->start(2*1100);
     //timer2->start(1*1100); // TODO: determine correct amount

@@ -7,20 +7,20 @@ Exchange::Exchange(QObject *parent) : QObject(parent)
 
 void Exchange::setConfig(Config *config)
 {
-  this->c = config;
+  this->config = config;
 }
 
-double Exchange::getFee()
+double Exchange::getFee() const
 {
     return fee;
 }
 
-QList<Balance> Exchange::getBalances()
+QList<Balance> Exchange::getBalances() const
 {
     return balances;
 }
 
-double Exchange::getBalance(QString currency)
+double Exchange::getBalance(QString currency) const
 {
     (void) currency;
     double amount = -1.0;
@@ -159,7 +159,7 @@ QObject *ExchangeTask::getSender() const
     return sender;
 }
 
-int ExchangeTask::getSenderID()
+int ExchangeTask::getSenderID() const
 {
     return senderID;
 }

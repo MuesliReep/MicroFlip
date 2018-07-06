@@ -21,13 +21,12 @@ Exchange_wex::Exchange_wex() {
 
   connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
   //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
-
 }
 
 void Exchange_wex::startWork() {
 
-  this->apiKey    = c->getApiKey();
-  this->apiSecret = c->getApiSecret();
+  this->apiKey    = config->getApiKey();
+  this->apiSecret = config->getApiSecret();
 
   timer->start(2*1100);
   //timer2->start(1*1100); // TODO: determine correct amount

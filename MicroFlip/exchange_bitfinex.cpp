@@ -25,8 +25,8 @@ Exchange_bitfinex::Exchange_bitfinex() {
 
 void Exchange_bitfinex::startWork() {
 
-  this->apiKey    = c->getApiKey();
-  this->apiSecret = c->getApiSecret();
+  this->apiKey    = config->getApiKey();
+  this->apiSecret = config->getApiSecret();
 
   // 30 requests per min
   timer->start(2000);

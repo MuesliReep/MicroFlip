@@ -42,14 +42,14 @@ class Exchange_wex : public Exchange
     QString getRequestErrorMessage(QJsonObject *object);
 
   public slots:
-    void UpdateMarketTickerReply (QNetworkReply *reply);
-    void UpdateMarketDepthReply  (QNetworkReply *reply);
-    void UpdateMarketTradesReply (QNetworkReply *reply);
-    void UpdateBalancesReply     (QNetworkReply *reply);
-    void CreateOrderReply        (QNetworkReply *reply);
-    void CancelOrderReply        (QNetworkReply *reply);
-    void UpdateActiveOrdersReply (QNetworkReply *reply);
-    void UpdateOrderInfoReply    (QNetworkReply *reply);
+    void UpdateMarketTickerReply  (QNetworkReply *reply);
+    void UpdateMarketDepthReply   (QNetworkReply *reply);
+    void UpdateMarketTradesReply  (QNetworkReply *reply);
+    void UpdateBalancesReply      (QNetworkReply *reply);
+    void CreateOrderReply         (QNetworkReply *reply);
+    void CancelOrderReply         (QNetworkReply *reply);
+    void UpdateActiveOrdersReply  (QNetworkReply *reply);
+    void UpdateOrderInfoReply     (QNetworkReply *reply);
 
   signals:
     void sendTicker     (Ticker ticker);

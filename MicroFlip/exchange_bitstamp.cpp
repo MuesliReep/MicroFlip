@@ -22,9 +22,9 @@ Exchange_bitstamp::Exchange_bitstamp() {
 
 void Exchange_bitstamp::startWork() {
 
-  apiKey     = c->getApiKey();
-  apiSecret  = c->getApiSecret();
-  customerID = c->getCustomerID();
+  apiKey     = config->getApiKey();
+  apiSecret  = config->getApiSecret();
+  customerID = config->getCustomerID();
 
   //timer->start(c->getCoolDownTime()*1100);
   //timer2->start(1*1100); // TODO: determine correct amount
