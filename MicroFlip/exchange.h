@@ -2,8 +2,6 @@
 #define EXCHANGE_H
 
 #include <QObject>
-#include <QDateTime>
-#include <QDebug>
 #include <QTimer>
 
 #include <QJsonDocument>
@@ -126,7 +124,7 @@ private:
   virtual void createOrder       (QString pair, int type, double rate, double amount) = 0;
   virtual void cancelOrder       (quint64 orderID) = 0;
   virtual void updateActiveOrders(QString pair)    = 0;
-  virtual void updateOrderInfo(quint64 orderID)    = 0;
+  virtual void updateOrderInfo   (quint64 orderID) = 0;
 
 protected:
   Config *config;

@@ -1,5 +1,7 @@
 #include "exchange.h"
 
+#include <QDateTime>
+
 Exchange::Exchange(QObject *parent) : QObject(parent)
 {
 
@@ -133,6 +135,10 @@ void Exchange::updateTick2() {
   // While currentTask is not complete, do nothing
 }
 
+//----------------------------------//
+//           ExchangeTask           //
+//----------------------------------//
+
 ExchangeTask::ExchangeTask(int Task, int senderID) {
 
   this->task     = Task;
@@ -171,3 +177,7 @@ QList<QString> ExchangeTask::getAttributes() const
 {
   return attributes;
 }
+
+//----------------------------------//
+//           ExchangeTask           //
+//----------------------------------//
