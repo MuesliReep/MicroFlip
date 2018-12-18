@@ -23,6 +23,10 @@ private:
 
   int currentLine;
 
+#ifdef ISWIN
+  bool EnableVTMode();
+#endif
+
   void updateScreen();
 
   void drawHeader();
@@ -34,9 +38,11 @@ private:
   void setForegroundColour(int colour);
   void setBackgroundColour(int colour);
   void getTerminalSize();
+
 public slots:
-  void logUpdate(int workID, QString state);
+  void logUpdate  (int workID, QString state);
   void stateUpdate(int workID, QString state);
+
 };
 
 #endif // DISPLAY_H

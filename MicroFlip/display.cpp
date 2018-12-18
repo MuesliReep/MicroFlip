@@ -1,31 +1,86 @@
 #include "display.h"
 
+#ifdef ISWIN
+#include <conio.h>
+#include <windows.h>
+#include <wchar.h>
+#else
 #include <sys/ioctl.h>
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
 
+#define ESC "\x1b"
+#define CSI "\x1b["
+
 Display::Display()
 {
+#ifdef ISWIN
+    EnableVTMode();
+#endif
+
     getTerminalSize();
 
-    printf ("lines %d\n", lines);
+    printf ("lines %d\n",   lines);
     printf ("columns %d\n", columns);
 
     std::cout << "\x1b[31m" << std::endl;
     std::cout << "Test"     << std::endl;
+
+    //std::cout << "\x1b[35m" << std::endl;
+    printf(CSI "35m");
+    printf("\n");
 }
+
+#ifdef ISWIN
+bool Display::EnableVTMode()
+{
+    // Set output mode to handle virtual terminal sequences
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE)
+    {
+        return false;
+    }
+
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode))
+    {
+        return false;
+    }
+
+    dwMode |= 0x0004;//ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if (!SetConsoleMode(hOut, dwMode))
+    {
+        return false;
+    }
+    return true;
+}
+#endif
 
 void Display::getTerminalSize() {
 
-  struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+#ifdef ISWIN
 
-  columns = (int)w.ws_col;
-  lines   = (int)w.ws_row;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-  // Minus 1 so there is room for 1 qDebug line
-  lines-=2;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    this->columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    this->lines   = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+#else
+
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    this->columns = (int)w.ws_col;
+    this->lines   = (int)w.ws_row;
+
+#endif
+
+    // Minus 1 so there is room for 1 qDebug line
+    lines-=2;
 }
 
 void Display::updateScreen()
