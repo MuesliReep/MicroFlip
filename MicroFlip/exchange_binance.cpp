@@ -30,25 +30,25 @@ void Exchange_Binance::updateMarketTrades(QString pair)
 
 void Exchange_Binance::updateBalances()
 {
-  "GET /api/v3/account"
+  "GET /api/v3/account";
 }
 
 void Exchange_Binance::createOrder(QString pair, int type, double rate, double amount)
 {
-  "POST /api/v3/order"
+  "POST /api/v3/order";
 }
 
 void Exchange_Binance::cancelOrder(quint64 orderID)
 {
-  "DELETE /api/v3/order"
+  "DELETE /api/v3/order";
 }
 
 void Exchange_Binance::updateActiveOrders(QString pair)
 {
-  "GET /api/v3/openOrders"
+  "GET /api/v3/openOrders";
 }
 
 void Exchange_Binance::updateOrderInfo(quint64 orderID)
 {
-  "GET /api/v3/order"
+  "GET /api/v3/order";
 }
