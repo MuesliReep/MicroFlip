@@ -17,7 +17,8 @@ Program::Program(QObject *parent) : QObject(parent) {
   // Create an exchange interface
   //Exchange *exchange = new Exchange_wex();
   //Exchange *exchange = new Exchange_bitfinex();
-  Exchange *exchange = new Exchange_Sim();
+  Exchange *exchange = new Exchange_Binance();
+//  Exchange *exchange = new Exchange_Sim();
   exchange->setConfig(config);
   exchange->startWork();
 
