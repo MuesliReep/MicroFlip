@@ -60,3 +60,4 @@ HEADERS  += program.h \
 CONFIG += console
 
 win32:DEFINES+=ISWIN
+win32:LIBS+=-LC:\Qt\Tools\mingw730_64\opt\bin
