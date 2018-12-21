@@ -2,6 +2,8 @@
 
 #include <QJsonArray>
 
+#include "json_helper.h"
+
 Exchange_bitfinex::Exchange_bitfinex() {
 
   currentTask = ExchangeTask();
@@ -220,99 +222,6 @@ void Exchange_bitfinex::UpdateMarketTickerReply(QNetworkReply *reply) {
     currentTask = ExchangeTask();
 }
 
-void Exchange_bitfinex::UpdateMarketDepthReply(QNetworkReply *reply) {
-
-  (void) reply;
-}
-
-void Exchange_bitfinex::UpdateMarketTradesReply(QNetworkReply *reply) {
-
-    if(!reply->error()) {
-
-        QJsonObject jsonObj;
-
-        // Extract JSON object from network reply
-        getObjectFromDocument(reply, &jsonObj);
-
-        // Parse the data
-    qDebug() << "New Data!";
-
-    } else {
-        QJsonObject jsonObj;
-        bool result = getObjectFromDocument(reply, &jsonObj);
-        QString errorString = reply->errorString();
-        qDebug() << "Market Trades Packet error: " << errorString;
-        (void) result;
-    }
-
-    reply->deleteLater();
-
-    // Disconnect the download signal and release
-    disconnect(updateMarketTradesDownloadManager, 0, this, 0);
-
-    // Mark this task complete
-    currentTask = ExchangeTask();
-}
-
-void Exchange_bitfinex::UpdateBalancesReply(QNetworkReply *reply) {
-
-  if(!reply->error()) {
-
-      QJsonObject jsonObj;
-
-      // Extract JSON object from network reply
-      getObjectFromDocument(reply, &jsonObj);
-//QJsonArray
-
-  } else {
-
-  }
-}
-
-void Exchange_bitfinex::CreateOrderReply(QNetworkReply *reply) {
-
-    quint64 orderID = -1;
-
-    if(!reply->error()) {
-
-      QJsonObject jsonObj;
-
-      // Extract JSON object from network reply
-      getObjectFromDocument(reply, &jsonObj);
-
-      // Check if authentication was a succes
-      if(jsonObj.contains("order_id")) {
-
-        // Parse new data
-        double orderIDd = jsonObj.value("order_id").toDouble(-1.0);
-        orderID = orderIDd;
-
-        qDebug() << "Trade created successfully, ID: " << orderID;
-      }
-      else {
-        qDebug() << "Trade error: " ;
-      }
-    } else {
-      QJsonObject jsonObj;
-      bool result = getObjectFromDocument(reply, &jsonObj);
-      QString errorString = reply->errorString();
-      qDebug() << "Trade Packet error: " << errorString;
-      (void) result;
-    }
-
-    // Connect & send order ID to the initiator
-    connect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
-    emit sendOrderID(orderID);
-    disconnect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
-
-    reply->deleteLater();
-
-    disconnect(createTradeDownloadManager, 0, this, 0);
-
-    // Mark this task complete
-    currentTask = ExchangeTask();
-}
-
 void Exchange_bitfinex::CancelOrderReply(QNetworkReply *reply) {
 
   int status = -1;
@@ -384,50 +293,94 @@ void Exchange_bitfinex::UpdateOrderInfoReply(QNetworkReply *reply) {
 //             Parsers              //
 //----------------------------------//
 
-///
-/// \brief Exchange_bitfinex::getObjectFromDocument Grabs a JSON object from a Network reply
-/// \param reply
-/// \param object
-/// \return Returns true if succesfull
-///
-bool Exchange_bitfinex::getObjectFromDocument(QNetworkReply *reply, QJsonObject *object) {
+Ticker Exchange_bitfinex::parseRawTickerData(QNetworkReply *reply) {
 
-  QJsonDocument   jsonDoc;
-  QJsonParseError error;
+    Ticker ticker;
 
-  jsonDoc = QJsonDocument().fromJson(reply->readAll(), &error);
-  *object = jsonDoc.object();
+    if(reply->error()) {
+        qDebug() << "Ticker Packet error: " << reply->errorString();
 
-  return true; // TODO: check json validity
+        return ticker;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Values are stored as strings, so first convert to string then further
+            double high = jsonObj.value("high").toString("-1.0").toDouble();
+            double low  = jsonObj.value("low").toString("-1.0").toDouble();
+            double avg  = jsonObj.value("avg").toString("-1.0").toDouble();
+            double last = jsonObj.value("last_price").toString("-1.0").toDouble();
+            double buy  = jsonObj.value("bid").toString("-1.0").toDouble();
+            double sell = jsonObj.value("ask").toString("-1.0").toDouble();
+            int    age  = jsonObj.value("timestamp").toString("-1").toInt();
+
+            ticker = Ticker(high, low, avg, last, buy, sell, age);
+        }
+    }
+
+    return ticker;
 }
 
-///
-/// \brief Exchange_bitfinex::getArrayFromDocument Grabs a JSON array from a Network reply
-/// \param reply
-/// \param array
-/// \return Returns true if succesfull
-///
-bool Exchange_bitfinex::getArrayFromDocument(QNetworkReply *reply, QJsonArray *array) {
+void Exchange_bitfinex::parseRawDepthData(QNetworkReply *reply)
+{
+    // TODO
 
-  QJsonDocument   jsonDoc;
-  QJsonParseError error;
-
-  jsonDoc = QJsonDocument().fromJson(reply->readAll(), &error);
-  *array  = jsonDoc.array();
-
-  return true; // TODO: check json validity
+    if(reply->error()) {
+        qDebug() << "Market Depth Packet error: " << reply->errorString();
+    }
 }
 
-Ticker Exchange_bitfinex::parseRawTickerData(QJsonObject *rawData) {
+void Exchange_bitfinex::parseRawTradesData(QNetworkReply *reply) {
 
-  // Values are stored as strings, so first convert to string then further
-  double high = rawData->value("high").toString("-1.0").toDouble();
-  double low  = rawData->value("low").toString("-1.0").toDouble();
-  double avg  = rawData->value("avg").toString("-1.0").toDouble();
-  double last = rawData->value("last_price").toString("-1.0").toDouble();
-  double buy  = rawData->value("bid").toString("-1.0").toDouble();
-  double sell = rawData->value("ask").toString("-1.0").toDouble();
-  int    age  = rawData->value("timestamp").toString("-1").toInt();
+    // TODO
 
-  return Ticker(high, low, avg, last, buy, sell, age);
+    if(reply->error()) {
+        qDebug() << "Market Trades Packet error: " << reply->errorString();
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+
+    }
+}
+
+quint64 Exchange_bitfinex::parseRawOrderCreationData(QNetworkReply *reply) {
+
+    quint64 orderID = -1;
+
+    if(reply->error()) {
+        qDebug() << "Create Order Packet error: " << reply->errorString();
+
+        return orderID;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Check if authentication was a succes
+            if(jsonObj.contains("order_id")) {
+
+                // Parse new data
+                double orderIDd = jsonObj.value("order_id").toDouble(-1.0);
+                orderID = orderIDd;
+
+                qDebug() << "Order created successfully, ID: " << orderID;
+            }
+            else {
+                qDebug() << "Order creation error!" ;
+            }
+        }
+    }
+
+    return orderID;
 }

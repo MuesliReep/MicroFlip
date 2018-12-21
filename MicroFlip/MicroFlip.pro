@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     exchange_bitstamp.cpp \
     exchange_bitfinex.cpp \
     exchange_sim.cpp \
-    exchange_binance.cpp
+    exchange_binance.cpp \
+    json_helper.cpp
 
 HEADERS  += program.h \
     workorder.h \
@@ -55,7 +56,8 @@ HEADERS  += program.h \
     exchange_bitstamp.h \
     exchange_bitfinex.h \
     exchange_sim.h \
-    exchange_binance.h
+    exchange_binance.h \
+    json_helper.h
 
 CONFIG += console
 

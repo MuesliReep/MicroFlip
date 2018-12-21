@@ -1,7 +1,6 @@
 #include "exchange_binance.h"
 
-#include <QJsonArray>
-#include <QJsonParseError>
+#include "json_helper.h"
 
 // Binance API: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md
 
@@ -10,9 +9,6 @@ Exchange_Binance::Exchange_Binance()
     currentTask = ExchangeTask();
 
     this->fee = 0.1;
-
-    // Initiate download managers
-    tickerDownloadManager             = new QNetworkAccessManager(this);
 
     // Create the interval timer
     timer  = new QTimer(this);
@@ -70,102 +66,38 @@ void Exchange_Binance::updateOrderInfo(quint64 orderID)
 }
 
 //----------------------------------//
-//           Task Replies           //
-//----------------------------------//
-
-void Exchange_Binance::UpdateMarketTickerReply(QNetworkReply *reply) {
-
-    Ticker ticker;
-
-    if(!reply->error()) {
-
-        QJsonObject jsonObj;
-
-        // Extract JSON object from network reply
-        getObjectFromDocument(reply, &jsonObj);
-
-        // Parse the raw data
-        ticker = parseRawTickerData(&jsonObj);
-
-    } else {
-        qDebug() << "Ticker Packet error: " << reply->errorString();
-
-        // TODO: send empty ticker!
-    }
-
-    QByteArray replyData = reply->readAll();
-
-    // Connect & send to the initiator
-    connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-    emit sendTicker(ticker);
-    disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-
-    reply->deleteLater();
-
-    // Disconnect the download signal and release
-    disconnect(tickerDownloadManager, 0, this, 0);
-
-    // Mark this task complete
-    currentTask = ExchangeTask();
-}
-
-//----------------------------------//
 //             Parsers              //
 //----------------------------------//
 
-bool Exchange_Binance::getDocumentFromNetworkReply(QNetworkReply *reply, QJsonDocument *document) {
+Ticker Exchange_Binance::parseRawTickerData(QNetworkReply *reply) {
 
-    QJsonParseError parseResult;
+    Ticker ticker;
 
-    *document = QJsonDocument().fromJson(reply->readAll(), &parseResult);
+    if(reply->error()) {
+        qDebug() << "Ticker Packet error: " << reply->errorString();
 
-    if(parseResult.error == QJsonParseError::NoError) {
-
-        return true;
+        return ticker;
     }
 
-    qDebug() << "Error parsing JSON Document: " << parseResult.errorString();
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
 
-    return false;
-}
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
 
-bool Exchange_Binance::getObjectFromDocument(QJsonDocument *document, QJsonObject *object) {
+            // Values are stored as strings, so first convert to string then further
+            double high = jsonObj.value("highPrice")       .toString("-1.0").toDouble();
+            double low  = jsonObj.value("lowPrice")        .toString("-1.0").toDouble();
+            double avg  = jsonObj.value("weightedAvgPrice").toString("-1.0").toDouble();
+            double last = jsonObj.value("lastPrice")       .toString("-1.0").toDouble();
+            double buy  = jsonObj.value("bidPrice")        .toString("-1.0").toDouble();
+            double sell = jsonObj.value("askPrice")        .toString("-1.0").toDouble();
+            int    age  = jsonObj.value("closeTime")       .toString("-1").toInt();
 
-    if(document->isObject()) {
-        *object = document->object();
-
-        return true;
+            ticker = Ticker(high, low, avg, last, buy, sell, age);
+        }
     }
 
-    qDebug() << "JSON Document does not contain object";
-
-    return false;
-}
-
-bool Exchange_Binance::getArrayFromDocument(QJsonDocument *document, QJsonArray *array) {
-
-
-    if(document->isArray()) {
-        *array  = document->array();
-
-        return true;
-    }
-
-    qDebug() << "JSON Document does not contain array";
-
-    return false;
-}
-
-Ticker Exchange_Binance::parseRawTickerData(QJsonObject *rawData) {
-
-  // Values are stored as strings, so first convert to string then further
-  double high = rawData->value("highPrice")       .toString("-1.0").toDouble();
-  double low  = rawData->value("lowPrice")        .toString("-1.0").toDouble();
-  double avg  = rawData->value("weightedAvgPrice").toString("-1.0").toDouble();
-  double last = rawData->value("lastPrice")       .toString("-1.0").toDouble();
-  double buy  = rawData->value("bidPrice")        .toString("-1.0").toDouble();
-  double sell = rawData->value("askPrice")        .toString("-1.0").toDouble();
-  int    age  = rawData->value("closeTime")       .toString("-1").toInt();
-
-  return Ticker(high, low, avg, last, buy, sell, age);
+    return ticker;
 }

@@ -17,13 +17,6 @@ private:
   QString apiKey;
   QString apiSecret;
 
-  QNetworkAccessManager* tickerDownloadManager;
-  QNetworkAccessManager* updateMarketTradesDownloadManager;
-  QNetworkAccessManager* updateBalancesDownloadManager;
-  QNetworkAccessManager* createTradeDownloadManager;
-  QNetworkAccessManager* orderInfoDownloadManager;
-  QNetworkAccessManager* cancelOrderDownloadManager;
-
   uint lastNonce;
   QString createNonce();
 
@@ -37,11 +30,15 @@ private:
   void updateActiveOrders(QString pair);
   void updateOrderInfo(quint64 OrderID);
 
-  bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
-  bool getArrayFromDocument (QNetworkReply *reply, QJsonArray *array);
-  Ticker parseRawTickerData(QJsonObject *rawData);
+  Ticker parseRawTickerData(QNetworkReply *reply);
+  void parseRawDepthData (QNetworkReply *reply);
+  void parseRawTradesData(QNetworkReply *reply);
+
+  quint64 parseRawOrderCreationData(QNetworkReply *reply);
+
   bool checkSuccess(QJsonObject *object);
   QString getRequestErrorMessage(QJsonObject *object);
+
 
 public slots:
   void UpdateMarketTickerReply (QNetworkReply *reply);

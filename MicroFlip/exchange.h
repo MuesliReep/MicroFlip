@@ -116,6 +116,7 @@ public:
   double         getBalance (QString currency) const;
 
 private:
+
   virtual void updateMarketTicker(QString pair)    = 0;
   virtual void updateMarketDepth (QString pair)    = 0;
   virtual void updateMarketTrades(QString pair)    = 0;
@@ -126,8 +127,26 @@ private:
   virtual void updateActiveOrders(QString pair)    = 0;
   virtual void updateOrderInfo   (quint64 orderID) = 0;
 
+  virtual Ticker parseRawTickerData(QNetworkReply *reply) = 0;
+  virtual void   parseRawDepthData (QNetworkReply *reply) = 0;
+  virtual void   parseRawTradesData(QNetworkReply *reply) = 0;
+
+  virtual void    parseRawBalancesData        (QNetworkReply *reply) = 0;
+  virtual quint64 parseRawOrderCreationData   (QNetworkReply *reply) = 0;
+  virtual void    parseRawOrderCancelationData(QNetworkReply *reply) = 0;
+  virtual void    parseRawActiveOrcersData    (QNetworkReply *reply) = 0;
+  virtual void    parseRawOrderInfoData       (QNetworkReply *reply) = 0;
+
 protected:
   Config *config;
+
+  QNetworkAccessManager* tickerDownloadManager;
+  QNetworkAccessManager* updateMarketDepthDownloadManager;
+  QNetworkAccessManager* updateMarketTradesDownloadManager;
+  QNetworkAccessManager* updateBalancesDownloadManager;
+  QNetworkAccessManager* createTradeDownloadManager;
+  QNetworkAccessManager* orderInfoDownloadManager;
+  QNetworkAccessManager* cancelOrderDownloadManager;
 
   QTimer *timer;
   QTimer *timer2;
@@ -151,6 +170,12 @@ public slots:
   void receiveCancelOrder       (quint64 orderID, QObject *sender, int SenderID);
   void receiveUpdateActiveOrders(QString pair,    QObject *sender, int SenderID);
   void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID);
+
+  void updateMarketTickerReply(QNetworkReply *reply);
+  void UpdateMarketDepthReply (QNetworkReply *reply);
+  void UpdateMarketTradesReply(QNetworkReply *reply);
+  void UpdateBalancesReply    (QNetworkReply *reply);
+  void CreateOrderReply       (QNetworkReply *reply);
 
 protected slots:
   void updateTick ();

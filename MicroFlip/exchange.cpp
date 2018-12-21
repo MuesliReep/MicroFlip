@@ -109,6 +109,88 @@ void Exchange::receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int Send
   exchangeTasks.append(ExchangeTask(7, sender, SenderID, attr));
 }
 
+void Exchange::updateMarketTickerReply(QNetworkReply *reply)
+{
+    // Parse the raw data
+    Ticker ticker = parseRawTickerData(reply);
+
+    // Connect & send to the initiator
+    connect(this, SIGNAL(sendNewMarketTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+    emit sendNewMarketTicker(ticker);
+    disconnect(this, SIGNAL(sendNewMarketTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(tickerDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
+void Exchange::UpdateMarketDepthReply(QNetworkReply *reply)
+{
+    // TODO
+
+    parseRawDepthData(reply);
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(updateMarketDepthDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
+void Exchange::UpdateMarketTradesReply(QNetworkReply *reply)
+{
+    // TODO
+
+    parseRawTradesData(reply);
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(updateMarketTradesDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
+void Exchange::UpdateBalancesReply(QNetworkReply *reply)
+{
+    // TODO
+
+    parseRawBalancesData(reply);
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(updateBalancesDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
+void Exchange::CreateOrderReply(QNetworkReply *reply)
+{
+    quint64 orderID = parseRawOrderCreationData(reply);
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(createTradeDownloadManager, 0, this, 0);
+
+    // Connect & send order ID to the initiator
+    connect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+    emit sendOrderID(orderID);
+    disconnect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
 //----------------------------------//
 //          Private Slots           //
 //----------------------------------//
