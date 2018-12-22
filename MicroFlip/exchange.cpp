@@ -128,7 +128,7 @@ void Exchange::updateMarketTickerReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::UpdateMarketDepthReply(QNetworkReply *reply)
+void Exchange::updateMarketDepthReply(QNetworkReply *reply)
 {
     // TODO
 
@@ -143,7 +143,7 @@ void Exchange::UpdateMarketDepthReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::UpdateMarketTradesReply(QNetworkReply *reply)
+void Exchange::updateMarketTradesReply(QNetworkReply *reply)
 {
     // TODO
 
@@ -158,7 +158,7 @@ void Exchange::UpdateMarketTradesReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::UpdateBalancesReply(QNetworkReply *reply)
+void Exchange::updateBalancesReply(QNetworkReply *reply)
 {
     // TODO
 
@@ -173,7 +173,7 @@ void Exchange::UpdateBalancesReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::CreateOrderReply(QNetworkReply *reply)
+void Exchange::createOrderReply(QNetworkReply *reply)
 {
     quint64 orderID = parseRawOrderCreationData(reply);
 
@@ -191,7 +191,7 @@ void Exchange::CreateOrderReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::CancelOrderReply(QNetworkReply *reply)
+void Exchange::cancelOrderReply(QNetworkReply *reply)
 {
     // TODO
 
@@ -206,7 +206,7 @@ void Exchange::CancelOrderReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::UpdateActiveOrdersReply(QNetworkReply *reply)
+void Exchange::updateActiveOrdersReply(QNetworkReply *reply)
 {
     // TODO
 
@@ -221,7 +221,7 @@ void Exchange::UpdateActiveOrdersReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::UpdateOrderInfoReply(QNetworkReply *reply)
+void Exchange::updateOrderInfoReply(QNetworkReply *reply)
 {
     int status = parseRawOrderInfoData(reply);
 

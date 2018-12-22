@@ -173,13 +173,13 @@ public slots:
   void receiveUpdateOrderInfo   (quint64 orderID, QObject *sender, int SenderID);
 
   void updateMarketTickerReply(QNetworkReply *reply);
-  void UpdateMarketDepthReply (QNetworkReply *reply);
-  void UpdateMarketTradesReply(QNetworkReply *reply);
-  void UpdateBalancesReply    (QNetworkReply *reply);
-  void CreateOrderReply       (QNetworkReply *reply);
-  void CancelOrderReply       (QNetworkReply *reply);
-  void UpdateActiveOrdersReply(QNetworkReply *reply);
-  void UpdateOrderInfoReply   (QNetworkReply *reply);
+  void updateMarketDepthReply (QNetworkReply *reply);
+  void updateMarketTradesReply(QNetworkReply *reply);
+  void updateBalancesReply    (QNetworkReply *reply);
+  void createOrderReply       (QNetworkReply *reply);
+  void cancelOrderReply       (QNetworkReply *reply);
+  void updateActiveOrdersReply(QNetworkReply *reply);
+  void updateOrderInfoReply   (QNetworkReply *reply);
 
 protected slots:
   void updateTick ();

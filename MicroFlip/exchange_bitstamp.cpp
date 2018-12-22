@@ -1,4 +1,5 @@
 #include "exchange_bitstamp.h"
+#include "json_helper.h"
 
 Exchange_bitstamp::Exchange_bitstamp() {
 
@@ -7,9 +8,14 @@ Exchange_bitstamp::Exchange_bitstamp() {
   fee = 0.25;
 
   // Initiate download managers
-  tickerDownloadManager      = new QNetworkAccessManager(this);
-  createTradeDownloadManager = new QNetworkAccessManager(this);
-  orderInfoDownloadManager   = new QNetworkAccessManager(this);
+  tickerDownloadManager             = new QNetworkAccessManager(this);
+  updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
+  updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
+  updateBalancesDownloadManager     = new QNetworkAccessManager(this);
+  createTradeDownloadManager        = new QNetworkAccessManager(this);
+  orderInfoDownloadManager          = new QNetworkAccessManager(this);
+  cancelOrderDownloadManager        = new QNetworkAccessManager(this);
+  activeOrdersDownloadManager       = new QNetworkAccessManager(this);
 
   // Start the interval timers
   timer  = new QTimer(this);
@@ -57,7 +63,7 @@ void Exchange_bitstamp::updateMarketTicker(QString pair) {
   QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/v2/ticker/"+pair));
 
   // Execute the download
-  downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
+  downloader.doDownload(request, tickerDownloadManager, this, SLOT(updateMarketTickerReply(QNetworkReply*)));
 }
 
 void Exchange_bitstamp::updateMarketDepth(QString pair) {
@@ -118,10 +124,10 @@ void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double 
     //downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
     // Execute the download
-    downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
+    downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
-void Exchange_bitstamp::cancelOrder(uint orderID) {
+void Exchange_bitstamp::cancelOrder(quint64 orderID) {
   (void) orderID;
   // TODO
 }
@@ -131,7 +137,7 @@ void Exchange_bitstamp::updateActiveOrders(QString pair) {
   // TODO
 }
 
-void Exchange_bitstamp::updateOrderInfo(uint OrderID) {
+void Exchange_bitstamp::updateOrderInfo(quint64 OrderID) {
 
     QByteArray orderID("id=");
     orderID.append(QString::number(OrderID));
@@ -162,248 +168,155 @@ void Exchange_bitstamp::updateOrderInfo(uint OrderID) {
     downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
 
     // Execute the download
-    downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
-}
-
-//----------------------------------//
-//           Task Replies           //
-//----------------------------------//
-
-void Exchange_bitstamp::UpdateMarketTickerReply(QNetworkReply *reply) {
-
-  Ticker ticker;
-
-  if(!reply->error()) {
-
-      QJsonObject jsonObj;
-      QJsonObject tickerData;
-
-      // Extract JSON object from network reply
-      getObjectFromDocument(reply, &jsonObj);
-
-      // Extract the market data we want
-      QString pair = currentTask.getAttributes().at(0);
-      tickerData = jsonObj.value(pair).toObject();
-
-      // Parse the raw data
-      Ticker ticker = parseRawTickerData(&jsonObj);
-
-      // Connect & send to the initiator
-      connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-      emit sendTicker(ticker);
-      disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-
-  }
-  else {
-    qDebug() << "Ticker Packet error: " << reply->errorString();
-  }
-
-  reply->deleteLater();
-
-  // Disconnect the download signal and release
-  disconnect(tickerDownloadManager, 0, this, 0);
-
-  // Mark this task complete
-  currentTask = ExchangeTask();
-}
-
-void Exchange_bitstamp::UpdateMarketDepthReply(QNetworkReply *reply) {
-
-    (void) reply;
-    // TODO
-}
-
-void Exchange_bitstamp::UpdateMarketTradesReply(QNetworkReply *reply) {
-
-    (void) reply;
-    // TODO
-}
-
-void Exchange_bitstamp::UpdateBalancesReply(QNetworkReply *reply) {
-
-    (void) reply;
-    // TODO
-}
-
-void Exchange_bitstamp::CreateOrderReply(QNetworkReply *reply) {
-
-    int orderID = -1;
-
-    if(!reply->error()) {
-
-        QJsonObject jsonObj;
-        // Extract JSON object from network reply
-        getObjectFromDocument(reply, &jsonObj);
-
-        // Check if authentication was a succes
-        if(checkCreateOrderSucces(&jsonObj)) {
-
-            // Extract the info data we want
-            orderID = jsonObj.value("id").toString("-1").toInt();
-
-            qDebug() << "Trade created successfully, ID: " << orderID;
-
-        } else {
-            // TODO:
-        }
-
-    } else {
-      QString errorString = reply->errorString();
-      qDebug() << "CreateOrder Packet error: " << errorString;
-    }
-
-    // Connect & send order ID to the initiator
-    connect(this, SIGNAL(sendOrderID(int)), currentTask.getSender(), SLOT(orderCreateReply(int)));
-    emit sendOrderID(orderID);
-    disconnect(this, SIGNAL(sendOrderID(int)), currentTask.getSender(), SLOT(orderCreateReply(int)));
-
-    reply->deleteLater();
-
-    disconnect(createTradeDownloadManager, 0, this, 0);
-
-    // Mark this task complete
-    currentTask = ExchangeTask();
-}
-
-void Exchange_bitstamp::CancelOrderReply(QNetworkReply *reply) {
-
-    (void) reply;
-    // TODO
-}
-
-void Exchange_bitstamp::UpdateActiveOrdersReply(QNetworkReply *reply) {
-
-    (void) reply;
-    // TODO
-}
-
-void Exchange_bitstamp::UpdateOrderInfoReply(QNetworkReply *reply) {
-
-    // TODO:!!!!!!!
-    int status = -1;
-
-    if(!reply->error()) {
-
-      QJsonObject jsonObj;
-
-      // Extract JSON object from network reply
-      getObjectFromDocument(reply, &jsonObj);
-
-      // Check if authentication was a succes
-      if(checkUpdateOrderInfoSuccess(&jsonObj)) {
-
-        // Parse new data
-        QString statusString = jsonObj.value("status").toString("-1");
-
-        if(statusString.compare("In Queue", Qt::CaseInsensitive) == 0) {
-            status = 0;
-        } else if(statusString.compare("Open", Qt::CaseInsensitive) == 0) {
-            status = 0;
-        } else if(statusString.compare("Finished", Qt::CaseInsensitive) == 0) {
-            status = 1;
-        } else {
-            status = -1;
-            qDebug() << "Received invalid Order Info state: " << statusString;
-        }
-
-      }
-      else {
-        qDebug() << "OrderInfo error: ";
-      }
-    } else {
-      qDebug() << "OrderInfo Packet error";
-      status = -2;
-    }
-
-    // Connect & send order ID to the initiator
-    connect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
-    emit sendOrderStatus(status);
-    disconnect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
-
-    reply->deleteLater();
-
-    disconnect(orderInfoDownloadManager, 0, this, 0);
-
-    // Mark this task complete
-    currentTask = ExchangeTask();
+    downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
 }
 
 //----------------------------------//
 //             Parsers              //
 //----------------------------------//
 
-// Grabs a JSON object from a Network reply
-// Returns true if succesfull
-bool Exchange_bitstamp::getObjectFromDocument(QNetworkReply *reply, QJsonObject *object) {
+Ticker Exchange_bitstamp::parseRawTickerData(QNetworkReply *reply) {
 
-  QJsonDocument   jsonDoc;
-  QJsonParseError error;
+    Ticker ticker;
 
-  jsonDoc = QJsonDocument().fromJson(reply->readAll(), &error);
-  *object = jsonDoc.object();
+    if(reply->error()) {
+        qDebug() << "Ticker Packet error: " << reply->errorString();
 
-  return true; // TODO: check json validity
-}
-
-Ticker Exchange_bitstamp::parseRawTickerData(QJsonObject *rawData) {
-
-  // Retrieve ticker data from JSON object
-  double high = rawData->value("high").toString().toDouble();
-  double low  = rawData->value("low").toString().toDouble();
-  double avg  = rawData->value("vwap").toString().toDouble();
-  double last = rawData->value("last").toString().toDouble();
-  double buy  = rawData->value("bid").toString().toDouble();
-  double sell = rawData->value("ask").toString().toDouble();
-  int    age  = rawData->value("timestamp").toString().toInt();
-
-  return Ticker(high, low, avg, last, buy, sell, age);
-}
-
-bool Exchange_bitstamp::checkSuccess(QJsonObject *object) {
-
-  bool result = false;
-
-  if(!object->contains("success"))
-    return result;
-
-  if(object->value("success").toInt() == 1)
-    result = true;
-
-  return result;
-}
-
-bool Exchange_bitstamp::checkUpdateOrderInfoSuccess(QJsonObject *object) {
-
-    bool result = false;
-
-    if(object->contains("Missing id POST param"))
-        return result;
-    if(object->contains("Invalid order id"))
-        return result;
-    if(object->contains("Order not found"))
-        return result;
-
-    result = true;
-
-    return result;
-}
-
-bool Exchange_bitstamp::checkCreateOrderSucces(QJsonObject *object) {
-
-    bool result = false;
-
-    if(object->contains("status")) {
-
-        if(object->value("status") == "error") {
-
-            qDebug() << "Failed to create order: " << object->value("reason");
-        } else {
-            result = true;
-        }
-
-    } else {
-        result = true;
+        return ticker;
     }
 
-    return result;
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Extract the market data we want
+            QString pair = currentTask.getAttributes().at(0);
+            QJsonObject tickerData = jsonObj.value(pair).toObject();
+
+            // Retrieve ticker data from JSON object
+            double high = tickerData.value("high").toString().toDouble();
+            double low  = tickerData.value("low").toString().toDouble();
+            double avg  = tickerData.value("vwap").toString().toDouble();
+            double last = tickerData.value("last").toString().toDouble();
+            double buy  = tickerData.value("bid").toString().toDouble();
+            double sell = tickerData.value("ask").toString().toDouble();
+            int    age  = tickerData.value("timestamp").toString().toInt();
+
+            ticker = Ticker(high, low, avg, last, buy, sell, age);
+        }
+    }
+
+    return ticker;
+}
+
+void Exchange_bitstamp::parseRawDepthData(QNetworkReply *reply)
+{
+    (void) reply;
+    // TODO
+}
+
+void Exchange_bitstamp::parseRawTradesData(QNetworkReply *reply)
+{
+    (void) reply;
+    // TODO
+}
+
+void Exchange_bitstamp::parseRawBalancesData(QNetworkReply *reply)
+{
+    (void) reply;
+    // TODO
+}
+
+quint64 Exchange_bitstamp::parseRawOrderCreationData(QNetworkReply *reply) {
+
+    quint64 orderID = -1;
+
+    if(reply->error()) {
+        qDebug() << "Create Order Packet error: " << reply->errorString();
+
+        return orderID;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Check if authentication was a succes
+            if(jsonObj.contains("status")) {
+                if(jsonObj.value("status") == "error") {
+                    qDebug() << "Failed to create order: " << jsonObj.value("reason");
+                    return orderID;
+                }
+            }
+
+            // Extract the order ID
+            orderID = jsonObj.value("id").toString("-1").toInt();
+        }
+    }
+
+    return orderID;
+}
+
+void Exchange_bitstamp::parseRawOrderCancelationData(QNetworkReply *reply)
+{
+    (void) reply;
+    // TODO
+}
+
+void Exchange_bitstamp::parseRawActiveOrdersData(QNetworkReply *reply)
+{
+    (void) reply;
+    // TODO
+}
+
+int Exchange_bitstamp::parseRawOrderInfoData(QNetworkReply *reply) {
+
+    // TODO
+
+    int status = -1;
+
+    if(reply->error()) {
+        qDebug() << "Order Info Packet error: " << reply->errorString();
+
+        return status;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Check if authentication was a succes
+            if(jsonObj.contains("Missing id POST param") ||
+                    jsonObj.contains("Invalid order id") ||
+                    jsonObj.contains("Order not found")) {
+
+                return status;
+            }
+
+            // Parse order status
+            QString statusString = jsonObj.value("status").toString("-1");
+
+            if(statusString.compare("In Queue", Qt::CaseInsensitive) == 0) {
+                status = 0;
+            } else if(statusString.compare("Open", Qt::CaseInsensitive) == 0) {
+                status = 0;
+            } else if(statusString.compare("Finished", Qt::CaseInsensitive) == 0) {
+                status = 1;
+            } else {
+                status = -1;
+                qDebug() << "Received invalid Order Info state: " << statusString;
+            }
+        }
+    }
+
+    return status;
 }

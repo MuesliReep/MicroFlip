@@ -78,7 +78,7 @@ void Exchange_bitfinex::updateMarketTrades(QString pair) {
   QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/trades/" + pair));
 
   // Execute the download
-  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(UpdateMarketTradesReply(QNetworkReply*)));
+  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::updateBalances() {
@@ -106,7 +106,7 @@ void Exchange_bitfinex::updateBalances() {
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
-    downloader.doPostDownload(request, updateBalancesDownloadManager, payloadData, this, SLOT(UpdateBalancesReply(QNetworkReply*)));
+    downloader.doPostDownload(request, updateBalancesDownloadManager, payloadData, this, SLOT(updateBalancesReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double Amount) {
@@ -140,7 +140,7 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
-    downloader.doPostDownload(request, createTradeDownloadManager, payloadData, this, SLOT(CreateOrderReply(QNetworkReply*)));
+    downloader.doPostDownload(request, createTradeDownloadManager, payloadData, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::cancelOrder(quint64 orderID) {
@@ -184,7 +184,7 @@ void Exchange_bitfinex::updateOrderInfo(quint64 OrderID) {
     downloader.addHeaderToRequest(&request, QByteArray("X-BFX-SIGNATURE"), signature);
 
     // Execute the download
-    downloader.doPostDownload(request, orderInfoDownloadManager, payloadData, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
+    downloader.doPostDownload(request, orderInfoDownloadManager, payloadData, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
 }
 
 //----------------------------------//

@@ -76,7 +76,7 @@ void Exchange_wex::updateMarketTrades(QString pair) {
   QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/api/3/trades/"+pair+"?&limit=5000"));
 
   // Execute the download
-  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(UpdateMarketTradesReply(QNetworkReply*)));
+  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
 }
 
 void Exchange_wex::updateBalances() {
@@ -121,7 +121,7 @@ void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amoun
   downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
   // Execute the download
-  downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(CreateOrderReply(QNetworkReply*)));
+  downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
 void Exchange_wex::cancelOrder(quint64 orderID) {
@@ -159,7 +159,7 @@ void Exchange_wex::updateOrderInfo(quint64 OrderID) {
   downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
   // Execute the download
-  downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(UpdateOrderInfoReply(QNetworkReply*)));
+  downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
 }
 
 //----------------------------------//

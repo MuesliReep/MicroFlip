@@ -18,10 +18,6 @@ private:
   QString apiSecret;
   QString customerID;
 
-  QNetworkAccessManager* tickerDownloadManager;
-  QNetworkAccessManager* createTradeDownloadManager;
-  QNetworkAccessManager* orderInfoDownloadManager;
-
   uint lastNonce;
   void createNonce(QByteArray *nonce);
 
@@ -29,33 +25,21 @@ private:
   void updateMarketDepth (QString pair) ;
   void updateMarketTrades(QString pair);
 
-  void updateBalances();
-  void createOrder(QString Pair, int Type, double Rate, double Amount);
-  void cancelOrder(uint orderID);
+  void updateBalances    ();
+  void createOrder       (QString pair, int type, double rate, double amount);
+  void cancelOrder       (quint64 orderID);
   void updateActiveOrders(QString pair);
-  void updateOrderInfo(uint OrderID);
+  void updateOrderInfo   (quint64 orderID);
 
-  bool getObjectFromDocument(QNetworkReply *reply, QJsonObject *object);
-  Ticker parseRawTickerData(QJsonObject *rawData);
+  Ticker parseRawTickerData(QNetworkReply *reply);
+  void   parseRawDepthData (QNetworkReply *reply);
+  void   parseRawTradesData(QNetworkReply *reply);
 
-  bool checkSuccess(QJsonObject *object);
-  bool checkUpdateOrderInfoSuccess(QJsonObject *object);
-  bool checkCreateOrderSucces(QJsonObject *object);
-
-public slots:
-  void UpdateMarketTickerReply (QNetworkReply *reply);
-  void UpdateMarketDepthReply  (QNetworkReply *reply);
-  void UpdateMarketTradesReply (QNetworkReply *reply);
-  void UpdateBalancesReply     (QNetworkReply *reply);
-  void CreateOrderReply        (QNetworkReply *reply);
-  void CancelOrderReply        (QNetworkReply *reply);
-  void UpdateActiveOrdersReply (QNetworkReply *reply);
-  void UpdateOrderInfoReply    (QNetworkReply *reply);
-
-signals:
-  void sendTicker(Ticker ticker);
-  void sendOrderID(int orderID);
-  void sendOrderStatus(int status);
+  void    parseRawBalancesData        (QNetworkReply *reply);
+  quint64 parseRawOrderCreationData   (QNetworkReply *reply);
+  void    parseRawOrderCancelationData(QNetworkReply *reply);
+  void    parseRawActiveOrdersData    (QNetworkReply *reply);
+  int     parseRawOrderInfoData       (QNetworkReply *reply);
 
 };
 
