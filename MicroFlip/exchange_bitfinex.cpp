@@ -12,10 +12,13 @@ Exchange_bitfinex::Exchange_bitfinex() {
 
   // Initiate download managers
   tickerDownloadManager             = new QNetworkAccessManager(this);
-  createTradeDownloadManager        = new QNetworkAccessManager(this);
-  orderInfoDownloadManager          = new QNetworkAccessManager(this);
+  updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
   updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
   updateBalancesDownloadManager     = new QNetworkAccessManager(this);
+  createTradeDownloadManager        = new QNetworkAccessManager(this);
+  orderInfoDownloadManager          = new QNetworkAccessManager(this);
+  cancelOrderDownloadManager        = new QNetworkAccessManager(this);
+  activeOrdersDownloadManager       = new QNetworkAccessManager(this);
 
   // Start the interval timers
   timer  = new QTimer(this);
@@ -185,111 +188,6 @@ void Exchange_bitfinex::updateOrderInfo(quint64 OrderID) {
 }
 
 //----------------------------------//
-//           Task Replies           //
-//----------------------------------//
-
-void Exchange_bitfinex::UpdateMarketTickerReply(QNetworkReply *reply) {
-
-    Ticker ticker;
-
-    if(!reply->error()) {
-
-        QJsonObject jsonObj;
-
-        // Extract JSON object from network reply
-        getObjectFromDocument(reply, &jsonObj);
-
-        // Parse the raw data
-        ticker = parseRawTickerData(&jsonObj);
-
-    } else {
-        qDebug() << "Ticker Packet error: " << reply->errorString();
-
-        // TODO: send empty ticker!
-    }
-
-    // Connect & send to the initiator
-    connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-    emit sendTicker(ticker);
-    disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-
-    reply->deleteLater();
-
-    // Disconnect the download signal and release
-    disconnect(tickerDownloadManager, 0, this, 0);
-
-    // Mark this task complete
-    currentTask = ExchangeTask();
-}
-
-void Exchange_bitfinex::CancelOrderReply(QNetworkReply *reply) {
-
-  int status = -1;
-
-  if(!reply->error()) {
-
-  }
-}
-
-void Exchange_bitfinex::UpdateActiveOrdersReply(QNetworkReply *reply) {
-
-  (void) reply;
-}
-
-void Exchange_bitfinex::UpdateOrderInfoReply(QNetworkReply *reply) {
-
-    int status = -1;
-
-    if(!reply->error()) {
-
-        QJsonObject jsonObj;
-
-        // Extract JSON object from network reply
-        getObjectFromDocument(reply, &jsonObj);
-
-        // First check if the "is_live" value is available
-        if(jsonObj.contains("is_live")) {
-
-            bool statusBool = jsonObj.value("is_live").toBool();
-
-            if(statusBool) {
-                status = 0; // In process
-            } else { // Order is no longer active
-
-                // Check if the order was cancelled
-                double remainingAmount = jsonObj.value("remaining_amount").toString("0.0").toDouble();
-                if(remainingAmount > 0.0) {
-                    status = -2;
-                } else { // Else the order was completed!
-                    status = 1; //
-                }
-            }
-        } else {
-            status = -2;
-        }
-
-    } else {
-        QJsonObject jsonObj;
-        bool result = getObjectFromDocument(reply, &jsonObj);
-        QString errorString = reply->errorString();
-        qDebug() << "OrderInfo Packet error";
-        status = -2;
-    }
-
-    // Connect & send order ID to the initiator
-    connect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
-    emit sendOrderStatus(status);
-    disconnect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
-
-    reply->deleteLater();
-
-    disconnect(orderInfoDownloadManager, 0, this, 0);
-
-    // Mark this task complete
-    currentTask = ExchangeTask();
-}
-
-//----------------------------------//
 //             Parsers              //
 //----------------------------------//
 
@@ -383,4 +281,53 @@ quint64 Exchange_bitfinex::parseRawOrderCreationData(QNetworkReply *reply) {
     }
 
     return orderID;
+}
+
+int Exchange_bitfinex::parseRawOrderInfoData(QNetworkReply *reply) {
+
+    int status = -1;
+
+    if(reply->error()) {
+        qDebug() << "Order Info Packet error: " << reply->errorString();
+
+        return status;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // First check if the "is_live" value is available
+            if(jsonObj.contains("is_live")) {
+
+                bool statusBool = jsonObj.value("is_live").toBool();
+
+                if(statusBool) {
+
+                    status = 0; // In process
+                }
+                else { // Order is no longer active
+
+                    // Check if the order was cancelled
+                    double remainingAmount = jsonObj.value("remaining_amount").toString("0.0").toDouble();
+
+                    if(remainingAmount > 0.0) {
+
+                        status = -2;
+                    }
+                    else { // Else the order was completed!
+
+                        status = 1; //
+                    }
+                }
+            } else {
+
+                status = -2;
+            }
+        }
+    }
+
+    return status;
 }

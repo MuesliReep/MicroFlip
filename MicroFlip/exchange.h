@@ -134,8 +134,8 @@ private:
   virtual void    parseRawBalancesData        (QNetworkReply *reply) = 0;
   virtual quint64 parseRawOrderCreationData   (QNetworkReply *reply) = 0;
   virtual void    parseRawOrderCancelationData(QNetworkReply *reply) = 0;
-  virtual void    parseRawActiveOrcersData    (QNetworkReply *reply) = 0;
-  virtual void    parseRawOrderInfoData       (QNetworkReply *reply) = 0;
+  virtual void    parseRawActiveOrdersData    (QNetworkReply *reply) = 0;
+  virtual int     parseRawOrderInfoData       (QNetworkReply *reply) = 0;
 
 protected:
   Config *config;
@@ -147,6 +147,7 @@ protected:
   QNetworkAccessManager* createTradeDownloadManager;
   QNetworkAccessManager* orderInfoDownloadManager;
   QNetworkAccessManager* cancelOrderDownloadManager;
+  QNetworkAccessManager* activeOrdersDownloadManager;
 
   QTimer *timer;
   QTimer *timer2;
@@ -176,6 +177,9 @@ public slots:
   void UpdateMarketTradesReply(QNetworkReply *reply);
   void UpdateBalancesReply    (QNetworkReply *reply);
   void CreateOrderReply       (QNetworkReply *reply);
+  void CancelOrderReply       (QNetworkReply *reply);
+  void UpdateActiveOrdersReply(QNetworkReply *reply);
+  void UpdateOrderInfoReply   (QNetworkReply *reply);
 
 protected slots:
   void updateTick ();
@@ -186,10 +190,10 @@ signals:
   void sendNewMarketDepth ();
   void sendNewMarketTrades();
   void sendNewBalances    ();
-  void sendNewCreateOrder ();
+  void sendNewOrderID     (quint64);
   void sendNewCancelOrder ();
   void sendNewActiveOrders();
-  void sendNewOrderInfo   ();
+  void sendNewOrderInfo   (int);
 
   void updateLog(int workID, QString log);
 };

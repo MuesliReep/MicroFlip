@@ -17,12 +17,6 @@ class Exchange_wex : public Exchange
     QString apiKey;
     QString apiSecret;
 
-    QNetworkAccessManager* tickerDownloadManager;
-    QNetworkAccessManager* updateMarketTradesManager;
-    QNetworkAccessManager* createTradeDownloadManager;
-    QNetworkAccessManager* orderInfoDownloadManager;
-    QNetworkAccessManager* cancelOrderDownloadManager;
-
     uint lastNonce;
     void createNonce(QByteArray *nonce);
 
@@ -36,25 +30,17 @@ class Exchange_wex : public Exchange
     void updateActiveOrders(QString pair);
     void updateOrderInfo   (quint64 OrderID);
 
-    bool    getObjectFromDocument (QNetworkReply *reply, QJsonObject *object);
-    Ticker  parseRawTickerData    (QJsonObject *rawData);
-    bool    checkSuccess          (QJsonObject *object);
-    QString getRequestErrorMessage(QJsonObject *object);
+    Ticker parseRawTickerData(QNetworkReply *reply);
+    void   parseRawDepthData (QNetworkReply *reply);
+    void   parseRawTradesData(QNetworkReply *reply);
 
-  public slots:
-    void UpdateMarketTickerReply  (QNetworkReply *reply);
-    void UpdateMarketDepthReply   (QNetworkReply *reply);
-    void UpdateMarketTradesReply  (QNetworkReply *reply);
-    void UpdateBalancesReply      (QNetworkReply *reply);
-    void CreateOrderReply         (QNetworkReply *reply);
-    void CancelOrderReply         (QNetworkReply *reply);
-    void UpdateActiveOrdersReply  (QNetworkReply *reply);
-    void UpdateOrderInfoReply     (QNetworkReply *reply);
+    void    parseRawBalancesData        (QNetworkReply *reply);
+    quint64 parseRawOrderCreationData   (QNetworkReply *reply);
+    void    parseRawOrderCancelationData(QNetworkReply *reply);
+    void    parseRawActiveOrdersData    (QNetworkReply *reply);
+    int     parseRawOrderInfoData       (QNetworkReply *reply);
 
-  signals:
-    void sendTicker     (Ticker ticker);
-    void sendOrderID    (quint64 orderID);
-    void sendOrderStatus(int status);
+    bool    checkSuccess(QJsonObject *object);
   };
 
 #endif // EXCHANGE_WEX_H

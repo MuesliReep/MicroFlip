@@ -10,6 +10,16 @@ Exchange_Binance::Exchange_Binance()
 
     this->fee = 0.1;
 
+    // Initiate download managers
+    tickerDownloadManager             = new QNetworkAccessManager(this);
+    updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
+    updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
+    updateBalancesDownloadManager     = new QNetworkAccessManager(this);
+    createTradeDownloadManager        = new QNetworkAccessManager(this);
+    orderInfoDownloadManager          = new QNetworkAccessManager(this);
+    cancelOrderDownloadManager        = new QNetworkAccessManager(this);
+    activeOrdersDownloadManager       = new QNetworkAccessManager(this);
+
     // Create the interval timer
     timer  = new QTimer(this);
     connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
@@ -27,7 +37,7 @@ void Exchange_Binance::updateMarketTicker(QString pair) {
     QNetworkRequest request = downloader.generateRequest(QUrl("https://www.binance.com/api/v1/ticker/24hr?symbol="+pair.toUpper()));
 
     // Execute the download
-    downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
+    downloader.doDownload(request, tickerDownloadManager, this, SLOT(updateMarketTickerReply(QNetworkReply*)));
 }
 
 void Exchange_Binance::updateMarketDepth(QString pair)
@@ -100,4 +110,44 @@ Ticker Exchange_Binance::parseRawTickerData(QNetworkReply *reply) {
     }
 
     return ticker;
+}
+
+void Exchange_Binance::parseRawDepthData(QNetworkReply *reply)
+{
+    // TODO
+    (void)reply;
+}
+
+void Exchange_Binance::parseRawTradesData(QNetworkReply *reply)
+{
+    // TODO
+    (void)reply;
+}
+
+void Exchange_Binance::parseRawBalancesData(QNetworkReply *reply)
+{
+    // TODO
+    (void)reply;
+}
+
+quint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply)
+{
+
+}
+
+void Exchange_Binance::parseRawOrderCancelationData(QNetworkReply *reply)
+{
+    // TODO
+    (void)reply;
+}
+
+void Exchange_Binance::parseRawActiveOrdersData(QNetworkReply *reply)
+{
+    // TODO
+    (void)reply;
+}
+
+int Exchange_Binance::parseRawOrderInfoData(QNetworkReply *reply)
+{
+
 }

@@ -3,6 +3,7 @@
 #include <QJsonArray>
 
 #include <trade.h>
+#include "json_helper.h"
 
 Exchange_wex::Exchange_wex() {
 
@@ -11,9 +12,14 @@ Exchange_wex::Exchange_wex() {
   fee = 0.2;
 
   // Initiate download managers
-  tickerDownloadManager      = new QNetworkAccessManager(this);
-  createTradeDownloadManager = new QNetworkAccessManager(this);
-  orderInfoDownloadManager   = new QNetworkAccessManager(this);
+  tickerDownloadManager             = new QNetworkAccessManager(this);
+  updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
+  updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
+  updateBalancesDownloadManager     = new QNetworkAccessManager(this);
+  createTradeDownloadManager        = new QNetworkAccessManager(this);
+  orderInfoDownloadManager          = new QNetworkAccessManager(this);
+  cancelOrderDownloadManager        = new QNetworkAccessManager(this);
+  activeOrdersDownloadManager       = new QNetworkAccessManager(this);
 
   // Start the interval timers
   timer  = new QTimer(this);
@@ -70,7 +76,7 @@ void Exchange_wex::updateMarketTrades(QString pair) {
   QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/api/3/trades/"+pair+"?&limit=5000"));
 
   // Execute the download
-  downloader.doDownload(request, updateMarketTradesManager, this, SLOT(UpdateMarketTradesReply(QNetworkReply*)));
+  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(UpdateMarketTradesReply(QNetworkReply*)));
 }
 
 void Exchange_wex::updateBalances() {
@@ -157,232 +163,193 @@ void Exchange_wex::updateOrderInfo(quint64 OrderID) {
 }
 
 //----------------------------------//
-//           Task Replies           //
-//----------------------------------//
-
-void Exchange_wex::UpdateMarketTickerReply(QNetworkReply *reply) {
-
-  Ticker ticker;
-
-  if(!reply->error()) {
-
-    QJsonObject jsonObj;
-    QJsonObject tickerData;
-
-    // Extract JSON object from network reply
-    getObjectFromDocument(reply, &jsonObj);
-
-    // Extract the market data we want
-    QString pair = currentTask.getAttributes().at(0);
-    tickerData = jsonObj.value(pair).toObject();
-
-    // Parse the raw data
-    Ticker ticker = parseRawTickerData(&tickerData);
-
-    // Connect & send to the initiator
-    connect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-    emit sendTicker(ticker);
-    disconnect(this, SIGNAL(sendTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-
-  }
-  else {
-    qDebug() << "Ticker Packet error: " << reply->errorString();
-  }
-
-  reply->deleteLater();
-
-  // Disconnect the download signal and release
-  disconnect(tickerDownloadManager, 0, this, 0);
-
-  // Mark this task complete
-  currentTask = ExchangeTask();
-}
-
-void Exchange_wex::UpdateMarketDepthReply(QNetworkReply *reply) {
-
-  (void) reply;
-
-    // TODO:
-}
-
-void Exchange_wex::UpdateMarketTradesReply(QNetworkReply *reply) {
-
-    // TODO:
-
-    QList<Trade> marketTrades;
-
-    if(!reply->error()) {
-
-        QJsonObject jsonObj;
-        QJsonArray  tradeData;
-
-        QString pair = "ltc_usd"; // FIX!!!
-
-        // Extract JSON object from network reply
-        getObjectFromDocument(reply, &jsonObj);
-
-        // Check if authentication was a succes
-        if(checkSuccess(&jsonObj)) {
-
-            // Extract the info data we want
-            tradeData = jsonObj.value(pair).toArray();
-
-            for(int i = 0; i < tradeData.size(); i++) {
-
-                QJsonObject currentTrade = tradeData.at(i).toObject();
-
-                marketTrades.append(Trade(currentTrade.value("price").toDouble(),
-                                          currentTrade.value("amount").toDouble(),
-                                          currentTrade.value("tid").toInt(),
-                                          currentTrade.value("timestamp").toInt()));
-            }
-        } else {
-            qDebug() << "UpdateMarketTrades error: " << getRequestErrorMessage(&jsonObj);
-        }
-    } else {
-        qDebug() << "UpdateMarketTrades Packet error";
-    }
-}
-
-void Exchange_wex::UpdateBalancesReply(QNetworkReply *reply) {
-
-  (void) reply;
-
-    // TODO:
-}
-
-void Exchange_wex::CreateOrderReply(QNetworkReply *reply) {
-
-  int orderID = -1;
-
-  if(!reply->error()) {
-
-    QJsonObject jsonObj;
-    QJsonObject tradeData;
-
-    // Extract JSON object from network reply
-    getObjectFromDocument(reply, &jsonObj);
-
-    // Check if authentication was a succes
-    if(checkSuccess(&jsonObj)) {
-
-      // Extract the info data we want
-      tradeData = jsonObj.value("return").toObject();
-
-      // Parse new data
-      orderID = tradeData.value("order_id").toInt(-1);
-
-      qDebug() << "Trade created successfully, ID: " << orderID;
-    }
-    else {
-      qDebug() << "Trade error: " << getRequestErrorMessage(&jsonObj);
-    }
-  } else {
-    qDebug() << "Trade Packet error";
-  }
-
-  // Connect & send order ID to the initiator
-  connect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
-  emit sendOrderID((quint64)orderID);
-  disconnect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
-
-  reply->deleteLater();
-
-  disconnect(createTradeDownloadManager, 0, this, 0);
-
-  // Mark this task complete
-  currentTask = ExchangeTask();
-}
-
-void Exchange_wex::CancelOrderReply(QNetworkReply *reply) {
-
-  int status = -1;
-
-  if(!reply->error()) {
-
-  }
-}
-
-void Exchange_wex::UpdateActiveOrdersReply(QNetworkReply *reply) {
-
-  (void) reply;
-}
-
-void Exchange_wex::UpdateOrderInfoReply(QNetworkReply *reply) {
-
-  int status = -1;
-
-  if(!reply->error()) {
-
-    QJsonObject jsonObj;
-    QJsonObject returnInfoData;
-    QJsonObject orderInfoData;
-
-    // Extract JSON object from network reply
-    getObjectFromDocument(reply, &jsonObj);
-
-    // Check if authentication was a succes
-    if(checkSuccess(&jsonObj)) {
-
-      // Extract the info data we want
-      returnInfoData = jsonObj.value("return").toObject();
-
-      int orderID = currentTask.getAttributes().at(0).toInt();
-      orderInfoData = returnInfoData.value(QString::number(orderID)).toObject();
-
-      // Parse new data
-      status = orderInfoData.value("status").toInt(-1);
-    }
-    else {
-      qDebug() << "OrderInfo error: " << getRequestErrorMessage(&jsonObj);
-    }
-  } else {
-    qDebug() << "OrderInfo Packet error";
-    status = -2;
-  }
-
-  // Connect & send order ID to the initiator
-  connect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
-  emit sendOrderStatus(status);
-  disconnect(this, SIGNAL(sendOrderStatus(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
-
-  reply->deleteLater();
-
-  disconnect(orderInfoDownloadManager, 0, this, 0);
-
-  // Mark this task complete
-  currentTask = ExchangeTask();
-}
-
-//----------------------------------//
 //             Parsers              //
 //----------------------------------//
 
-// Grabs a JSON object from a Network reply
-// Returns true if succesfull
-bool Exchange_wex::getObjectFromDocument(QNetworkReply *reply, QJsonObject *object) {
+Ticker Exchange_wex::parseRawTickerData(QNetworkReply *reply) {
 
-  QJsonDocument   jsonDoc;
-  QJsonParseError error;
+    Ticker ticker;
 
-  jsonDoc = QJsonDocument().fromJson(reply->readAll(), &error);
-  *object = jsonDoc.object();
+    if(reply->error()) {
+        qDebug() << "Ticker Packet error: " << reply->errorString();
 
-  return true; // TODO: check json validity
+        return ticker;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Parse individual ticker data items
+            double high = jsonObj.value("high").toDouble();
+            double low  = jsonObj.value("low") .toDouble();
+            double avg  = jsonObj.value("avg") .toDouble();
+            double last = jsonObj.value("last").toDouble();
+            double buy  = jsonObj.value("buy") .toDouble();
+            double sell = jsonObj.value("sell").toDouble();
+            int    age  = jsonObj.value("age") .toInt();
+
+            ticker = Ticker(high, low, avg, last, buy, sell, age);
+        }
+    }
+
+    return ticker;
 }
 
-Ticker Exchange_wex::parseRawTickerData(QJsonObject *rawData) {
+void Exchange_wex::parseRawDepthData(QNetworkReply *reply)
+{
+    // TODO
+    (void) reply;
+}
 
-  // Parse individual ticker data items
-  double high = rawData->value("high").toDouble();
-  double low  = rawData->value("low") .toDouble();
-  double avg  = rawData->value("avg") .toDouble();
-  double last = rawData->value("last").toDouble();
-  double buy  = rawData->value("buy") .toDouble();
-  double sell = rawData->value("sell").toDouble();
-  int    age  = rawData->value("age") .toInt();
+void Exchange_wex::parseRawTradesData(QNetworkReply *reply) {
 
-  return Ticker(high, low, avg, last, buy, sell, age);
+    // TODO
+
+    QList<Trade> marketTrades;
+
+    if(reply->error()) {
+        qDebug() << "Update Market Trades Packet error:" << reply->errorString();
+
+//        return marketTrades;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+    QJsonArray    jsonArr;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            QString pair = "ltc_usd"; // FIX!!!
+
+            // Check if authentication was a succes
+            if(checkSuccess(&jsonObj)) {
+
+                // Extract the pair data we want
+                jsonArr = jsonObj.value(pair).toArray();
+
+                for(int i = 0; i < jsonArr.size(); i++) {
+
+                    QJsonObject currentTrade = jsonArr.at(i).toObject();
+
+                    marketTrades.append(Trade(currentTrade.value("price")    .toDouble(),
+                                              currentTrade.value("amount")   .toDouble(),
+                                              currentTrade.value("tid")      .toInt(),
+                                              currentTrade.value("timestamp").toInt()));
+                }
+
+            } else {
+                qDebug() << "Update Market Trades authentication error";
+            }
+
+        }
+    }
+
+    //    return marketTrades;
+}
+
+void Exchange_wex::parseRawBalancesData(QNetworkReply *reply)
+{
+    // TODO
+    (void) reply;
+}
+
+quint64 Exchange_wex::parseRawOrderCreationData(QNetworkReply *reply) {
+
+    quint64 orderID = -1;
+
+    if(reply->error()) {
+        qDebug() << "Trade Packet error" << reply->errorString();
+
+        return orderID;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Check if authentication was a succes
+            if(checkSuccess(&jsonObj)) {
+
+                QJsonObject tradeData;
+
+                // Extract the info data we want
+                tradeData = jsonObj.value("return").toObject();
+
+                // Parse new data
+                orderID = tradeData.value("order_id").toInt(-1);
+
+                qDebug() << "Trade created successfully, ID: " << orderID;
+            }
+            else {
+                qDebug() << "Create Trade authentication error";
+            }
+        }
+    }
+
+    return orderID;
+}
+
+void Exchange_wex::parseRawOrderCancelationData(QNetworkReply *reply)
+{
+    // TODO
+    (void) reply;
+}
+
+void Exchange_wex::parseRawActiveOrdersData(QNetworkReply *reply)
+{
+    // TODO
+    (void) reply;
+}
+
+int Exchange_wex::parseRawOrderInfoData(QNetworkReply *reply)
+{
+    int status = -1;
+
+    if(reply->error()) {
+        qDebug() << "Order Info Packet error" << reply->errorString();
+
+        status = -2;
+        return status;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    // Extract JSON object from network reply
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // Check if authentication was a succes
+            if(checkSuccess(&jsonObj)) {
+
+                QJsonObject returnInfoData;
+                QJsonObject orderInfoData;
+
+                // Extract the info data we want
+                returnInfoData = jsonObj.value("return").toObject();
+
+                int orderID = currentTask.getAttributes().at(0).toInt();
+                orderInfoData = returnInfoData.value(QString::number(orderID)).toObject();
+
+                // Parse new data
+                status = orderInfoData.value("status").toInt(-1);
+            }
+            else {
+                qDebug() << "Order Info authentication error";
+            }
+        }
+    }
+
+    return status;
 }
 
 bool Exchange_wex::checkSuccess(QJsonObject *object) {
@@ -396,9 +363,4 @@ bool Exchange_wex::checkSuccess(QJsonObject *object) {
     result = true;
 
   return result;
-}
-
-QString Exchange_wex::getRequestErrorMessage(QJsonObject *object) {
-
-  return object->value("error").toString();
 }

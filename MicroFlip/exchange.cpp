@@ -183,9 +183,57 @@ void Exchange::CreateOrderReply(QNetworkReply *reply)
     disconnect(createTradeDownloadManager, 0, this, 0);
 
     // Connect & send order ID to the initiator
-    connect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
-    emit sendOrderID(orderID);
-    disconnect(this, SIGNAL(sendOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+    connect(this, SIGNAL(sendNewOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+    emit sendNewOrderID(orderID);
+    disconnect(this, SIGNAL(sendNewOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
+void Exchange::CancelOrderReply(QNetworkReply *reply)
+{
+    // TODO
+
+    parseRawOrderCancelationData(reply);
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(cancelOrderDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
+void Exchange::UpdateActiveOrdersReply(QNetworkReply *reply)
+{
+    // TODO
+
+    parseRawActiveOrdersData(reply);
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(activeOrdersDownloadManager, 0, this, 0);
+
+    // Mark this task complete
+    currentTask = ExchangeTask();
+}
+
+void Exchange::UpdateOrderInfoReply(QNetworkReply *reply)
+{
+    int status = parseRawOrderInfoData(reply);
+
+    reply->deleteLater();
+
+    // Disconnect the download signal and release
+    disconnect(orderInfoDownloadManager, 0, this, 0);
+
+    // Connect & send order status to the initiator
+    connect(this, SIGNAL(sendNewOrderInfo(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
+    emit sendNewOrderInfo(status);
+    disconnect(this, SIGNAL(sendNewOrderInfo(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
 
     // Mark this task complete
     currentTask = ExchangeTask();
