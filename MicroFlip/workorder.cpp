@@ -225,6 +225,8 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
       stdInterval         = false;
       longIntervalRequest = true;
+
+      return;
   }
 
   // Save the ticker data locally
