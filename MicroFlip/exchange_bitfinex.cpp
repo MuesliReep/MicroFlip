@@ -249,6 +249,11 @@ void Exchange_bitfinex::parseRawTradesData(QNetworkReply *reply) {
     }
 }
 
+void Exchange_bitfinex::parseRawBalancesData(QNetworkReply *reply)
+{
+    // TODO
+}
+
 quint64 Exchange_bitfinex::parseRawOrderCreationData(QNetworkReply *reply) {
 
     quint64 orderID = -1;
@@ -281,6 +286,16 @@ quint64 Exchange_bitfinex::parseRawOrderCreationData(QNetworkReply *reply) {
     }
 
     return orderID;
+}
+
+void Exchange_bitfinex::parseRawOrderCancelationData(QNetworkReply *reply)
+{
+    // TODO
+}
+
+void Exchange_bitfinex::parseRawActiveOrdersData(QNetworkReply *reply)
+{
+    // TODO
 }
 
 int Exchange_bitfinex::parseRawOrderInfoData(QNetworkReply *reply) {
