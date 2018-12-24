@@ -34,20 +34,32 @@ void Exchange_Binance::startWork() {
 void Exchange_Binance::updateMarketTicker(QString pair) {
 
     // Create the request to download new data
-    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.binance.com/api/v1/ticker/24hr?symbol="+pair.toUpper()));
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v1/ticker/24hr?symbol="+pair.toUpper()));
 
     // Execute the download
     downloader.doDownload(request, tickerDownloadManager, this, SLOT(updateMarketTickerReply(QNetworkReply*)));
 }
 
-void Exchange_Binance::updateMarketDepth(QString pair)
-{
-  "GET /api/v1/depth";
+void Exchange_Binance::updateMarketDepth(QString pair) {
+
+    QString limit = "100";
+
+    // Create the request to download new data
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v1/depth?symbol="+pair.toUpper()+"&limit="+limit));
+
+    // Execute the download
+    downloader.doDownload(request, updateMarketDepthDownloadManager, this, SLOT(updateMarketDepthReply(QNetworkReply*)));
 }
 
-void Exchange_Binance::updateMarketTrades(QString pair)
-{
-  "GET /api/v1/trades";
+void Exchange_Binance::updateMarketTrades(QString pair) {
+
+    QString limit = "500";
+
+    // Create the request to download new data
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v1/trades?symbol="+pair.toUpper()+"&limit="+limit));
+
+    // Execute the download
+    downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
 }
 
 void Exchange_Binance::updateBalances()
@@ -55,9 +67,59 @@ void Exchange_Binance::updateBalances()
   "GET /api/v3/account";
 }
 
-void Exchange_Binance::createOrder(QString pair, int type, double rate, double amount)
-{
+void Exchange_Binance::createOrder(QString pair, int type, double rate, double amount) {
+
   "POST /api/v3/order";
+
+    QByteArray query;
+
+    // Symbol
+    query.append("symbol=");
+    query.append(pair);
+
+    // Side
+    query.append("&side=");
+    query.append(type == 0 ? "BUY" : "SELL");
+
+    // Type
+    query.append("&type=");
+    query.append("LIMIT");
+
+    // Quantity
+    query.append("&quantity=");
+    query.append(QByteArray::number(amount,'f',8)); // TODO
+
+    // Receive window
+    query.append("&recvWindow=");
+    query.append("5000"); // TODO
+
+    // Timestamp
+    query.append("&timestamp=");
+    query.append(QByteArray::number(QDateTime::currentDateTime().toSecsSinceEpoch())); // TODO
+
+    // Price
+    query.append("&price=");
+    query.append(QByteArray::number(rate,'f',3)); // TODO
+
+    // Time in Force
+    query.append("&timeInForce=");
+    query.append("GTC"); // Good-Til-Canceled
+
+    // Create signature
+    QByteArray signature = QMessageAuthenticationCode::hash(query, this->apiSecret.toUtf8(), QCryptographicHash::Sha256).toHex();
+
+    // Add signature to query
+    query.append("&signature=");
+    query.append(signature);
+
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v3/order/test?"+query));
+
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("X-MBX-APIKEY"), this->apiKey.toUtf8());
+
+    // Execute the download
+    downloader.doPostDownload(request, createTradeDownloadManager, query, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
 void Exchange_Binance::cancelOrder(quint64 orderID)
@@ -103,7 +165,9 @@ Ticker Exchange_Binance::parseRawTickerData(QNetworkReply *reply) {
             double last = jsonObj.value("lastPrice")       .toString("-1.0").toDouble();
             double buy  = jsonObj.value("bidPrice")        .toString("-1.0").toDouble();
             double sell = jsonObj.value("askPrice")        .toString("-1.0").toDouble();
-            int    age  = jsonObj.value("closeTime")       .toString("-1").toInt();
+            int    age  = jsonObj.value("closeTime")       .toInt(-1);
+
+            if()
 
             ticker = Ticker(high, low, avg, last, buy, sell, age);
         }
@@ -132,7 +196,7 @@ void Exchange_Binance::parseRawBalancesData(QNetworkReply *reply)
 
 quint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply)
 {
-
+    qDebug() << reply->readAll();
 }
 
 void Exchange_Binance::parseRawOrderCancelationData(QNetworkReply *reply)

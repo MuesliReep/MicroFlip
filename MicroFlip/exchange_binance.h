@@ -17,6 +17,9 @@ private:
 
     Downloader downloader;
 
+    QString apiKey;
+    QString apiSecret;
+
     void updateMarketTicker(QString pair);
     void updateMarketDepth (QString pair);
     void updateMarketTrades(QString pair);
