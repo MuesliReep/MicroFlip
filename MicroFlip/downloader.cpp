@@ -18,7 +18,7 @@ QNetworkRequest Downloader::generateRequest(QUrl url) {
 // Adds a custuom header to the given request
 void Downloader::addHeaderToRequest(QNetworkRequest *request, QByteArray headerName, QByteArray headerValue) {
 
-  request->setRawHeader(headerName, headerValue);
+    request->setRawHeader(headerName, headerValue);
 }
 
 // // Generates a HTTP GET request
@@ -40,42 +40,62 @@ void Downloader::addHeaderToRequest(QNetworkRequest *request, QByteArray headerN
 //
 QNetworkAccessManager* Downloader::doDownload(QNetworkRequest request, QObject * receiver, const char * method) {
 
-  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 
-  connect(manager, SIGNAL(finished(QNetworkReply*)),
-  receiver, method);
+    manager->get(request);
 
-  manager->get(request);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+    receiver, method);
 
-  return manager;
+    return manager;
 }
 
 void Downloader::doDownload(QNetworkRequest request, QNetworkAccessManager *manager, QObject * receiver, const char * method) {
 
-  manager->get(request);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+    receiver, method);
 
-  connect(manager, SIGNAL(finished(QNetworkReply*)),
-  receiver, method);
+    manager->get(request);
 }
 
 QNetworkAccessManager* Downloader::doPostDownload(QNetworkRequest request, QByteArray data, QObject * receiver, const char * method) {
 
-  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 
-  connect(manager, SIGNAL(finished(QNetworkReply*)),
-  receiver, method);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+    receiver, method);
 
-  manager->post(request, data);
+    manager->post(request, data);
 
-  return manager;
+    return manager;
 }
 
 void Downloader::doPostDownload(QNetworkRequest request, QNetworkAccessManager *manager, QByteArray data, QObject * receiver, const char * method) {
 
-  manager->post(request, data);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            receiver, method);
 
-  connect(manager, SIGNAL(finished(QNetworkReply*)),
-  receiver, method);
+    manager->post(request, data);
+}
+
+QNetworkAccessManager *Downloader::doDeleteRequest(QNetworkRequest request, QObject *receiver, const char *method) {
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+    receiver, method);
+
+    manager->deleteResource(request);
+
+    return manager;
+}
+
+void Downloader::doDeleteRequest(QNetworkRequest request, QNetworkAccessManager *manager, QObject *receiver, const char *method) {
+
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            receiver, method);
+
+    manager->deleteResource(request);
 }
 
 // Checks the validity of a network reply
