@@ -30,8 +30,9 @@ class WorkOrder : public QThread
 public:
   WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget, int shortInterval, int longInterval, double minSellPrice = 0.0, int sellTTL = 5, int buyTTL = 1440, bool highSpeed = false);
 
-  double getSellPrice() { return sellPrice; }
-  int getWorkID() { return workID; }
+  double  getSellPrice() { return sellPrice; }
+  int     getWorkID()    { return workID;    }
+  QString getPair()      { return pair;      }
 
 private:
   Exchange *exchange;
