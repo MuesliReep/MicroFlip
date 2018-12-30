@@ -35,7 +35,7 @@ private:
   void   parseRawTradesData(QNetworkReply *reply);
 
   void    parseRawBalancesData        (QNetworkReply *reply);
-  quint64 parseRawOrderCreationData   (QNetworkReply *reply);
+  qint64  parseRawOrderCreationData   (QNetworkReply *reply);
   void    parseRawOrderCancelationData(QNetworkReply *reply);
   void    parseRawActiveOrdersData    (QNetworkReply *reply);
   int     parseRawOrderInfoData       (QNetworkReply *reply);

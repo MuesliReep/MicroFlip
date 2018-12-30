@@ -170,12 +170,6 @@ Ticker Exchange_wex::parseRawTickerData(QNetworkReply *reply) {
 
     Ticker ticker;
 
-    if(reply->error()) {
-        qDebug() << "Ticker Packet error: " << reply->errorString();
-
-        return ticker;
-    }
-
     QJsonDocument jsonDoc;
     QJsonObject   jsonObj;
 
@@ -210,12 +204,6 @@ void Exchange_wex::parseRawTradesData(QNetworkReply *reply) {
     // TODO
 
     QList<Trade> marketTrades;
-
-    if(reply->error()) {
-        qDebug() << "Update Market Trades Packet error:" << reply->errorString();
-
-//        return marketTrades;
-    }
 
     QJsonDocument jsonDoc;
     QJsonObject   jsonObj;
@@ -259,15 +247,9 @@ void Exchange_wex::parseRawBalancesData(QNetworkReply *reply)
     (void) reply;
 }
 
-quint64 Exchange_wex::parseRawOrderCreationData(QNetworkReply *reply) {
+qint64 Exchange_wex::parseRawOrderCreationData(QNetworkReply *reply) {
 
-    quint64 orderID = -1;
-
-    if(reply->error()) {
-        qDebug() << "Trade Packet error" << reply->errorString();
-
-        return orderID;
-    }
+    qint64 orderID = -1;
 
     QJsonDocument jsonDoc;
     QJsonObject   jsonObj;
@@ -313,13 +295,6 @@ void Exchange_wex::parseRawActiveOrdersData(QNetworkReply *reply)
 int Exchange_wex::parseRawOrderInfoData(QNetworkReply *reply)
 {
     int status = -1;
-
-    if(reply->error()) {
-        qDebug() << "Order Info Packet error" << reply->errorString();
-
-        status = -2;
-        return status;
-    }
 
     QJsonDocument jsonDoc;
     QJsonObject   jsonObj;

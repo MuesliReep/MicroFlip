@@ -1,5 +1,7 @@
 #include "exchange.h"
 
+#include "common.h"
+
 #include <QDateTime>
 
 Exchange::Exchange(QObject *parent) : QObject(parent)
@@ -111,8 +113,14 @@ void Exchange::receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int Send
 
 void Exchange::updateMarketTickerReply(QNetworkReply *reply)
 {
-    // Parse the raw data
-    Ticker ticker = parseRawTickerData(reply);
+    Ticker ticker;
+
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Ticker Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+    } else {
+        // Parse the raw data
+        ticker = parseRawTickerData(reply);
+    }
 
     // Connect & send to the initiator
     connect(this, SIGNAL(sendNewMarketTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
@@ -132,7 +140,11 @@ void Exchange::updateMarketDepthReply(QNetworkReply *reply)
 {
     // TODO
 
-    parseRawDepthData(reply);
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Market Depth Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+    } else {
+        parseRawDepthData(reply);
+    }
 
     reply->deleteLater();
 
@@ -147,7 +159,11 @@ void Exchange::updateMarketTradesReply(QNetworkReply *reply)
 {
     // TODO
 
-    parseRawTradesData(reply);
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Market Trades Update Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+    } else {
+        parseRawTradesData(reply);
+    }
 
     reply->deleteLater();
 
@@ -161,8 +177,11 @@ void Exchange::updateMarketTradesReply(QNetworkReply *reply)
 void Exchange::updateBalancesReply(QNetworkReply *reply)
 {
     // TODO
-
-    parseRawBalancesData(reply);
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Balance Update Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+    } else {
+        parseRawBalancesData(reply);
+    }
 
     reply->deleteLater();
 
@@ -175,7 +194,13 @@ void Exchange::updateBalancesReply(QNetworkReply *reply)
 
 void Exchange::createOrderReply(QNetworkReply *reply)
 {
-    quint64 orderID = parseRawOrderCreationData(reply);
+    qint64 orderID = -1;
+
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Create Order Packet error: " + reply->errorString() + " " + reply->readAll(), logSeverity::LOG_CRITICAL);
+    } else {
+        orderID = parseRawOrderCreationData(reply);
+    }
 
     reply->deleteLater();
 
@@ -195,7 +220,11 @@ void Exchange::cancelOrderReply(QNetworkReply *reply)
 {
     // TODO
 
-    parseRawOrderCancelationData(reply);
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Order Cancelation Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+    } else {
+        parseRawOrderCancelationData(reply);
+    }
 
     reply->deleteLater();
 
@@ -210,7 +239,11 @@ void Exchange::updateActiveOrdersReply(QNetworkReply *reply)
 {
     // TODO
 
-    parseRawActiveOrdersData(reply);
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Order Cancelation Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+    } else {
+        parseRawActiveOrdersData(reply);
+    }
 
     reply->deleteLater();
 
@@ -223,7 +256,13 @@ void Exchange::updateActiveOrdersReply(QNetworkReply *reply)
 
 void Exchange::updateOrderInfoReply(QNetworkReply *reply)
 {
-    int status = parseRawOrderInfoData(reply);
+    int status = -1;
+
+    if(reply->error()) {
+        updateLog(currentTask.getSenderID(), className, "Order Cancelation Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+    } else {
+        status = parseRawOrderInfoData(reply);
+    }
 
     reply->deleteLater();
 
@@ -307,7 +346,3 @@ QList<QString> ExchangeTask::getAttributes() const
 {
   return attributes;
 }
-
-//----------------------------------//
-//           ExchangeTask           //
-//----------------------------------//

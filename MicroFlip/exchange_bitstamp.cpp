@@ -179,12 +179,6 @@ Ticker Exchange_bitstamp::parseRawTickerData(QNetworkReply *reply) {
 
     Ticker ticker;
 
-    if(reply->error()) {
-        qDebug() << "Ticker Packet error: " << reply->errorString();
-
-        return ticker;
-    }
-
     QJsonDocument jsonDoc;
     QJsonObject   jsonObj;
 
@@ -230,15 +224,9 @@ void Exchange_bitstamp::parseRawBalancesData(QNetworkReply *reply)
     // TODO
 }
 
-quint64 Exchange_bitstamp::parseRawOrderCreationData(QNetworkReply *reply) {
+qint64 Exchange_bitstamp::parseRawOrderCreationData(QNetworkReply *reply) {
 
-    quint64 orderID = -1;
-
-    if(reply->error()) {
-        qDebug() << "Create Order Packet error: " << reply->errorString();
-
-        return orderID;
-    }
+    qint64 orderID = -1;
 
     QJsonDocument jsonDoc;
     QJsonObject   jsonObj;
@@ -280,12 +268,6 @@ int Exchange_bitstamp::parseRawOrderInfoData(QNetworkReply *reply) {
     // TODO
 
     int status = -1;
-
-    if(reply->error()) {
-        qDebug() << "Order Info Packet error: " << reply->errorString();
-
-        return status;
-    }
 
     QJsonDocument jsonDoc;
     QJsonObject   jsonObj;
