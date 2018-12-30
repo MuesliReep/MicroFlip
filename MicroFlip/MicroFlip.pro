@@ -57,7 +57,8 @@ HEADERS  += program.h \
     exchange_bitfinex.h \
     exchange_sim.h \
     exchange_binance.h \
-    json_helper.h
+    json_helper.h \
+    common.h
 
 CONFIG += console
 

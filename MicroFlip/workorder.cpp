@@ -1,5 +1,7 @@
 #include "workorder.h"
 
+#include "common.h"
+
 ///
 /// \brief WorkOrder::WorkOrder
 /// \param exchange Pointer to the exchange interface
@@ -129,7 +131,7 @@ void WorkOrder::createSellOrder(double amount) {
   // Create order
   int type   = 1; // Sell
 
-  emit updateLog(workID, " Creating Sell Order: " + QString::number(amount) + " BTC for " + QString::number(sellPrice) + " USD");
+  emit updateLog(workID, "WORKORDER", "Creating Sell Order: " + QString::number(amount) + " BTC for " + QString::number(sellPrice) + " USD", logSeverity::LOG_INFO);
 
   // Connect & send order
   requestCreateOrder(type, sellPrice, maxAmount);
@@ -172,9 +174,11 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
   QString pair1 = pair.mid(0,3).toUpper();
   QString pair2 = pair.mid(pair.length()-3-1,3).toUpper();
 
-  emit updateLog(workID, "Buying "   + QString::number(*buyAmount) + " " + pair1 +
+  emit updateLog(workID, className,
+                         "Buying "   + QString::number(*buyAmount) + " " + pair1 +
                          " @ "       + QString::number(*buyPrice)  + " " + pair2 + "/" + pair1 +
-                         ". Total: " + QString::number(*buyTotal)  + " " + pair2);
+                         ". Total: " + QString::number(*buyTotal)  + " " + pair2,
+                         logSeverity::LOG_INFO);
 }
 
 //----------------------------------//
@@ -218,7 +222,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
   // Check ticker validity
   if (ticker.getAge() < 0) {
 
-      updateLog(workID, "Received invalid ticker data, resetting");
+      emit updateLog(workID, className, "Received invalid ticker data, resetting", logSeverity::LOG_WARNING);
 
       // Something went wrong with the ticker, we need to revert to start state
       workState = START;
@@ -232,15 +236,16 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
   // Save the ticker data locally
   currentTicker = ticker;
 
-  updateLog(workID, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
-                                 + " Sell: " + QString::number(currentTicker.getSell())
-                                 + " Last: " + QString::number(currentTicker.getLast()));
+  updateLog(workID, className, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
+                             + " Sell: " + QString::number(currentTicker.getSell())
+                             + " Last: " + QString::number(currentTicker.getLast()),
+                               logSeverity::LOG_INFO);
 
   // If we are using a dynamic minimum sell price, calculate it here
   // TODO: Use something smarter than just using the 24h average
   if(dynamicMinSell) {
     minSellPrice = currentTicker.getAvg();
-    updateLog(workID, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice));
+    emit updateLog(workID, className, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice), logSeverity::LOG_INFO);
   }
 
 //  // return to START state if buy price is too low
@@ -255,7 +260,10 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
   // return to START state if buy price is too low
   if(currentTicker.getSell() <= minSellPrice) {
-    updateLog(workID, "Price " + QString::number(currentTicker.getSell()) + " lower than minimum: " + QString::number(minSellPrice) + ". Reverting state!");
+    emit updateLog(workID, className, "Price " + QString::number(currentTicker.getSell())
+                                               + " lower than minimum: " + QString::number(minSellPrice)
+                                               + ". Reverting state!",
+                                                 logSeverity::LOG_INFO);
     workState = START;
 
     // Pause workorder for 5 minutes
@@ -268,12 +276,12 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
     workState = CREATESELL;
 }
 
-void WorkOrder::orderCreateReply(quint64 orderID) {
+void WorkOrder::orderCreateReply(qint64 orderID) {
 
   // Check if this is not an old create reply
   if(workState != WAITINGFORSELL) {
     if(workState != WAITINGFORBUY) {
-      updateLog(workID, "Create reply received during wrong state");
+      updateLog(workID, className, "Create order reply received during wrong state", logSeverity::LOG_WARNING);
       return;
     }
   }
@@ -322,7 +330,7 @@ void WorkOrder::orderInfoReply(int status) {
   // Check if this is not an old info reply
   if(workState != SELLORDER) {
     if(workState != BUYORDER) {
-      updateLog(workID, "Received old order info reply");
+      updateLog(workID, className, "Received old order info reply", logSeverity::LOG_WARNING);
       return;
     }
   }
@@ -343,11 +351,10 @@ void WorkOrder::orderInfoReply(int status) {
       break;
     case -2:
       // Packet error, continue
-      updateLog(workID, "Continuing with order");
     case 2:
     case 3:
     default:
-      updateLog(workID, " Order status: " + QString::number(status));
+      updateLog(workID, className, " Critical Order info status: " + QString::number(status), logSeverity::LOG_CRITICAL);
       workState = ERROR;
       break;
   }
@@ -357,12 +364,12 @@ void WorkOrder::orderCancelReply(bool succes) {
 
     if(!succes) {
         workState = ERROR;
-        updateLog(workID, "Failed to cancel order!");
+        updateLog(workID, className, "Failed to cancel order!", logSeverity::LOG_CRITICAL);
         return;
     }
 
     workState = START;
-    updateLog(workID, "Order cancelled");
+    updateLog(workID, className, "Order cancelled", logSeverity::LOG_INFO);
 }
 
 void WorkOrder::startOrder() {

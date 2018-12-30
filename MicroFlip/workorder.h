@@ -35,6 +35,9 @@ public:
   QString getPair()      { return pair;      }
 
 private:
+
+  QString className = "WORKORDER";
+
   Exchange *exchange;
   WorkState workState;
   QTimer   *timer;
@@ -81,7 +84,7 @@ private slots:
 public slots:
   void UpdateMarketTickerReply(Ticker ticker);
 
-  void orderCreateReply(quint64 orderID);
+  void orderCreateReply(qint64 orderID);
   void orderInfoReply  (int status);
   void orderCancelReply(bool succes);
 
@@ -93,7 +96,7 @@ signals:
   void sendUpdateOrderInfo   (quint64 orderID, QObject *sender, int senderID);
   void sendCancelOrder       (quint64 orderID, QObject *sender, int senderID);
 
-  void updateLog(int workID, QString log);
+  void updateLog  (int workID, QString classID, QString logString, int severity);
   void updateState(int workID, QString state);
 };
 

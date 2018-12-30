@@ -1,5 +1,7 @@
 #include "program.h"
 
+#include "common.h"
+
 //#include "exchange_btce.h"
 //#include "exchange_okcoin.h"
 #include "exchange_wex.h"
@@ -24,7 +26,9 @@ Program::Program(QObject *parent) : QObject(parent) {
   exchange->startWork();
 
   display = new Display();
-  connect(this, SIGNAL(updateLog(int,QString)), display, SLOT(logUpdate(int,QString)));
+  connect(this, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
+
+  connect(exchange, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
 
   // Create work orders
   workOrderFactory(config->getNumWorkers(), exchange, config->getAmount(), config->getProfit(), config->getPair(), config->getShortInterval(), config->getLongInterval(), config->getMinSell());
@@ -42,15 +46,15 @@ Program::Program(QObject *parent) : QObject(parent) {
 ///
 bool Program::workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, double minSell) {
 
-  emit updateLog(00, "User requested " + QString::number(numWorkers) + " work orders");
+  emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
 
   for(int i = 0; i < numWorkers; i++) {
 
-    emit updateLog(00, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair);
+    emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
     WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, minSell);
 
-    connect(wo, SIGNAL(updateLog(int,QString)),   display, SLOT(logUpdate(int,QString)));
-    connect(wo, SIGNAL(updateState(int,QString)), display, SLOT(stateUpdate(int,QString)));
+    connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
+    connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
 
     // Tell the newly created work order to start
     connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));

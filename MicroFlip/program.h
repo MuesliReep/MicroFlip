@@ -19,6 +19,9 @@ public:
   explicit Program(QObject *parent = 0);
 
 private:
+
+    QString className = "PROGRAM";
+
   Display *display;
   Config  *config;
   QList<WorkOrder*> workOrders;
@@ -26,7 +29,7 @@ private:
   bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, double minSell = -1.0);
 
 signals:
-  void updateLog(int workID, QString log);
+  void updateLog(int workID, QString className, QString log, int severity);
   void startOrder();
 public slots:
 };

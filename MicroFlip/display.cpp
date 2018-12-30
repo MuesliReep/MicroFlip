@@ -1,5 +1,7 @@
 #include "display.h"
 
+#include "common.h"
+
 #ifdef ISWIN
 #include <conio.h>
 #include <windows.h>
@@ -15,8 +17,8 @@
 #define ESC "\x1b"
 #define CSI "\x1b["
 
-Display::Display()
-{
+Display::Display() {
+
 #ifdef ISWIN
     EnableVTMode();
 #endif
@@ -92,24 +94,18 @@ void Display::updateScreen()
   drawLog();
 }
 
-void Display::logUpdate(int workID, QString log) {
+void Display::addToLog(int workID, QString classID, QString logString, int severity) {
 
-  QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
-  QString logLine = "[" + time + "]";
-  if(workID > 0) {
-      logLine.append( " ID:" + QString::number(workID));
-  }
-  logLine.append(" " + log);
+    QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
 
+    logList.prepend(LogItem(time, workID, classID, logString, severity));
 
-  logList.prepend(logLine);
+    // Clean up log
+    while(logList.size() > 50){
+      logList.removeLast();
+    }
 
-  // Clean up log
-  while(logList.size() > 50){
-    logList.removeLast();
-  }
-
-  updateScreen();
+    updateScreen();
 }
 
 void Display::stateUpdate(int workID, QString state) {
@@ -180,21 +176,58 @@ void Display::drawWorkOrders() {
 }
 
 void Display::drawLog() {
-  resetAttributes();
 
-  std::cout << std::endl;
-  currentLine++;
+    resetAttributes();
 
-  for(int i = 0; i < logList.size(); i++) {
-
-    if(currentLine > lines)
-      break;
-
-    QString log = logList.at(i);
-
-    std::cout << log.toStdString() << std::endl;
+    std::cout << std::endl;
     currentLine++;
-  }
+
+    for(int i = 0; i < logList.size(); i++) {
+
+        if(currentLine > lines)
+          break;
+
+        LogItem logItem = logList.at(i);
+
+        // Set colour according to log severity
+        switch(logItem.getSeverity()) {
+        case logSeverity::LOG_DEBUG:
+            setForegroundColour(MAGENTA);
+            break;
+        case logSeverity::LOG_INFO:
+            setForegroundColour(BLUE, true);
+            break;
+        case logSeverity::LOG_WARNING:
+            setForegroundColour(YELLOW, true);
+            break;
+        case logSeverity::LOG_CRITICAL:
+            setForegroundColour(RED, true);
+            break;
+        case logSeverity::LOG_FATAL:
+            setForegroundColour(YELLOW);
+            setBackgroundColour(RED);
+            break;
+        default:
+            break;
+        }
+
+        // Time
+        std::cout << "[" << logItem.getTime().toStdString() << "]";
+
+        // Work Order ID
+        std::cout << "[" << "ID " << logItem.getWorkID() << "]";
+
+        // Class origin
+        std::cout << "[" << logItem.getClassID().toStdString() << "]";
+
+        // Log line
+        std::cout << " " << logItem.getLogString().toStdString();
+
+        std::cout << std::endl;
+        currentLine++;
+    }
+
+    resetAttributes();
 }
 
 void Display::resetAttributes() {
@@ -206,16 +239,56 @@ void Display::clearScreen() {
   std::cout << "\x1b[1;1f";
 }
 
-void Display::setForegroundColour(int colour) {
+void Display::setForegroundColour(int colour, bool bright) {
 
-  QString code = "\x1b[3" + QString::number(colour) + "m";
+    QString colourPrefix = bright ? "9" : "3";
+    QString colourSuffix = "m";
 
-  std::cout << code.toStdString();
+    QString code = "\x1b[" + colourPrefix + QString::number(colour) + colourSuffix;
+
+    std::cout << code.toStdString();
 }
 
-void Display::setBackgroundColour(int colour) {
+void Display::setBackgroundColour(int colour, bool bright) {
 
-  QString code = "\x1b[4" + QString::number(colour) + "m";
+    QString colourPrefix = bright ? "10" : "4";
+    QString colourSuffix = "m";
 
-  std::cout << code.toStdString();
+    QString code = "\x1b[" + colourPrefix + QString::number(colour) + colourSuffix;
+
+    std::cout << code.toStdString();
+}
+
+LogItem::LogItem(QString time, int workID, QString classID, QString logString, int severity)
+{
+    this->time      = time;
+    this->workID    = workID;
+    this->classID   = classID;
+    this->logString = logString;
+    this->severity  = severity;
+}
+
+int LogItem::getSeverity() const
+{
+    return severity;
+}
+
+QString LogItem::getClassID() const
+{
+    return classID;
+}
+
+QString LogItem::getLogString() const
+{
+    return logString;
+}
+
+QString LogItem::getTime() const
+{
+    return time;
+}
+
+int LogItem::getWorkID() const
+{
+    return workID;
 }
