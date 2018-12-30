@@ -20,6 +20,8 @@ private:
     QString apiKey;
     QString apiSecret;
 
+    qint64 deltaTime;
+
     void updateMarketTicker(QString pair);
     void updateMarketDepth (QString pair);
     void updateMarketTrades(QString pair);
@@ -34,11 +36,13 @@ private:
     void   parseRawDepthData (QNetworkReply *reply);
     void   parseRawTradesData(QNetworkReply *reply);
 
-    void    parseRawBalancesData        (QNetworkReply *reply);
-    quint64 parseRawOrderCreationData   (QNetworkReply *reply);
-    void    parseRawOrderCancelationData(QNetworkReply *reply);
-    void    parseRawActiveOrdersData    (QNetworkReply *reply);
-    int     parseRawOrderInfoData       (QNetworkReply *reply);
+    void   parseRawBalancesData        (QNetworkReply *reply);
+    qint64 parseRawOrderCreationData   (QNetworkReply *reply);
+    void   parseRawOrderCancelationData(QNetworkReply *reply);
+    void   parseRawActiveOrdersData    (QNetworkReply *reply);
+    int    parseRawOrderInfoData       (QNetworkReply *reply);
+
+    bool exchangeErrorCheck(QJsonObject *jsonObj);
 };
 
 #endif // EXCHANGE_BINANCE_H

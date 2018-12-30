@@ -2,6 +2,8 @@
 
 #include "json_helper.h"
 
+#include "workorder.h"
+
 // Binance API: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md
 
 Exchange_Binance::Exchange_Binance()
@@ -26,6 +28,9 @@ Exchange_Binance::Exchange_Binance()
 }
 
 void Exchange_Binance::startWork() {
+
+    this->apiKey    = config->getApiKey();
+    this->apiSecret = config->getApiSecret();
 
     // 30 requests per min
     timer->start(2000);
@@ -62,8 +67,8 @@ void Exchange_Binance::updateMarketTrades(QString pair) {
     downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
 }
 
-void Exchange_Binance::updateBalances()
-{
+void Exchange_Binance::updateBalances() {
+
   "GET /api/v3/account";
 }
 
@@ -85,9 +90,21 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
     query.append("&type=");
     query.append("LIMIT");
 
+    // Time in Force
+    query.append("&timeInForce=");
+    query.append("GTC"); // Good-Til-Canceled
+
     // Quantity
     query.append("&quantity=");
-    query.append(QByteArray::number(amount,'f',8)); // TODO
+    query.append(QByteArray::number(amount,'f',4)); // TODO
+
+    // Price
+    query.append("&price=");
+    query.append(QByteArray::number(rate,'f',3)); // TODO
+
+    // Response Type
+    query.append("&newOrderRespType=");
+    query.append("ACK");
 
     // Receive window
     query.append("&recvWindow=");
@@ -95,15 +112,7 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
 
     // Timestamp
     query.append("&timestamp=");
-    query.append(QByteArray::number(QDateTime::currentDateTime().toSecsSinceEpoch())); // TODO
-
-    // Price
-    query.append("&price=");
-    query.append(QByteArray::number(rate,'f',3)); // TODO
-
-    // Time in Force
-    query.append("&timeInForce=");
-    query.append("GTC"); // Good-Til-Canceled
+    query.append(QByteArray::number(QDateTime::currentDateTime().toMSecsSinceEpoch() - deltaTime)); // TODO
 
     // Create signature
     QByteArray signature = QMessageAuthenticationCode::hash(query, this->apiSecret.toUtf8(), QCryptographicHash::Sha256).toHex();
@@ -113,28 +122,64 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
     query.append(signature);
 
     // Create request
-    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v3/order/test?"+query));
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.binance.com/api/v3/order"));
 
     // Add headers
-    downloader.addHeaderToRequest(&request, QByteArray("X-MBX-APIKEY"), this->apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("X-MBX-APIKEY"), QByteArray::fromStdString(this->apiKey.toStdString()));
 
     // Execute the download
     downloader.doPostDownload(request, createTradeDownloadManager, query, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
-void Exchange_Binance::cancelOrder(quint64 orderID)
-{
+void Exchange_Binance::cancelOrder(quint64 orderID) {
+
   "DELETE /api/v3/order";
 }
 
-void Exchange_Binance::updateActiveOrders(QString pair)
-{
+void Exchange_Binance::updateActiveOrders(QString pair) {
+
   "GET /api/v3/openOrders";
 }
 
-void Exchange_Binance::updateOrderInfo(quint64 orderID)
-{
+void Exchange_Binance::updateOrderInfo(quint64 orderID) {
+
   "GET /api/v3/order";
+
+    QByteArray query;
+
+    // Symbol
+    query.append("symbol=");
+    query.append(((WorkOrder*)currentTask.getSender())->getPair());
+
+    // Order ID
+    query.append("&orderId=");
+    query.append(QByteArray::number(orderID)); // TODO
+
+    // Receive Window
+    query.append("&recvWindow=");
+    query.append("5000"); // TODO
+
+    // Timestamp
+    query.append("&timestamp=");
+    query.append(QByteArray::number(QDateTime::currentDateTime().toMSecsSinceEpoch() - deltaTime)); // TODO
+
+    // Create signature
+    QByteArray signature = QMessageAuthenticationCode::hash(query, this->apiSecret.toUtf8(), QCryptographicHash::Sha256).toHex();
+
+    // Add signature to query
+    query.append("&signature=");
+    query.append(signature);
+
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v3/order"));
+
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("X-MBX-APIKEY"), QByteArray::fromStdString(this->apiKey.toStdString()));
+
+    // Execute the download
+    downloader.doPostDownload(request, orderInfoDownloadManager, query, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
 }
 
 //----------------------------------//
@@ -165,11 +210,11 @@ Ticker Exchange_Binance::parseRawTickerData(QNetworkReply *reply) {
             double last = jsonObj.value("lastPrice")       .toString("-1.0").toDouble();
             double buy  = jsonObj.value("bidPrice")        .toString("-1.0").toDouble();
             double sell = jsonObj.value("askPrice")        .toString("-1.0").toDouble();
-            int    age  = jsonObj.value("closeTime")       .toInt(-1);
+            double age  = jsonObj.value("closeTime")       .toDouble(-1);
 
-            if()
+            deltaTime = QDateTime::currentDateTime().toMSecsSinceEpoch() - (qint64)age;
 
-            ticker = Ticker(high, low, avg, last, buy, sell, age);
+            ticker = Ticker(high, low, avg, last, buy, sell, (qint64)age);
         }
     }
 
@@ -194,9 +239,26 @@ void Exchange_Binance::parseRawBalancesData(QNetworkReply *reply)
     (void)reply;
 }
 
-quint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply)
+qint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply)
 {
     qDebug() << reply->readAll();
+
+    qint64 orderID = -1;
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // TODO: check if object contains "error code"
+            if(exchangeErrorCheck(&jsonObj)) {
+                orderID = (qint64)jsonObj.value("orderID").toDouble();
+            }
+        }
+    }
+
+    return orderID;
 }
 
 void Exchange_Binance::parseRawOrderCancelationData(QNetworkReply *reply)
@@ -213,5 +275,21 @@ void Exchange_Binance::parseRawActiveOrdersData(QNetworkReply *reply)
 
 int Exchange_Binance::parseRawOrderInfoData(QNetworkReply *reply)
 {
+    int status = -1;
 
+    return status;
+}
+
+bool Exchange_Binance::exchangeErrorCheck(QJsonObject *jsonObj) {
+
+    bool result = false;
+
+    if(jsonObj->contains("code")) {
+
+        qDebug() << "Error code: " << jsonObj->value("code").toInt() << " " << jsonObj->value("msg").toString();
+    } else {
+        result = true;
+    }
+
+    return result;
 }
