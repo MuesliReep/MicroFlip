@@ -127,7 +127,7 @@ void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double 
     downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
-void Exchange_bitstamp::cancelOrder(quint64 orderID) {
+void Exchange_bitstamp::cancelOrder(qint64 orderID) {
   (void) orderID;
   // TODO
 }
@@ -137,7 +137,7 @@ void Exchange_bitstamp::updateActiveOrders(QString pair) {
   // TODO
 }
 
-void Exchange_bitstamp::updateOrderInfo(quint64 OrderID) {
+void Exchange_bitstamp::updateOrderInfo(qint64 OrderID) {
 
     QByteArray orderID("id=");
     orderID.append(QString::number(OrderID));

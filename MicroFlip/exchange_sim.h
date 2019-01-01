@@ -21,9 +21,9 @@ private:
 
   void updateBalances    ();
   void createOrder       (QString pair, int type, double rate, double amount);
-  void cancelOrder       (quint64 orderID);
+  void cancelOrder       (qint64 orderID);
   void updateActiveOrders(QString pair)   ;
-  void updateOrderInfo(quint64 orderID)   ;
+  void updateOrderInfo   (qint64 orderID)   ;
 };
 
 #endif // EXCHANGE_SIM_H

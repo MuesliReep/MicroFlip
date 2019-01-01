@@ -199,18 +199,18 @@ void WorkOrder::requestCreateOrder(int type, double rate, double amount) {
   disconnect(this, SIGNAL(sendCreateOrder(QString,int,double,double,QObject*,int)), exchange, SLOT(receiveCreateOrder(QString,int,double,double,QObject*,int)));
 }
 
-void WorkOrder::requestOrderInfo(quint64 orderID) {
+void WorkOrder::requestOrderInfo(qint64 orderID) {
 
-  connect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*,int)));
-  emit sendUpdateOrderInfo((quint64)orderID, this, this->workID);
-  disconnect(this, SIGNAL(sendUpdateOrderInfo(quint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(quint64,QObject*,int)));
+  connect(this, SIGNAL(sendUpdateOrderInfo(qint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(qint64,QObject*,int)));
+  emit sendUpdateOrderInfo((qint64)orderID, this, this->workID);
+  disconnect(this, SIGNAL(sendUpdateOrderInfo(qint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(qint64,QObject*,int)));
 }
 
-void WorkOrder::requestCancelOrder(quint64 orderID) {
+void WorkOrder::requestCancelOrder(qint64 orderID) {
 
-  connect(this, SIGNAL(sendCancelOrder(quint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(quint64,QObject*,int)));
+  connect(this, SIGNAL(sendCancelOrder(qint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(qint64,QObject*,int)));
   emit sendCancelOrder(orderID, this, this->workID);
-  disconnect(this, SIGNAL(sendCancelOrder(quint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(quint64,QObject*,int)));
+  disconnect(this, SIGNAL(sendCancelOrder(qint64,QObject*,int)), exchange, SLOT(receiveCancelOrder(qint64,QObject*,int)));
 }
 
 //----------------------------------//

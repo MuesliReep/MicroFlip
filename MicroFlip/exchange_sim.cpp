@@ -48,7 +48,7 @@ void Exchange_Sim::createOrder(QString pair, int type, double rate, double amoun
 
 }
 
-void Exchange_Sim::cancelOrder(quint64 orderID)
+void Exchange_Sim::cancelOrder(qint64 orderID)
 {
 
 }
@@ -58,7 +58,7 @@ void Exchange_Sim::updateActiveOrders(QString pair)
 
 }
 
-void Exchange_Sim::updateOrderInfo(quint64 orderID)
+void Exchange_Sim::updateOrderInfo(qint64 orderID)
 {
 
 }

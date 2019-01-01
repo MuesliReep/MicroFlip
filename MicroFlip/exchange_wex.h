@@ -26,9 +26,9 @@ class Exchange_wex : public Exchange
 
     void updateBalances    ();
     void createOrder       (QString Pair, int Type, double Rate, double Amount);
-    void cancelOrder       (quint64 orderID);
+    void cancelOrder       (qint64 orderID);
     void updateActiveOrders(QString pair);
-    void updateOrderInfo   (quint64 OrderID);
+    void updateOrderInfo   (qint64 OrderID);
 
     Ticker parseRawTickerData(QNetworkReply *reply);
     void   parseRawDepthData (QNetworkReply *reply);

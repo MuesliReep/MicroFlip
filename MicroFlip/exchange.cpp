@@ -87,7 +87,7 @@ void Exchange::receiveCreateOrder(QString pair, int type, double rate, double am
   attr.append(QString(QString::number(amount)));
   exchangeTasks.append(ExchangeTask(4, sender, SenderID, attr));
 }
-void Exchange::receiveCancelOrder(quint64 orderID, QObject *sender, int SenderID){
+void Exchange::receiveCancelOrder(qint64 orderID, QObject *sender, int SenderID){
   QList<QString> attr; attr.append(QString::number(orderID));
   exchangeTasks.append(ExchangeTask(5, sender, SenderID, attr));
 }
@@ -95,7 +95,7 @@ void Exchange::receiveUpdateActiveOrders(QString pair, QObject *sender, int Send
   QList<QString> attr; attr.append(QString(pair));
   exchangeTasks.append(ExchangeTask(6, sender, SenderID, attr));
 }
-void Exchange::receiveUpdateOrderInfo(quint64 orderID, QObject *sender, int SenderID){
+void Exchange::receiveUpdateOrderInfo(qint64 orderID, QObject *sender, int SenderID){
 
   // TODO: beter way of doing this
   // Check if task already exists in list
@@ -208,9 +208,9 @@ void Exchange::createOrderReply(QNetworkReply *reply)
     disconnect(createTradeDownloadManager, 0, this, 0);
 
     // Connect & send order ID to the initiator
-    connect(this, SIGNAL(sendNewOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+    connect(this, SIGNAL(sendNewOrderID(qint64)), currentTask.getSender(), SLOT(orderCreateReply(qint64)));
     emit sendNewOrderID(orderID);
-    disconnect(this, SIGNAL(sendNewOrderID(quint64)), currentTask.getSender(), SLOT(orderCreateReply(quint64)));
+    disconnect(this, SIGNAL(sendNewOrderID(qint64)), currentTask.getSender(), SLOT(orderCreateReply(qint64)));
 
     // Mark this task complete
     currentTask = ExchangeTask();

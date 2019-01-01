@@ -170,9 +170,9 @@ public slots:
   void receiveUpdateMarketTrades(QString pair,    QObject *sender, int SenderID);
   void receiveUpdateBalances    (QObject *sender, int SenderID);
   void receiveCreateOrder       (QString pair,    int type, double rate, double amount, QObject *sender, int SenderID);
-  void receiveCancelOrder       (quint64 orderID,  QObject *sender, int SenderID);
+  void receiveCancelOrder       (qint64  orderID, QObject *sender, int SenderID);
   void receiveUpdateActiveOrders(QString pair,    QObject *sender, int SenderID);
-  void receiveUpdateOrderInfo   (quint64 orderID,  QObject *sender, int SenderID);
+  void receiveUpdateOrderInfo   (qint64  orderID, QObject *sender, int SenderID);
 
   void updateMarketTickerReply(QNetworkReply *reply);
   void updateMarketDepthReply (QNetworkReply *reply);

@@ -124,7 +124,7 @@ void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amoun
   downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
-void Exchange_wex::cancelOrder(quint64 orderID) {
+void Exchange_wex::cancelOrder(qint64 orderID) {
   (void) orderID;
   // TODO
 }
@@ -134,7 +134,7 @@ void Exchange_wex::updateActiveOrders(QString pair) {
   // TODO
 }
 
-void Exchange_wex::updateOrderInfo(quint64 OrderID) {
+void Exchange_wex::updateOrderInfo(qint64 OrderID) {
 
   // Create POST data from method and nonce
   QByteArray method("method=OrderInfo");

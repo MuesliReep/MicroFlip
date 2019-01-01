@@ -143,7 +143,7 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
     downloader.doPostDownload(request, createTradeDownloadManager, payloadData, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
-void Exchange_bitfinex::cancelOrder(quint64 orderID) {
+void Exchange_bitfinex::cancelOrder(qint64 orderID) {
 
     (void) orderID;
   // TODO
@@ -155,7 +155,7 @@ void Exchange_bitfinex::updateActiveOrders(QString pair) {
   // TODO
 }
 
-void Exchange_bitfinex::updateOrderInfo(quint64 OrderID) {
+void Exchange_bitfinex::updateOrderInfo(qint64 OrderID) {
 
     double orderIDd = OrderID;
 
