@@ -123,9 +123,9 @@ private:
 
   virtual void updateBalances    ()                = 0;
   virtual void createOrder       (QString pair, int type, double rate, double amount) = 0;
-  virtual void cancelOrder       (quint64 orderID) = 0;
+  virtual void cancelOrder       (qint64 orderID) = 0;
   virtual void updateActiveOrders(QString pair)    = 0;
-  virtual void updateOrderInfo   (quint64 orderID) = 0;
+  virtual void updateOrderInfo   (qint64 orderID) = 0;
 
   virtual Ticker parseRawTickerData(QNetworkReply *reply) = 0;
   virtual void   parseRawDepthData (QNetworkReply *reply) = 0;
