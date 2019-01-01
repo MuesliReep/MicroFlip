@@ -122,7 +122,7 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
     query.append(signature);
 
     // Create request
-    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.binance.com/api/v3/order/test"));
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v3/order"));
 
     // Add headers
     downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
