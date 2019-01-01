@@ -132,7 +132,7 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
     downloader.doPostDownload(request, createTradeDownloadManager, query, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
-void Exchange_Binance::cancelOrder(quint64 orderID) {
+void Exchange_Binance::cancelOrder(qint64 orderID) {
 
   "DELETE /api/v3/order";
 }
@@ -142,7 +142,7 @@ void Exchange_Binance::updateActiveOrders(QString pair) {
   "GET /api/v3/openOrders";
 }
 
-void Exchange_Binance::updateOrderInfo(quint64 orderID) {
+void Exchange_Binance::updateOrderInfo(qint64 orderID) {
 
   "GET /api/v3/order";
 
