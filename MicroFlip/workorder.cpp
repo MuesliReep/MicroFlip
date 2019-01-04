@@ -202,7 +202,7 @@ void WorkOrder::requestCreateOrder(int type, double rate, double amount) {
 void WorkOrder::requestOrderInfo(qint64 orderID) {
 
   connect(this, SIGNAL(sendUpdateOrderInfo(qint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(qint64,QObject*,int)));
-  emit sendUpdateOrderInfo((qint64)orderID, this, this->workID);
+  emit sendUpdateOrderInfo(orderID, this, this->workID);
   disconnect(this, SIGNAL(sendUpdateOrderInfo(qint64,QObject*,int)), exchange, SLOT(receiveUpdateOrderInfo(qint64,QObject*,int)));
 }
 
