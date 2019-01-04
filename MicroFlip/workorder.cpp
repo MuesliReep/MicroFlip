@@ -238,7 +238,8 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
   updateLog(workID, className, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
                              + " Sell: " + QString::number(currentTicker.getSell())
-                             + " Last: " + QString::number(currentTicker.getLast()),
+                             + " Last: " + QString::number(currentTicker.getLast())
+                             + " Avg.: " + QString::number(currentTicker.getAvg()),
                                logSeverity::LOG_INFO);
 
   // If we are using a dynamic minimum sell price, calculate it here
