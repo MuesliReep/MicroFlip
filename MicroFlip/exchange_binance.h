@@ -43,6 +43,9 @@ private:
     int    parseRawOrderInfoData       (QNetworkReply *reply);
 
     bool exchangeErrorCheck(QJsonObject *jsonObj);
+
+    double roundUp  (double value);
+    double roundDown(double value);
 };
 
 #endif // EXCHANGE_BINANCE_H

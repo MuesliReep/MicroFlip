@@ -1,7 +1,8 @@
 #include "exchange_binance.h"
 
-#include "json_helper.h"
+#include <math.h>
 
+#include "json_helper.h"
 #include "workorder.h"
 
 // Binance API: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md
@@ -99,9 +100,12 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
     query.append(QByteArray::number(amount,'f',5)); // TODO
 
     // Price
-    query.append("&price=");
-    query.append(QByteArray::number(rate,'f',2)); // TODO
-
+    query.append("&price="); // If buy, round up, else round down
+    if(type == 0) {
+        query.append(QByteArray::number(roundUp(rate),'f',2));
+    } else {
+        query.append(QByteArray::number(roundDown(rate),'f',2)); // TODO
+    }
 
     // Response Type
     query.append("&newOrderRespType=");
@@ -322,4 +326,14 @@ bool Exchange_Binance::exchangeErrorCheck(QJsonObject *jsonObj) {
     }
 
     return result;
+}
+
+double Exchange_Binance::roundUp(double value)
+{
+    return ceil(value * 100) / 100;
+}
+
+double Exchange_Binance::roundDown(double value)
+{
+    return floor(value * 100) / 100;
 }
