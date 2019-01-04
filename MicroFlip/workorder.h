@@ -33,6 +33,7 @@ public:
   double  getSellPrice() { return sellPrice; }
   int     getWorkID()    { return workID;    }
   QString getPair()      { return pair;      }
+  int     getOrderSide() { return (workState == BUYORDER ? 0 : 1); }
 
 private:
 

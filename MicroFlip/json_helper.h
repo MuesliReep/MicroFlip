@@ -12,6 +12,7 @@ public:
     static bool getDocumentFromNetworkReply(QNetworkReply *reply,    QJsonDocument *document);
     static bool getObjectFromDocument      (QJsonDocument *document, QJsonObject *object);
     static bool getArrayFromDocument       (QJsonDocument *document, QJsonArray *array);
+    static bool getObjectFromString        (QJsonObject *object,     QString *string);
 };
 
 #endif // JSON_HELPER_H

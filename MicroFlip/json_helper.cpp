@@ -1,12 +1,15 @@
 #include "json_helper.h"
 
 #include <QJsonParseError>
+#include <QJsonValue>
 
 bool JSON_Helper::getDocumentFromNetworkReply(QNetworkReply *reply, QJsonDocument *document) {
 
     QJsonParseError parseResult;
 
-    *document = QJsonDocument().fromJson(reply->readAll(), &parseResult);
+    QString str = QString::fromUtf8(reply->readAll());
+
+    *document = QJsonDocument().fromJson(str.toLocal8Bit(), &parseResult);
 
     if(parseResult.error == QJsonParseError::NoError) {
 
@@ -16,6 +19,11 @@ bool JSON_Helper::getDocumentFromNetworkReply(QNetworkReply *reply, QJsonDocumen
     qDebug() << "Error parsing JSON Document: " << parseResult.errorString();
 
     return false;
+}
+
+bool JSON_Helper::getObjectFromString(QJsonObject *object, QString *string) {
+
+//    QJsonObject val(&string);
 }
 
 bool JSON_Helper::getObjectFromDocument(QJsonDocument *document, QJsonObject *object) {

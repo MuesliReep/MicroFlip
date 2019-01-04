@@ -96,11 +96,12 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
 
     // Quantity
     query.append("&quantity=");
-    query.append(QByteArray::number(amount,'f',4)); // TODO
+    query.append(QByteArray::number(amount,'f',5)); // TODO
 
     // Price
     query.append("&price=");
-    query.append(QByteArray::number(rate,'f',3)); // TODO
+    query.append(QByteArray::number(rate,'f',2)); // TODO
+
 
     // Response Type
     query.append("&newOrderRespType=");
@@ -125,7 +126,9 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
     QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v3/order"));
 
     // Add headers
-    downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("Content-Type"), QByteArray("application/x-www-form-urlencoded"));
+//    downloader.addHeaderToRequest(&request, QByteArray("Content-Type"), QByteArray("application/json"));
+    downloader.addHeaderToRequest(&request, QByteArray("Accept"),       QByteArray("application/json"));
     downloader.addHeaderToRequest(&request, QByteArray("X-MBX-APIKEY"), QByteArray::fromStdString(this->apiKey.toStdString()));
 
     // Execute the download
@@ -152,6 +155,10 @@ void Exchange_Binance::updateOrderInfo(qint64 orderID) {
     query.append("symbol=");
     query.append(((WorkOrder*)currentTask.getSender())->getPair());
 
+//    // Side
+//    query.append("&side=");
+//    query.append(((WorkOrder*)currentTask.getSender())->getOrderSide() == 0 ? "BUY" : "SELL");
+
     // Order ID
     query.append("&orderId=");
     query.append(QByteArray::number(orderID)); // TODO
@@ -171,15 +178,20 @@ void Exchange_Binance::updateOrderInfo(qint64 orderID) {
     query.append("&signature=");
     query.append(signature);
 
+    // Prepend questionmark to querystring
+    query.prepend("?");
+
     // Create request
-    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v3/order"));
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.binance.com/api/v3/order" + query));
 
     // Add headers
     downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+//    downloader.addHeaderToRequest(&request, QByteArray("Content-Type"), QByteArray("application/json"));
+    downloader.addHeaderToRequest(&request, QByteArray("Accept"),       QByteArray("application/json"));
     downloader.addHeaderToRequest(&request, QByteArray("X-MBX-APIKEY"), QByteArray::fromStdString(this->apiKey.toStdString()));
 
     // Execute the download
-    downloader.doPostDownload(request, orderInfoDownloadManager, query, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
+    downloader.doDownload(request, orderInfoDownloadManager, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
 }
 
 //----------------------------------//
@@ -239,9 +251,7 @@ void Exchange_Binance::parseRawBalancesData(QNetworkReply *reply)
     (void)reply;
 }
 
-qint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply)
-{
-    qDebug() << reply->readAll();
+qint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply) {
 
     qint64 orderID = -1;
 
@@ -253,7 +263,7 @@ qint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply)
 
             // TODO: check if object contains "error code"
             if(exchangeErrorCheck(&jsonObj)) {
-                orderID = (qint64)jsonObj.value("orderID").toDouble();
+                orderID = (qint64)jsonObj.value("orderId").toDouble(-1.0);
             }
         }
     }
@@ -276,6 +286,26 @@ void Exchange_Binance::parseRawActiveOrdersData(QNetworkReply *reply)
 int Exchange_Binance::parseRawOrderInfoData(QNetworkReply *reply)
 {
     int status = -1;
+
+    QJsonDocument jsonDoc;
+    QJsonObject   jsonObj;
+
+    if(JSON_Helper::getDocumentFromNetworkReply(reply, &jsonDoc)) {
+        if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
+
+            // TODO: check if object contains "error code"
+            if(exchangeErrorCheck(&jsonObj)) {
+
+                QString statusString = jsonObj.value("status").toString();
+
+                if(statusString == "FILLED") {
+                    status = 1;
+                } else if(statusString == "NEW" || statusString == "PARTIALLY_FILLED") {
+                    status = 0;
+                }
+            }
+        }
+    }
 
     return status;
 }

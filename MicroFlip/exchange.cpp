@@ -259,7 +259,7 @@ void Exchange::updateOrderInfoReply(QNetworkReply *reply)
     int status = -1;
 
     if(reply->error()) {
-        updateLog(currentTask.getSenderID(), className, "Order Cancelation Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
+        updateLog(currentTask.getSenderID(), className, "Order Info Packet error: " + reply->errorString() + " " + reply->readAll(), logSeverity::LOG_CRITICAL);
     } else {
         status = parseRawOrderInfoData(reply);
     }
