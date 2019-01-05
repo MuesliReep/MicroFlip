@@ -245,7 +245,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
   // If we are using a dynamic minimum sell price, calculate it here
   // TODO: Use something smarter than just using the 24h average
   if(dynamicMinSell) {
-    minSellPrice = currentTicker.getAvg();
+    minSellPrice = currentTicker.getAvg() + 0.5; // TODO: calculate actual buyback price
     emit updateLog(workID, className, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice), logSeverity::LOG_INFO);
   }
 
