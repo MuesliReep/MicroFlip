@@ -211,18 +211,29 @@ void Display::drawLog() {
             break;
         }
 
+        QString logLine;
+
         // Time
-        std::cout << "[" << logItem.getTime().toStdString() << "]";
+        logLine.append("[" + logItem.getTime() + "]");
 
         // Work Order ID
-        std::cout << "[" << "ID " << logItem.getWorkID() << "]";
+        logLine.append("[ID " + QString::number(logItem.getWorkID()) + "]");
 
         // Class origin
-        std::cout << "[" << logItem.getClassID().toStdString() << "]";
+        logLine.append("[" + logItem.getClassID() + "]");
 
         // Log line
-        std::cout << " " << logItem.getLogString().toStdString();
+        logLine.append(" " + logItem.getLogString());
 
+        // Truncate if line is too long for window
+        if(logLine.length() > columns) {
+            logLine.truncate(columns);
+        }
+
+        //
+        std::cout << logLine.toStdString();
+
+        // Go to next line
         std::cout << std::endl;
         currentLine++;
     }
