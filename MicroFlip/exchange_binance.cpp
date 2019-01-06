@@ -100,11 +100,11 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
     query.append(QByteArray::number(amount,'f',5)); // TODO
 
     // Price
-    query.append("&price="); // If buy, round up, else round down
+    query.append("&price="); // If buy, round down, else round up
     if(type == 0) {
-        query.append(QByteArray::number(roundUp(rate),'f',2));
+        query.append(QByteArray::number(roundDown(rate),'f',2));
     } else {
-        query.append(QByteArray::number(roundDown(rate),'f',2)); // TODO
+        query.append(QByteArray::number(roundUp(rate),'f',2)); // TODO
     }
 
     // Response Type
