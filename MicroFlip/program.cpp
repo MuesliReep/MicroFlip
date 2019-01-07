@@ -31,7 +31,9 @@ Program::Program(QObject *parent) : QObject(parent) {
   connect(exchange, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
 
   // Create work orders
-  workOrderFactory(config->getNumWorkers(), exchange, config->getAmount(), config->getProfit(), config->getPair(), config->getShortInterval(), config->getLongInterval(), config->getMinSell());
+  workOrderFactory(config->getNumWorkers(),   exchange,          config->getAmount(),
+                   config->getProfit(),       config->getPair(), config->getShortInterval(),
+                   config->getLongInterval(), config->getMode(), config->getMinSell());
 }
 
 ///
@@ -44,14 +46,16 @@ Program::Program(QObject *parent) : QObject(parent) {
 /// \param minSell Sets a static minimum sell price. To use a dynamic price, set to a negative number
 /// \return
 ///
-bool Program::workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, double minSell) {
+bool Program::workOrderFactory(int numWorkers,   Exchange *exchange, double amount,
+                               double profit,    QString pair,       int shortInterval,
+                               int longInterval, int mode,           double minSell) {
 
   emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
 
   for(int i = 0; i < numWorkers; i++) {
 
     emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-    WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, minSell);
+    WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, minSell);
 
     connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
     connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
@@ -63,7 +67,7 @@ bool Program::workOrderFactory(int numWorkers, Exchange *exchange, double amount
     disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
 
     workOrders.append(wo);
-    QThread::sleep(5);
+    QThread::sleep(1);
   }
 
   return true;

@@ -16,8 +16,8 @@
 ///
 WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
                      double maxAmount,    double profitTarget, int shortInterval,
-                     int longInterval,    double minSellPrice, int sellTTL,
-                     int buyTTL,          bool highSpeed) {
+                     int longInterval,    int mode,            double minSellPrice,
+                     int sellTTL,         int buyTTL,          bool highSpeed) {
 
   this->exchange      = exchange;
   this->workID        = workID;
@@ -30,8 +30,7 @@ WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
   this->highSpeed     = highSpeed;
   this->intervalShort = shortInterval;
   this->intervalLong  = longInterval;
-
-  dynamicMinSell = this->minSellPrice < 0 ? true : false;
+  this->mode          = mode;
 
   workState = START;
 
@@ -242,27 +241,23 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
                              + " Avg.: " + QString::number(currentTicker.getAvg()),
                                logSeverity::LOG_DEBUG);
 
+  double minimumPrice = minSellPrice;
+
   // If we are using a dynamic minimum sell price, calculate it here
   // TODO: Use something smarter than just using the 24h average
-  if(dynamicMinSell) {
-    minSellPrice = currentTicker.getAvg() + 0.5; // TODO: calculate actual buyback price
-    emit updateLog(workID, className, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice), logSeverity::LOG_DEBUG);
+  if(mode == workerMode::TICKERAVG) {
+
+      double tickerAvg = currentTicker.getAvg() + 0.5; // TODO: calculate actual buyback price
+      if(tickerAvg > minimumPrice) {
+          minimumPrice = tickerAvg;
+      }
+      emit updateLog(workID, className, "Using dynamic min. sell price, currently: " + QString::number(tickerAvg), logSeverity::LOG_DEBUG);
   }
 
-//  // return to START state if buy price is too low
-//  if(currentTicker.getBuy() <= minSellPrice) {
-//    updateLog(workID, "Price " + QString::number(currentTicker.getBuy()) + " lower than minimum: " + QString::number(minSellPrice) + ". Reverting state!");
-//    workState = START;
-
-//    // Pause workorder for 5 minutes
-//    stdInterval         = false;
-//    longIntervalRequest = true;
-//  }
-
   // return to START state if buy price is too low
-  if(currentTicker.getSell() <= minSellPrice) {
+  if(currentTicker.getSell() <= minimumPrice) {
     emit updateLog(workID, className, "Price " + QString::number(currentTicker.getSell())
-                                               + " lower than minimum: " + QString::number(minSellPrice)
+                                               + " lower than minimum: " + QString::number(minimumPrice)
                                                + ". Reverting state!",
                                                  logSeverity::LOG_INFO);
     workState = START;

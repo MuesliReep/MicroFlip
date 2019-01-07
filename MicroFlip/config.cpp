@@ -24,6 +24,7 @@ bool Config::loadConfigFromFile(QString fileName) {
     static const double  DEFAULT_MINSELL = 0;
     static const int     DEFAULT_WORKERS = 0;
     static const QString DEFAULT_PAIR    = "btc_usd";
+    static const int     DEFAULT_MODE    = workerMode::MINSELL;
 
     static const int     DEFAULT_INTERVAL_SHORT = 10000;
     static const int     DEFAULT_INTERVAL_LONG  = 60*1*1000;
@@ -51,6 +52,7 @@ bool Config::loadConfigFromFile(QString fileName) {
         settings.setValue("Worker/MinimumSell",     DEFAULT_MINSELL);
         settings.setValue("Worker/NumberOfWorkers", DEFAULT_WORKERS);
         settings.setValue("Worker/CurrencyPair",    DEFAULT_PAIR);
+        settings.setValue("Worker/Mode",            DEFAULT_MODE);
 
         settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT);
         settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG);
@@ -74,6 +76,7 @@ bool Config::loadConfigFromFile(QString fileName) {
     this->minSell       = settings.value("Worker/MinimumSell",     DEFAULT_MINSELL        ).toDouble();
     this->numWorkers    = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS        ).toInt();
     this->pair          = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR           ).toString();
+    this->mode          = settings.value("Worker/Mode",            DEFAULT_MODE           ).toInt();
 
     this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt();
     this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt();
@@ -100,6 +103,7 @@ void Config::saveConfigToFile(QString fileName) {
     settings.setValue("Worker/MinimumSell",     this->minSell       );
     settings.setValue("Worker/NumberOfWorkers", this->numWorkers    );
     settings.setValue("Worker/CurrencyPair",    this->pair          );
+    settings.setValue("Worker/Mode",            this->mode          );
 
     settings.setValue("Worker/Interval/Short",  this->shortInterval );
     settings.setValue("Worker/Interval/Long",   this->longInterval  );
@@ -151,6 +155,11 @@ int Config::getLongInterval() const
 int Config::getLogLevel() const
 {
     return logLevel;
+}
+
+int Config::getMode() const
+{
+    return mode;
 }
 
 /* Example:

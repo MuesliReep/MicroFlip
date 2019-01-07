@@ -22,6 +22,7 @@ public:
   double  getMinSell()    const;
   QString getPair()       const;
   int     getNumWorkers() const;
+  int     getMode()       const;
 
   int getShortInterval() const;
   int getLongInterval()  const;
@@ -39,6 +40,7 @@ private:
   double minSell;
   QString pair;
   int numWorkers;
+  int mode;
 
   int shortInterval;
   int longInterval;

@@ -26,7 +26,7 @@ private:
   Config  *config;
   QList<WorkOrder*> workOrders;
 
-  bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, double minSell = -1.0);
+  bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, int mode, double minSell = -1.0);
 
 signals:
   void updateLog(int workID, QString className, QString log, int severity);
