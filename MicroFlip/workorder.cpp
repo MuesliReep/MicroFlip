@@ -240,13 +240,13 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
                              + " Sell: " + QString::number(currentTicker.getSell())
                              + " Last: " + QString::number(currentTicker.getLast())
                              + " Avg.: " + QString::number(currentTicker.getAvg()),
-                               logSeverity::LOG_INFO);
+                               logSeverity::LOG_DEBUG);
 
   // If we are using a dynamic minimum sell price, calculate it here
   // TODO: Use something smarter than just using the 24h average
   if(dynamicMinSell) {
     minSellPrice = currentTicker.getAvg() + 0.5; // TODO: calculate actual buyback price
-    emit updateLog(workID, className, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice), logSeverity::LOG_INFO);
+    emit updateLog(workID, className, "Using dynamic min. sell price, currently: " + QString::number(minSellPrice), logSeverity::LOG_DEBUG);
   }
 
 //  // return to START state if buy price is too low
@@ -267,7 +267,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
                                                  logSeverity::LOG_INFO);
     workState = START;
 
-    // Pause workorder for 5 minutes
+    // Pause workorder for long interval
     stdInterval         = false;
     longIntervalRequest = true;
   }
