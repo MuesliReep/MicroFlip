@@ -36,6 +36,11 @@ Display::Display() {
     printf("\n");
 }
 
+void Display::setLogLevel(int value)
+{
+    logLevel = value;
+}
+
 #ifdef ISWIN
 bool Display::EnableVTMode()
 {
@@ -188,6 +193,9 @@ void Display::drawLog() {
           break;
 
         LogItem logItem = logList.at(i);
+
+        if(logItem.getSeverity() < this->logLevel)
+            continue;
 
         // Set colour according to log severity
         switch(logItem.getSeverity()) {

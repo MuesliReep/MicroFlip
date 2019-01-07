@@ -35,6 +35,8 @@ public:
 
   Display();
 
+  void setLogLevel(int value);
+
 private:
 
   int columns;
@@ -44,6 +46,8 @@ private:
   QList<QString> woList;
 
   int currentLine;
+
+  int logLevel;
 
 #ifdef ISWIN
   bool EnableVTMode();

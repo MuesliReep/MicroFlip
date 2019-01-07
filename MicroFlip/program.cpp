@@ -26,8 +26,8 @@ Program::Program(QObject *parent) : QObject(parent) {
   exchange->startWork();
 
   display = new Display();
-  connect(this, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
-
+  display->setLogLevel(config->getLogLevel());
+  connect(this,     SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
   connect(exchange, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
 
   // Create work orders

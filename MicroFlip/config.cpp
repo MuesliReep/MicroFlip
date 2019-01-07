@@ -3,6 +3,8 @@
 #include <QSettings>
 #include <QFile>
 
+#include "common.h"
+
 Config::Config() {
 
 }
@@ -25,6 +27,8 @@ bool Config::loadConfigFromFile(QString fileName) {
 
     static const int     DEFAULT_INTERVAL_SHORT = 10000;
     static const int     DEFAULT_INTERVAL_LONG  = 60*1*1000;
+
+    static const int     DEFAULT_LOG_LEVEL = logSeverity::LOG_INFO;
 
     bool result = false;
 
@@ -51,6 +55,8 @@ bool Config::loadConfigFromFile(QString fileName) {
         settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT);
         settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG);
 
+        settings.setValue("System/LogLevel",        DEFAULT_LOG_LEVEL);
+
         // Save settings
         settings.sync();
 
@@ -69,10 +75,14 @@ bool Config::loadConfigFromFile(QString fileName) {
     this->numWorkers    = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS        ).toInt();
     this->pair          = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR           ).toString();
 
-    this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt();;
-    this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt();;
+    this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt();
+    this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt();
+
+    this->logLevel      = settings.value("System/LogLevel",        DEFAULT_LOG_LEVEL      ).toInt();
 
     result = true;
+
+    settings.sync();
 
     return result;
 }
@@ -93,6 +103,8 @@ void Config::saveConfigToFile(QString fileName) {
 
     settings.setValue("Worker/Interval/Short",  this->shortInterval );
     settings.setValue("Worker/Interval/Long",   this->longInterval  );
+
+    settings.setValue("System/LogLevel",        this->logLevel      );
 
     settings.sync();
 }
@@ -134,6 +146,11 @@ int Config::getShortInterval() const
 int Config::getLongInterval() const
 {
     return longInterval;
+}
+
+int Config::getLogLevel() const
+{
+    return logLevel;
 }
 
 /* Example:

@@ -11,7 +11,7 @@ public:
   ~Config();
 
   bool loadConfigFromFile(QString fileName = "config.ini");
-  void saveConfigToFile(QString fileName = "config.ini");
+  void saveConfigToFile  (QString fileName = "config.ini");
 
   QString getApiKey();
   QString getApiSecret();
@@ -25,6 +25,8 @@ public:
 
   int getShortInterval() const;
   int getLongInterval()  const;
+
+  int getLogLevel() const;
 
 private:
 
@@ -40,6 +42,8 @@ private:
 
   int shortInterval;
   int longInterval;
+
+  int logLevel;
 };
 
 #endif // CONFIG_H
