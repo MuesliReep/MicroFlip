@@ -5,6 +5,7 @@ Exchange_Sim::Exchange_Sim()
     currentTask = ExchangeTask();
 
     fee = 0.2;
+    this->exchangeName = "Simulation";
 
     // Start the interval timers
     timer  = new QTimer(this);

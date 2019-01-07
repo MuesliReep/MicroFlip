@@ -115,6 +115,8 @@ public:
   QList<Balance> getBalances()                 const;
   double         getBalance (QString currency) const;
 
+  QString getExchangeName() const;
+
 private:
 
   virtual void updateMarketTicker(QString pair)    = 0;
@@ -140,7 +142,8 @@ private:
 protected:
   Config *config;
 
-  QString className = "EXCHANGE";
+  QString exchangeName = "NONE";
+  QString className    = "EXCHANGE";
 
   QNetworkAccessManager* tickerDownloadManager;
   QNetworkAccessManager* updateMarketDepthDownloadManager;

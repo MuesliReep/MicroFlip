@@ -100,6 +100,8 @@ signals:
 
   void updateLog  (int workID, QString classID, QString logString, int severity);
   void updateState(int workID, QString state);
+
+  void updateExchangePrices(double lastPrice, double avgPrice);
 };
 
 #endif // WORKORDER_H

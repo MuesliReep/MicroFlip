@@ -36,6 +36,7 @@ public:
   Display();
 
   void setLogLevel(int value);
+  void setExchangeName(const QString &value);
 
 private:
 
@@ -48,6 +49,10 @@ private:
   int currentLine;
 
   int logLevel;
+  QString exchangeName;
+
+  double lastPrice;
+  double avgPrice;
 
 #ifdef ISWIN
   bool EnableVTMode();
@@ -70,6 +75,7 @@ public slots:
   void stateUpdate(int workID, QString state);
   void addToLog   (int workID, QString classID, QString logString, int severity = 1);
 
+  void updateExchangePrices(double lastPrice, double avgPrice);
 };
 
 #endif // DISPLAY_H

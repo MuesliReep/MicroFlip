@@ -34,11 +34,20 @@ Display::Display() {
     //std::cout << "\x1b[35m" << std::endl;
     printf(CSI "35m");
     printf("\n");
+
+    exchangeName = "";
+    lastPrice    = 0.0;
+    avgPrice     = 0.0;
 }
 
 void Display::setLogLevel(int value)
 {
     logLevel = value;
+}
+
+void Display::setExchangeName(const QString &value)
+{
+    exchangeName = value;
 }
 
 #ifdef ISWIN
@@ -113,6 +122,12 @@ void Display::addToLog(int workID, QString classID, QString logString, int sever
     updateScreen();
 }
 
+void Display::updateExchangePrices(double lastPrice, double avgPrice)
+{
+    this->lastPrice = lastPrice;
+    this->avgPrice  = avgPrice;
+}
+
 void Display::stateUpdate(int workID, QString state) {
 
   int listID = -1;
@@ -148,12 +163,22 @@ void Display::drawHeader() {
   // Set foreground to white
   std::cout << "\x1b[37m";
 
-  std::cout << "  MicroFlip";
+  QString header = " ";
+
+  static const QString programName = "MicroFlip";
+  static const QString average     = "Avg:";
+  static const QString last        = "Last:";
+
+  header.append(programName + "       " + exchangeName + "       " + last + QString::number(lastPrice,'f',2) + "  " + average + QString::number(avgPrice,'f',2));
 
   // Draw header
-  for(int i=11; i<columns; i++) { // MicroFlip text is 11 characters
-    std::cout << ' ';
+  if(header < columns) {
+      header.resize(header.length() + (columns - header.length()), ' ');
+  } else {
+      header.truncate(columns);
   }
+
+  std::cout << header.toStdString();
 
   currentLine = 2;
 }

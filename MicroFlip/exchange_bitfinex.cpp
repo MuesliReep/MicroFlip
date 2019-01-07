@@ -9,6 +9,7 @@ Exchange_bitfinex::Exchange_bitfinex() {
   currentTask = ExchangeTask();
 
   fee = 0.2;
+  this->exchangeName = "Bitfinex";
 
   // Initiate download managers
   tickerDownloadManager             = new QNetworkAccessManager(this);

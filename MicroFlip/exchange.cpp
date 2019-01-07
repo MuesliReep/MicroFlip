@@ -40,9 +40,14 @@ double Exchange::getBalance(QString currency) const
     return amount;
 }
 
+QString Exchange::getExchangeName() const
+{
+    return exchangeName;
+}
+
 void Exchange::executeExchangeTask(ExchangeTask *exchangeTask)
 {
-  switch(exchangeTask->getTask()) {
+    switch(exchangeTask->getTask()) {
 
     case 0: updateMarketTicker(exchangeTask->getAttributes().at(0)); break;
     case 1: updateMarketDepth (exchangeTask->getAttributes().at(0)); break;

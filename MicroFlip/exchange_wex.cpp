@@ -10,6 +10,7 @@ Exchange_wex::Exchange_wex() {
   currentTask = ExchangeTask();
 
   fee = 0.2;
+  this->exchangeName = "Wex";
 
   // Initiate download managers
   tickerDownloadManager             = new QNetworkAccessManager(this);

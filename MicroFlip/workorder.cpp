@@ -235,6 +235,8 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
   // Save the ticker data locally
   currentTicker = ticker;
 
+  emit updateExchangePrices(currentTicker.getSell(), currentTicker.getAvg());
+
   updateLog(workID, className, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
                              + " Sell: " + QString::number(currentTicker.getSell())
                              + " Last: " + QString::number(currentTicker.getLast())

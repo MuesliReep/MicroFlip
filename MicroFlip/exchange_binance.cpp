@@ -12,6 +12,7 @@ Exchange_Binance::Exchange_Binance()
     currentTask = ExchangeTask();
 
     this->fee = 0.1;
+    this->exchangeName = "Binance";
 
     // Initiate download managers
     tickerDownloadManager             = new QNetworkAccessManager(this);

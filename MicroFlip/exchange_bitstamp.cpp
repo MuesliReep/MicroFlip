@@ -6,6 +6,7 @@ Exchange_bitstamp::Exchange_bitstamp() {
   currentTask = ExchangeTask();
 
   fee = 0.25;
+  this->exchangeName = "Bitstamp";
 
   // Initiate download managers
   tickerDownloadManager             = new QNetworkAccessManager(this);
