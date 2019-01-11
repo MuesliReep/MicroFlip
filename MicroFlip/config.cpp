@@ -19,12 +19,13 @@ bool Config::loadConfigFromFile(QString fileName) {
     static const QString DEFAULT_API_SECRET  = "";
     static const QString DEFAULT_CUSTOMER_ID = "";
 
-    static const double  DEFAULT_AMOUNT  = 0;
-    static const double  DEFAULT_PROFIT  = 0;
-    static const double  DEFAULT_MINSELL = 0;
-    static const int     DEFAULT_WORKERS = 0;
-    static const QString DEFAULT_PAIR    = "btc_usd";
-    static const int     DEFAULT_MODE    = workerMode::MINSELL;
+    static const double  DEFAULT_AMOUNT     = 0;
+    static const double  DEFAULT_PROFIT     = 0;
+    static const double  DEFAULT_MINSELL    = 0;
+    static const int     DEFAULT_WORKERS    = 0;
+    static const QString DEFAULT_PAIR       = "btc_usd";
+    static const int     DEFAULT_MODE       = workerMode::MINSELL;
+    static const bool    DEFAULT_SINGLESHOT = false;
 
     static const int     DEFAULT_INTERVAL_SHORT = 10000;
     static const int     DEFAULT_INTERVAL_LONG  = 60*1*1000;
@@ -53,6 +54,7 @@ bool Config::loadConfigFromFile(QString fileName) {
         settings.setValue("Worker/NumberOfWorkers", DEFAULT_WORKERS);
         settings.setValue("Worker/CurrencyPair",    DEFAULT_PAIR);
         settings.setValue("Worker/Mode",            DEFAULT_MODE);
+        settings.setValue("Worker/SingleShot",      DEFAULT_SINGLESHOT);
 
         settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT);
         settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG);
@@ -77,6 +79,7 @@ bool Config::loadConfigFromFile(QString fileName) {
     this->numWorkers    = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS        ).toInt();
     this->pair          = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR           ).toString();
     this->mode          = settings.value("Worker/Mode",            DEFAULT_MODE           ).toInt();
+    this->singleShot    = settings.value("Worker/SingleShot",      DEFAULT_SINGLESHOT     ).toBool();
 
     this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt();
     this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt();
@@ -104,6 +107,7 @@ void Config::saveConfigToFile(QString fileName) {
     settings.setValue("Worker/NumberOfWorkers", this->numWorkers    );
     settings.setValue("Worker/CurrencyPair",    this->pair          );
     settings.setValue("Worker/Mode",            this->mode          );
+    settings.setValue("Worker/SingleShot",      this->singleShot    );
 
     settings.setValue("Worker/Interval/Short",  this->shortInterval );
     settings.setValue("Worker/Interval/Long",   this->longInterval  );
@@ -155,6 +159,11 @@ int Config::getLongInterval() const
 int Config::getLogLevel() const
 {
     return logLevel;
+}
+
+bool Config::getSingleShot() const
+{
+    return singleShot;
 }
 
 int Config::getMode() const

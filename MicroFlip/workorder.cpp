@@ -16,8 +16,9 @@
 ///
 WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
                      double maxAmount,    double profitTarget, int shortInterval,
-                     int longInterval,    int mode,            double minSellPrice,
-                     int sellTTL,         int buyTTL,          bool highSpeed) {
+                     int longInterval,    int mode,            bool singleShot,
+                     double minSellPrice, int sellTTL,         int buyTTL,
+                     bool highSpeed) {
 
   this->exchange      = exchange;
   this->workID        = workID;
@@ -31,6 +32,7 @@ WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
   this->intervalShort = shortInterval;
   this->intervalLong  = longInterval;
   this->mode          = mode;
+  this->singleShot    = singleShot;
 
   workState = START;
 
@@ -103,10 +105,16 @@ void WorkOrder::updateTick() {
     case COMPLETE:
       emit updateState(workID, "COMPLETE");
 
-      stdInterval         = false;
-      longIntervalRequest = true;
+      // If single shot, stop this workorder
+      if(singleShot) {
+          timer->stop();
+      } else {
+          stdInterval         = false;
+          longIntervalRequest = true;
 
-      workState = START;
+          workState = START;
+      }
+
       break;
     case ERROR:
     default:

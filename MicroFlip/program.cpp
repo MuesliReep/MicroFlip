@@ -35,7 +35,8 @@ Program::Program(QObject *parent) : QObject(parent) {
   // Create work orders
   workOrderFactory(config->getNumWorkers(),   exchange,          config->getAmount(),
                    config->getProfit(),       config->getPair(), config->getShortInterval(),
-                   config->getLongInterval(), config->getMode(), config->getMinSell());
+                   config->getLongInterval(), config->getMode(), config->getSingleShot(),
+                   config->getMinSell());
 }
 
 ///
@@ -50,18 +51,19 @@ Program::Program(QObject *parent) : QObject(parent) {
 ///
 bool Program::workOrderFactory(int numWorkers,   Exchange *exchange, double amount,
                                double profit,    QString pair,       int shortInterval,
-                               int longInterval, int mode,           double minSell) {
+                               int longInterval, int mode,           bool singleShot,
+                               double minSell) {
 
   emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
 
   for(int i = 0; i < numWorkers; i++) {
 
     emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-    WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, minSell);
+    WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
 
     connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
     connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
-    connect(wo, SIGNAL(updateExchangePrices(double, double)),   display, SLOT(updateExchangePrices(double, double)));
+    connect(wo, SIGNAL(updateExchangePrices(double, double)),  display, SLOT(updateExchangePrices(double, double)));
 
     // Tell the newly created work order to start
     connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));

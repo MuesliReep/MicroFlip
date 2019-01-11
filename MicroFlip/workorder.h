@@ -29,7 +29,7 @@ class WorkOrder : public QThread
   Q_OBJECT
 public:
   WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget,
-            int shortInterval, int longInterval, int mode, double minSellPrice = 0.0, int sellTTL = 5, int buyTTL = 1440, bool highSpeed = false);
+            int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice = 0.0, int sellTTL = 5, int buyTTL = 1440, bool highSpeed = false);
 
   double  getSellPrice() { return sellPrice; }
   int     getWorkID()    { return workID;    }
@@ -59,6 +59,7 @@ private:
   int     buyTTL;
   bool    highSpeed;
   int     mode;
+  bool    singleShot;
 
   Ticker currentTicker;
 

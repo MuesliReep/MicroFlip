@@ -27,7 +27,8 @@ public:
   int getShortInterval() const;
   int getLongInterval()  const;
 
-  int getLogLevel() const;
+  int  getLogLevel() const;
+  bool getSingleShot() const;
 
 private:
 
@@ -35,12 +36,13 @@ private:
   QString apiSecret;
   QString customerID;
 
-  double amount;
-  double profit;
-  double minSell;
+  double  amount;
+  double  profit;
+  double  minSell;
   QString pair;
-  int numWorkers;
-  int mode;
+  int     numWorkers;
+  int     mode;
+  bool    singleShot;
 
   int shortInterval;
   int longInterval;
