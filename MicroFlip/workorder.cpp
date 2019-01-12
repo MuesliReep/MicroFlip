@@ -26,6 +26,7 @@ WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
   this->profitTarget  = profitTarget;
   this->pair          = pair;
   this->minSellPrice  = minSellPrice;
+  this->minimumPrice  = minSellPrice;
   this->sellTTL       = sellTTL;
   this->buyTTL        = buyTTL;
   this->highSpeed     = highSpeed;
@@ -131,6 +132,9 @@ void WorkOrder::createSellOrder(double amount) {
 
   // Match current sell order
   sellPrice = currentTicker.getBuy();// * 1.19;
+
+  // If matched price is lower than minimum, correct it
+  if(sellPrice < minimumPrice) { sellPrice = minimumPrice; }
 
   // Check balance
   // TODO
@@ -251,7 +255,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
                              + " Avg.: " + QString::number(currentTicker.getAvg()),
                                logSeverity::LOG_DEBUG);
 
-  double minimumPrice = minSellPrice;
+  minimumPrice = minSellPrice;
 
   // If we are using a dynamic minimum sell price, calculate it here
   // TODO: Use something smarter than just using the 24h average

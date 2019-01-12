@@ -55,6 +55,7 @@ private:
   double  buyPrice;
   QString pair;
   double  minSellPrice;
+  double  minimumPrice;
   int     sellTTL;
   int     buyTTL;
   bool    highSpeed;
