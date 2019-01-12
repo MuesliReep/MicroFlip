@@ -35,7 +35,7 @@ void Exchange_Binance::startWork() {
     this->apiSecret = config->getApiSecret();
 
     // 30 requests per min
-    timer->start(2000);
+    timer->start(750);
 }
 
 void Exchange_Binance::updateMarketTicker(QString pair) {
