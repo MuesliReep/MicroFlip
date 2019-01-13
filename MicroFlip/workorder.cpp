@@ -269,7 +269,7 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
   }
 
   // return to START state if buy price is too low
-  if(currentTicker.getSell() <= minimumPrice) {
+  if(currentTicker.getSell() < minimumPrice) {
     emit updateLog(workID, className, "Price " + QString::number(currentTicker.getSell())
                                                + " lower than minimum: " + QString::number(minimumPrice)
                                                + ". Reverting state!",
