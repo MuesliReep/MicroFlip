@@ -27,6 +27,10 @@ Exchange_Binance::Exchange_Binance()
     // Create the interval timer
     timer  = new QTimer(this);
     connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
+
+    // Create ticker timer
+    tickerTimer = new QTimer(this);
+    connect(timer,  SIGNAL(timeout()), this, SLOT(receiveUpdateMarketTicker()));
 }
 
 void Exchange_Binance::startWork() {
