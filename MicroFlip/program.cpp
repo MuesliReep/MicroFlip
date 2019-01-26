@@ -29,8 +29,9 @@ Program::Program(QObject *parent) : QObject(parent) {
   display = new Display();
   display->setLogLevel(config->getLogLevel());
   display->setExchangeName(exchange->getExchangeName());
-  connect(this,     SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
-  connect(exchange, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
+  connect(this,     SIGNAL(updateLog(int, QString, QString, int)),          display, SLOT(addToLog(int, QString, QString, int)));
+  connect(exchange, SIGNAL(updateLog(int, QString, QString, int)),          display, SLOT(addToLog(int, QString, QString, int)));
+  connect(exchange, SIGNAL(updateExchangePrices(QString, double, double)),  display, SLOT(updateExchangePrices(QString, double, double)));
 
   // Create work orders
   workOrderFactory(config->getNumWorkers(),   exchange,          config->getAmount(),
@@ -63,7 +64,6 @@ bool Program::workOrderFactory(int numWorkers,   Exchange *exchange, double amou
 
     connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
     connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
-    connect(wo, SIGNAL(updateExchangePrices(double, double)),  display, SLOT(updateExchangePrices(double, double)));
 
     // Tell the newly created work order to start
     connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));

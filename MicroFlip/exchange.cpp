@@ -63,12 +63,41 @@ void Exchange::executeExchangeTask(ExchangeTask *exchangeTask)
     case 6: updateActiveOrders(exchangeTask->getAttributes().at(0));   break;
     case 7: updateOrderInfo(exchangeTask->getAttributes().at(0).toUInt()); break;
     default: qDebug() << "Bad exchange task received: " << exchangeTask->getTask(); break;
-  }
+    }
 }
+
+
 
 //----------------------------------//
 //          Public Slots            //
 //----------------------------------//
+
+void Exchange::receiveRequestForTicker(QString pair, QObject *sender)
+{
+    Ticker requestedTicker;
+
+    // Find correct ticker and copy it
+    for (int i = 0; i < tickers.size(); i++) {
+        Ticker queryTicker = tickers.at(i);
+
+        if(queryTicker.getSymbol() == pair) {
+            requestedTicker = queryTicker;
+        }
+    }
+
+    // Connect & send to the initiator
+    connect(this, SIGNAL(sendNewMarketTicker(Ticker)), sender, SLOT(UpdateMarketTickerReply(Ticker)));
+    emit sendNewMarketTicker(requestedTicker);
+    disconnect(this, SIGNAL(sendNewMarketTicker(Ticker)), sender, SLOT(UpdateMarketTickerReply(Ticker)));
+}
+
+void Exchange::receiveInitialiseSymbol(QString symbol)
+{
+    // Add symbol if not already present
+    if(!symbols.contains(symbol)) {
+        symbols.append(symbol);
+    }
+}
 
 void Exchange::receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID){
   QList<QString> attr; attr.append(QString(pair));
@@ -127,10 +156,18 @@ void Exchange::updateMarketTickerReply(QNetworkReply *reply)
         ticker = parseRawTickerData(reply);
     }
 
-    // Connect & send to the initiator
-    connect(this, SIGNAL(sendNewMarketTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
-    emit sendNewMarketTicker(ticker);
-    disconnect(this, SIGNAL(sendNewMarketTicker(Ticker)), currentTask.getSender(), SLOT(UpdateMarketTickerReply(Ticker)));
+    // Remove old ticker from ticker list
+    for (int i = 0; i < tickers.length(); i++) {
+        if(tickers.at(i).getSymbol() == ticker.getSymbol()) {
+            tickers.removeAt(i);
+        }
+    }
+
+    // Store new ticker in ticker list
+    tickers.append(ticker);
+
+    // Send new prices to display
+    emit updateExchangePrices(ticker.getSymbol(), ticker.getLast(), ticker.getAvg());
 
     reply->deleteLater();
 
@@ -306,7 +343,31 @@ void Exchange::updateTick() {
 
 void Exchange::updateTick2() {
 
-  // While currentTask is not complete, do nothing
+    // While currentTask is not complete, do nothing
+}
+
+void Exchange::updateTickers()
+{
+    // Create a task for each symbol
+    foreach (QString symbol, symbols) {
+
+        bool containsSymbol = false;
+
+        // Do not add the symbol if it already exists
+        foreach (ExchangeTask task, exchangeTasks) {
+
+            if(task.getAttributes().at(0) == symbol) {
+                containsSymbol = true;
+                break;
+            }
+        }
+
+        // Add the symbol if it was not found in the list
+        if(!containsSymbol) {
+            receiveUpdateMarketTicker(symbol, this, 0);
+        }
+    }
+
 }
 
 //----------------------------------//

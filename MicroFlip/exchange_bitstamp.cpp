@@ -200,7 +200,9 @@ Ticker Exchange_bitstamp::parseRawTickerData(QNetworkReply *reply) {
             double sell = tickerData.value("ask").toString().toDouble();
             int    age  = tickerData.value("timestamp").toString().toInt();
 
-            ticker = Ticker(high, low, avg, last, buy, sell, age);
+            QString symbol = currentTask.getAttributes().at(0);
+
+            ticker = Ticker(symbol, high, low, avg, last, buy, sell, age);
         }
     }
 

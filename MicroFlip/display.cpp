@@ -122,10 +122,13 @@ void Display::addToLog(int workID, QString classID, QString logString, int sever
     updateScreen();
 }
 
-void Display::updateExchangePrices(double lastPrice, double avgPrice)
+void Display::updateExchangePrices(QString symbol, double lastPrice, double avgPrice)
 {
+    this->symbol    = symbol;
     this->lastPrice = lastPrice;
     this->avgPrice  = avgPrice;
+
+    updateScreen();
 }
 
 void Display::stateUpdate(int workID, QString state) {

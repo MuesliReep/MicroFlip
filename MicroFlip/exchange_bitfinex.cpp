@@ -204,15 +204,17 @@ Ticker Exchange_bitfinex::parseRawTickerData(QNetworkReply *reply) {
         if(JSON_Helper::getObjectFromDocument(&jsonDoc, &jsonObj)) {
 
             // Values are stored as strings, so first convert to string then further
-            double high = jsonObj.value("high").toString("-1.0").toDouble();
-            double low  = jsonObj.value("low").toString("-1.0").toDouble();
-            double avg  = jsonObj.value("avg").toString("-1.0").toDouble();
-            double last = jsonObj.value("last_price").toString("-1.0").toDouble();
-            double buy  = jsonObj.value("bid").toString("-1.0").toDouble();
-            double sell = jsonObj.value("ask").toString("-1.0").toDouble();
-            int    age  = jsonObj.value("timestamp").toString("-1").toInt();
+            double  high   = jsonObj.value("high").toString("-1.0").toDouble();
+            double  low    = jsonObj.value("low").toString("-1.0").toDouble();
+            double  avg    = jsonObj.value("avg").toString("-1.0").toDouble();
+            double  last   = jsonObj.value("last_price").toString("-1.0").toDouble();
+            double  buy    = jsonObj.value("bid").toString("-1.0").toDouble();
+            double  sell   = jsonObj.value("ask").toString("-1.0").toDouble();
+            int     age    = jsonObj.value("timestamp").toString("-1").toInt();
 
-            ticker = Ticker(high, low, avg, last, buy, sell, age);
+            QString symbol = currentTask.getAttributes().at(0);
+
+            ticker = Ticker(symbol, high, low, avg, last, buy, sell, age);
         }
     }
 

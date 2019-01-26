@@ -22,7 +22,7 @@
 // BUYORDER         : Order processed, waiting for execution
 // COMPLETE         : Order executed, workorder complete
 
-enum WorkState { ERROR = -1, START, WAITINGFORTICKER, CREATESELL, WAITINGFORSELL, SELLORDER, SOLD, CREATEBUY, WAITINGFORBUY, BUYORDER, COMPLETE };
+enum WorkState { ERROR = -1, INITIALISE, START, WAITINGFORTICKER, CREATESELL, WAITINGFORSELL, SELLORDER, SOLD, CREATEBUY, WAITINGFORBUY, BUYORDER, COMPLETE };
 
 class WorkOrder : public QThread
 {
@@ -77,6 +77,7 @@ private:
 
   void calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit);
 
+  void initialiseSymbol(QString symbol);
   void requestUpdateMarketTicker();
   void requestCreateOrder(int type, double rate, double amount);
   void requestOrderInfo  (qint64 orderID);
@@ -95,8 +96,9 @@ public slots:
   void startOrder();
 
 signals:
-  void sendUpdateMarketTicker(QString pair, QObject *sender, int senderID);
-  void sendCreateOrder       (QString pair, int type, double price, double amount, QObject *sender, int senderID);
+  void sendInitialiseSymbol  (QString symbol);
+  void sendRequestForTicker  (QString pair,   QObject *sender);
+  void sendCreateOrder       (QString pair,   int type, double price, double amount, QObject *sender, int senderID);
   void sendUpdateOrderInfo   (qint64 orderID, QObject *sender, int senderID);
   void sendCancelOrder       (qint64 orderID, QObject *sender, int senderID);
 
