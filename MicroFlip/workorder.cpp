@@ -35,7 +35,7 @@ WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
   this->mode          = mode;
   this->singleShot    = singleShot;
 
-  workState = START;
+  workState = INITIALISE;
 
   stdInterval         = true;
   longIntervalRequest = false;
@@ -54,6 +54,11 @@ void WorkOrder::updateTick() {
   }
 
   switch(workState) {
+    case INITIALISE:
+      initialiseSymbol(this->getPair());
+
+      workState = START;
+      break;
     case START: {
         emit updateState(workID, "START");
 
@@ -189,18 +194,25 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
                          "Buying "   + QString::number(*buyAmount) + " " + pair1 +
                          " @ "       + QString::number(*buyPrice)  + " " + pair2 + "/" + pair1 +
                          ". Total: " + QString::number(*buyTotal)  + " " + pair2,
-                         logSeverity::LOG_INFO);
+                 logSeverity::LOG_INFO);
 }
 
 //----------------------------------//
 //            Requests              //
 //----------------------------------//
 
+void WorkOrder::initialiseSymbol(QString symbol) {
+
+  connect(this, SIGNAL(sendInitialiseSymbol(QString)), exchange, SLOT(receiveInitialiseSymbol(QString)));
+  emit sendInitialiseSymbol(symbol);
+  disconnect(this, SIGNAL(sendInitialiseSymbol(QString)), exchange, SLOT(receiveInitialiseSymbol(QString)));
+}
+
 void WorkOrder::requestUpdateMarketTicker() {
 
-  connect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*,int)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*,int)));
-  emit sendUpdateMarketTicker(pair, this, this->workID);
-  disconnect(this, SIGNAL(sendUpdateMarketTicker(QString,QObject*,int)), exchange, SLOT(receiveUpdateMarketTicker(QString,QObject*,int)));
+  connect(this, SIGNAL(sendRequestForTicker(QString,QObject*)), exchange, SLOT(receiveRequestForTicker(QString,QObject*)));
+  emit sendRequestForTicker(pair, this);
+  disconnect(this, SIGNAL(sendRequestForTicker(QString,QObject*)), exchange, SLOT(receiveRequestForTicker(QString,QObject*)));
 }
 
 void WorkOrder::requestCreateOrder(int type, double rate, double amount) {
@@ -246,8 +258,6 @@ void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
 
   // Save the ticker data locally
   currentTicker = ticker;
-
-  emit updateExchangePrices(currentTicker.getSell(), currentTicker.getAvg());
 
   updateLog(workID, className, "New ticker data: Buy: " + QString::number(currentTicker.getBuy())
                              + " Sell: " + QString::number(currentTicker.getSell())

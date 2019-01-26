@@ -62,6 +62,7 @@ class Ticker {
 
 public:
   Ticker(){
+    this->symbol = "";
     this->high = -1.0;
     this->low  = -1.0;
     this->avg  = -1.0;
@@ -70,32 +71,35 @@ public:
     this->sell = -1.0;
     this->age  = -1;
   }
-  Ticker(double high, double low, double avg, double last, double buy, double sell, double age) {
-    this->high = high;
-    this->low  = low;
-    this->avg  = avg;
-    this->last = last;
-    this->buy  = buy;
-    this->sell = sell;
-    this->age  = age;
+  Ticker(QString symbol, double high, double low, double avg, double last, double buy, double sell, double age) {
+    this->symbol = symbol;
+    this->high   = high;
+    this->low    = low;
+    this->avg    = avg;
+    this->last   = last;
+    this->buy    = buy;
+    this->sell   = sell;
+    this->age    = age;
   }
 
-  double getHigh() { return high; }
-  double getLow () { return low;  }
-  double getAvg () { return avg;  }
-  double getLast() { return last; }
-  double getBuy () { return buy;  }
-  double getSell() { return sell; }
-  qint64 getAge () { return age;  }
+  QString getSymbol() const { return symbol; }
+  double getHigh   () const { return high;   }
+  double getLow    () const { return low;    }
+  double getAvg    () const { return avg;    }
+  double getLast   () const { return last;   }
+  double getBuy    () const { return buy;    }
+  double getSell   () const { return sell;   }
+  qint64 getAge    () const { return age;    }
 
 private:
-  double high;
-  double low;
-  double avg;
-  double last;
-  double buy;
-  double sell;
-  qint64 age;
+  QString symbol;
+  double  high;
+  double  low;
+  double  avg;
+  double  last;
+  double  buy;
+  double  sell;
+  qint64  age;
 };
 
 ///
@@ -125,9 +129,9 @@ private:
 
   virtual void updateBalances    ()                = 0;
   virtual void createOrder       (QString pair, int type, double rate, double amount) = 0;
-  virtual void cancelOrder       (qint64 orderID) = 0;
+  virtual void cancelOrder       (qint64 orderID)  = 0;
   virtual void updateActiveOrders(QString pair)    = 0;
-  virtual void updateOrderInfo   (qint64 orderID) = 0;
+  virtual void updateOrderInfo   (qint64 orderID)  = 0;
 
   virtual Ticker parseRawTickerData(QNetworkReply *reply) = 0;
   virtual void   parseRawDepthData (QNetworkReply *reply) = 0;
@@ -155,7 +159,7 @@ protected:
   QNetworkAccessManager* activeOrdersDownloadManager;
 
   QTimer *timer;
-  QTimer *timer2;
+  QTimer *tickerTimer;
 
   ExchangeTask currentTask;
 
@@ -163,11 +167,15 @@ protected:
 
   QList<Order>        activeOrders;
   QList<Balance>      balances;
+  QList<Ticker>       tickers;
+  QList<QString>      symbols;
   QList<ExchangeTask> exchangeTasks;
 
   void executeExchangeTask(ExchangeTask *exchangeTask);
 
 public slots:
+  void receiveInitialiseSymbol  (QString symbol);
+  void receiveRequestForTicker  (QString pair,    QObject *sender);
   void receiveUpdateMarketTicker(QString pair,    QObject *sender, int SenderID);
   void receiveUpdateMarketDepth (QString pair,    QObject *sender, int SenderID);
   void receiveUpdateMarketTrades(QString pair,    QObject *sender, int SenderID);
@@ -189,6 +197,7 @@ public slots:
 protected slots:
   void updateTick ();
   void updateTick2();
+  void updateTickers();
 
 signals:
   void sendNewMarketTicker(Ticker ticker);
@@ -200,7 +209,8 @@ signals:
   void sendNewActiveOrders();
   void sendNewOrderInfo   (int);
 
-  void updateLog  (int workID, QString classID, QString logString, int severity);
+  void updateLog           (int workID, QString classID, QString logString, int severity);
+  void updateExchangePrices(QString, double, double);
 };
 
 #endif // EXCHANGE_H

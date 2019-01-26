@@ -187,7 +187,9 @@ Ticker Exchange_wex::parseRawTickerData(QNetworkReply *reply) {
             double sell = jsonObj.value("sell").toDouble();
             int    age  = jsonObj.value("age") .toInt();
 
-            ticker = Ticker(high, low, avg, last, buy, sell, age);
+            QString symbol = currentTask.getAttributes().at(0);
+
+            ticker = Ticker(symbol, high, low, avg, last, buy, sell, age);
         }
     }
 

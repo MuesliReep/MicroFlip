@@ -27,6 +27,10 @@ Exchange_Binance::Exchange_Binance()
     // Create the interval timer
     timer  = new QTimer(this);
     connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
+
+    // Create ticker timer
+    tickerTimer = new QTimer(this);
+    connect(timer,  SIGNAL(timeout()), this, SLOT(updateTickers()));
 }
 
 void Exchange_Binance::startWork() {
@@ -35,7 +39,8 @@ void Exchange_Binance::startWork() {
     this->apiSecret = config->getApiSecret();
 
     // 30 requests per min
-    timer->start(750);
+    timer->start(100);
+    tickerTimer->start(500);
 }
 
 void Exchange_Binance::updateMarketTicker(QString pair) {
@@ -231,7 +236,9 @@ Ticker Exchange_Binance::parseRawTickerData(QNetworkReply *reply) {
 
             deltaTime = QDateTime::currentDateTime().toMSecsSinceEpoch() - (qint64)age;
 
-            ticker = Ticker(high, low, avg, last, buy, sell, (qint64)age);
+            QString symbol = currentTask.getAttributes().at(0);
+
+            ticker = Ticker(symbol, high, low, avg, last, buy, sell, (qint64)age);
         }
     }
 
