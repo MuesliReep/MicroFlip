@@ -69,8 +69,9 @@ private:
   void drawLog();
   void setForegroundColour(int colour, bool bright = false);
   void setBackgroundColour(int colour, bool bright = false);
-  void getTerminalSize();
+  bool getTerminalSize();
 
+  void setCursorToPosition(int x, int y);
 public slots:
 
   void stateUpdate(int workID, QString state);
