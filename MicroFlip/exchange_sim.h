@@ -8,6 +8,7 @@ class Exchange_Sim : public Exchange
 public:
     Exchange_Sim();
 
+public slots:
     void startWork();
 
 private:

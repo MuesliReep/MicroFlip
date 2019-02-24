@@ -111,7 +111,7 @@ class Exchange : public QObject
 public:
   explicit Exchange(QObject *parent = 0);
 
-  virtual void startWork() = 0;
+
 
   void setConfig(Config *config);
 
@@ -174,6 +174,8 @@ protected:
   void executeExchangeTask(ExchangeTask *exchangeTask);
 
 public slots:
+  virtual void startWork() = 0;
+
   void receiveInitialiseSymbol  (QString symbol);
   void receiveRequestForTicker  (QString pair,    QObject *sender);
   void receiveUpdateMarketTicker(QString pair,    QObject *sender, int SenderID);
