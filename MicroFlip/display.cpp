@@ -121,6 +121,11 @@ void Display::updateScreen()
 
 void Display::addToLog(int workID, QString classID, QString logString, int severity) {
 
+    // Dont add to log if loglevel is too low
+    if(severity < logLevel) {
+        return;
+    }
+
     QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
 
     logList.prepend(LogItem(time, workID, classID, logString, severity));
