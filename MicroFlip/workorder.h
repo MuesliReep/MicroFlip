@@ -24,7 +24,7 @@
 
 enum WorkState { ERROR = -1, INITIALISE, START, WAITINGFORTICKER, CREATESELL, WAITINGFORSELL, SELLORDER, SOLD, CREATEBUY, WAITINGFORBUY, BUYORDER, COMPLETE };
 
-class WorkOrder : public QThread
+class WorkOrder : public QObject
 {
   Q_OBJECT
 public:

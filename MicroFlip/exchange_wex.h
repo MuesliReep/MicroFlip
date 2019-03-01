@@ -9,7 +9,9 @@ class Exchange_wex : public Exchange
   public:
     Exchange_wex();
 
+public slots:
     void startWork();
+
   private:
 
     Downloader downloader;

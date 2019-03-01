@@ -75,7 +75,12 @@ bool Display::EnableVTMode()
 }
 #endif
 
-void Display::getTerminalSize() {
+bool Display::getTerminalSize() {
+
+    int currentColumns = this->columns;
+    int currentLines   = this->lines;
+
+    bool windowChanged = false;
 
 #ifdef ISWIN
 
@@ -95,8 +100,14 @@ void Display::getTerminalSize() {
 
 #endif
 
+    if((this->columns != currentColumns) || (this->lines != currentLines)) {
+        windowChanged = true;
+    }
+
     // Minus 1 so there is room for 1 qDebug line
     lines-=2;
+
+    return windowChanged;
 }
 
 void Display::updateScreen()
@@ -109,6 +120,11 @@ void Display::updateScreen()
 }
 
 void Display::addToLog(int workID, QString classID, QString logString, int severity) {
+
+    // Dont add to log if loglevel is too low
+    if(severity < logLevel) {
+        return;
+    }
 
     QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
 
@@ -284,6 +300,14 @@ void Display::resetAttributes() {
 void Display::clearScreen() {
   std::cout << "\x1b[1J";
   std::cout << "\x1b[1;1f";
+}
+
+void Display::setCursorToPosition(int x, int y) {
+
+    // Do not place cursor outside of bounds
+    if((x > columns) || (y > lines)) {
+        return;
+    }
 }
 
 void Display::setForegroundColour(int colour, bool bright) {

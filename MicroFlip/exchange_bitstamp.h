@@ -9,7 +9,9 @@ class Exchange_bitstamp : public Exchange
 public:
     Exchange_bitstamp();
 
+public slots:
     void startWork();
+
 private:
 
   Downloader downloader;

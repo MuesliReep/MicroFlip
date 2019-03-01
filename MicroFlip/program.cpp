@@ -17,13 +17,14 @@ Program::Program(QObject *parent) : QObject(parent) {
   config->loadConfigFromFile();
 
   // Create an exchange interface
-//  Exchange *exchange = new Exchange_wex();
-//  Exchange *exchange = new Exchange_bitfinex();
-//  Exchange *exchange = new Exchange_bitstamp();
-  Exchange *exchange = new Exchange_Binance();
-//  Exchange *exchange = new Exchange_Sim();
+//  exchange = new Exchange_wex();
+//  exchange = new Exchange_bitfinex();
+//  exchange = new Exchange_bitstamp();
+  exchange = new Exchange_Binance();
+//  exchange = new Exchange_Sim();
   exchange->setConfig(config);
-  exchange->startWork();
+
+  qRegisterMetaType<Ticker>();
 
   // Create & setup display
   display = new Display();
@@ -33,11 +34,26 @@ Program::Program(QObject *parent) : QObject(parent) {
   connect(exchange, SIGNAL(updateLog(int, QString, QString, int)),          display, SLOT(addToLog(int, QString, QString, int)));
   connect(exchange, SIGNAL(updateExchangePrices(QString, double, double)),  display, SLOT(updateExchangePrices(QString, double, double)));
 
-  // Create work orders
-  workOrderFactory(config->getNumWorkers(),   exchange,          config->getAmount(),
-                   config->getProfit(),       config->getPair(), config->getShortInterval(),
-                   config->getLongInterval(), config->getMode(), config->getSingleShot(),
-                   config->getMinSell());
+  // Setup threads
+  QThread *exchangeThread = new QThread();
+  QThread *displayThread  = new QThread();
+  exchange->moveToThread(exchangeThread);
+  display-> moveToThread(displayThread);
+  exchangeThread->start();
+  displayThread-> start();
+
+  // Create start shot, this is called when the main event loop is triggered
+  QTimer::singleShot(1, this,     &Program::startShotReceived);
+  QTimer::singleShot(1, exchange, &Exchange::startWork);
+}
+
+void Program::startShotReceived() {
+
+    // Create work orders
+    workOrderFactory(config->getNumWorkers(),   exchange,          config->getAmount(),
+                     config->getProfit(),       config->getPair(), config->getShortInterval(),
+                     config->getLongInterval(), config->getMode(), config->getSingleShot(),
+                     config->getMinSell());
 }
 
 ///
@@ -62,16 +78,20 @@ bool Program::workOrderFactory(int numWorkers,   Exchange *exchange, double amou
     emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
     WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
 
+    QThread *workOrderThread = new QThread();
+    wo->moveToThread(workOrderThread);
+
     connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
     connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
 
     // Tell the newly created work order to start
     connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
-    wo->start();
+    workOrderThread->start();
     emit startOrder();
     disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
 
     workOrders.append(wo);
+    workOrderThreads.append(workOrderThread);
     QThread::sleep(1);
   }
 

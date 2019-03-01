@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <QObject>
+#include <QTimer>
 #include <QList>
 #include <QThread>
 
@@ -22,16 +23,21 @@ private:
 
     QString className = "PROGRAM";
 
-  Display *display;
-  Config  *config;
+  Display  *display;
+  Config   *config;
+  Exchange *exchange;
+  QTimer   *startShot;
   QList<WorkOrder*> workOrders;
+  QList<QThread*>   workOrderThreads;
 
   bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, int mode, bool singleShot, double minSell = -1.0);
 
 signals:
   void updateLog(int workID, QString className, QString log, int severity);
   void startOrder();
-public slots:
+
+private slots:
+  void startShotReceived();
 };
 
 #endif // PROGRAM_H
