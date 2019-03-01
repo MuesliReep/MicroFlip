@@ -102,6 +102,8 @@ private:
   qint64  age;
 };
 
+Q_DECLARE_METATYPE(Ticker)
+
 ///
 /// \brief The Exchange interface
 ///

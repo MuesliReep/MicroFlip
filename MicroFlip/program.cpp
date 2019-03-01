@@ -24,6 +24,8 @@ Program::Program(QObject *parent) : QObject(parent) {
 //  exchange = new Exchange_Sim();
   exchange->setConfig(config);
 
+  qRegisterMetaType<Ticker>();
+
   // Create & setup display
   display = new Display();
   display->setLogLevel(config->getLogLevel());
