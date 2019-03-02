@@ -10,7 +10,7 @@ public:
     Exchange_Binance();
 
     // Exchange interface
-public:
+public slots:
     void startWork();
 
 private:

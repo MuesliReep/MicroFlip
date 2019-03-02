@@ -9,6 +9,7 @@ class Exchange_bitfinex : public Exchange
 public:
     Exchange_bitfinex();
 
+public slots:
     void startWork();
 private:
 
