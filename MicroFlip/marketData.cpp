@@ -21,9 +21,7 @@ MarketData::MarketData(Config *C, bool loadFromFile) {
   }
 }
 
-MarketData::~MarketData() {
-
-}
+MarketData::~MarketData() = default;
 
 // Finds the current closest bin according to the clock
 // For example: the time is 12:02:33 & binsize = 3min, closest bin would be 12:03:00
@@ -406,8 +404,9 @@ bool MarketData::loadTradeDataFromFile(uint maxAge) {
 // Loads a market data set from a specified file
 void MarketData::saveTradeDataToFile() {
 
-    if(!(tradeData.size()>0))
+    if(!tradeData.empty()) {
         return;
+    }
 
   QJsonObject object;
   QJsonArray marketData;
@@ -441,8 +440,9 @@ void MarketData::saveTradeDataToFile() {
 // Returns the oldest stored trade
 uint MarketData::getOldestTrade() {
 
-  if(!(tradeData.size()>0))
+  if(!tradeData.empty()) {
     return 0;
+  }
 
   return tradeData[tradeData.size()-1].getTimeStamp();
 }

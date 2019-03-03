@@ -5,15 +5,10 @@
 
 #include "common.h"
 
-Config::Config() {
+Config:: Config() = default;
+Config::~Config() = default;
 
-}
-
-Config::~Config() {
-
-}
-
-bool Config::loadConfigFromFile(QString fileName) {
+bool Config::loadConfigFromFile(const QString& fileName) {
 
     static const QString DEFAULT_API_KEY     = "";
     static const QString DEFAULT_API_SECRET  = "";
@@ -38,28 +33,27 @@ bool Config::loadConfigFromFile(QString fileName) {
 
     // If config file does not exist, create a default file and exit
     if(!file.exists()) {
-        // TODO: log line instead of qdebug
 
         // Create file
         QSettings settings(fileName, QSettings::IniFormat);
 
         // Set default values
-        settings.setValue("Exchange/ApiKey",        DEFAULT_API_KEY);
-        settings.setValue("Exchange/ApiSecret",     DEFAULT_API_SECRET);
-        settings.setValue("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID);
+        settings.setValue("Exchange/ApiKey",        DEFAULT_API_KEY        );
+        settings.setValue("Exchange/ApiSecret",     DEFAULT_API_SECRET     );
+        settings.setValue("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID    );
 
-        settings.setValue("Worker/Amount",          DEFAULT_AMOUNT);
-        settings.setValue("Worker/Profit",          DEFAULT_PROFIT);
-        settings.setValue("Worker/MinimumSell",     DEFAULT_MINSELL);
-        settings.setValue("Worker/NumberOfWorkers", DEFAULT_WORKERS);
-        settings.setValue("Worker/CurrencyPair",    DEFAULT_PAIR);
-        settings.setValue("Worker/Mode",            DEFAULT_MODE);
-        settings.setValue("Worker/SingleShot",      DEFAULT_SINGLESHOT);
+        settings.setValue("Worker/Amount",          DEFAULT_AMOUNT         );
+        settings.setValue("Worker/Profit",          DEFAULT_PROFIT         );
+        settings.setValue("Worker/MinimumSell",     DEFAULT_MINSELL        );
+        settings.setValue("Worker/NumberOfWorkers", DEFAULT_WORKERS        );
+        settings.setValue("Worker/CurrencyPair",    DEFAULT_PAIR           );
+        settings.setValue("Worker/Mode",            DEFAULT_MODE           );
+        settings.setValue("Worker/SingleShot",      DEFAULT_SINGLESHOT     );
 
-        settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT);
-        settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG);
+        settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT );
+        settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  );
 
-        settings.setValue("System/LogLevel",        DEFAULT_LOG_LEVEL);
+        settings.setValue("System/LogLevel",        DEFAULT_LOG_LEVEL      );
 
         // Save settings
         settings.sync();
@@ -69,22 +63,22 @@ bool Config::loadConfigFromFile(QString fileName) {
 
     QSettings settings(fileName, QSettings::IniFormat);
 
-    this->apiKey        = settings.value("Exchange/ApiKey",        DEFAULT_API_KEY        ).toString();
-    this->apiSecret     = settings.value("Exchange/ApiSecret",     DEFAULT_API_SECRET     ).toString();
-    this->customerID    = settings.value("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID    ).toString();
+    this->apiKey        = settings.value("Exchange/ApiKey",        DEFAULT_API_KEY        ).toString ();
+    this->apiSecret     = settings.value("Exchange/ApiSecret",     DEFAULT_API_SECRET     ).toString ();
+    this->customerID    = settings.value("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID    ).toString ();
 
-    this->amount        = settings.value("Worker/Amount",          DEFAULT_AMOUNT         ).toDouble();
-    this->profit        = settings.value("Worker/Profit",          DEFAULT_PROFIT         ).toDouble();
-    this->minSell       = settings.value("Worker/MinimumSell",     DEFAULT_MINSELL        ).toDouble();
-    this->numWorkers    = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS        ).toInt();
-    this->pair          = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR           ).toString();
-    this->mode          = settings.value("Worker/Mode",            DEFAULT_MODE           ).toInt();
-    this->singleShot    = settings.value("Worker/SingleShot",      DEFAULT_SINGLESHOT     ).toBool();
+    this->amount        = settings.value("Worker/Amount",          DEFAULT_AMOUNT         ).toDouble ();
+    this->profit        = settings.value("Worker/Profit",          DEFAULT_PROFIT         ).toDouble ();
+    this->minSell       = settings.value("Worker/MinimumSell",     DEFAULT_MINSELL        ).toDouble ();
+    this->numWorkers    = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS        ).toInt    ();
+    this->pair          = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR           ).toString ();
+    this->mode          = settings.value("Worker/Mode",            DEFAULT_MODE           ).toInt    ();
+    this->singleShot    = settings.value("Worker/SingleShot",      DEFAULT_SINGLESHOT     ).toBool   ();
 
-    this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt();
-    this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt();
+    this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt    ();
+    this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt    ();
 
-    this->logLevel      = settings.value("System/LogLevel",        DEFAULT_LOG_LEVEL      ).toInt();
+    this->logLevel      = settings.value("System/LogLevel",        DEFAULT_LOG_LEVEL      ).toInt    ();
 
     result = true;
 
@@ -93,7 +87,7 @@ bool Config::loadConfigFromFile(QString fileName) {
     return result;
 }
 
-void Config::saveConfigToFile(QString fileName) {
+void Config::saveConfigToFile(const QString& fileName) {
 
     QSettings settings(fileName, QSettings::IniFormat);
 
@@ -117,59 +111,19 @@ void Config::saveConfigToFile(QString fileName) {
     settings.sync();
 }
 
-QString Config::getApiKey() { return apiKey; }
-QString Config::getApiSecret() { return apiSecret; }
-QString Config::getCustomerID() { return customerID; }
-
-double Config::getAmount() const
-{
-    return amount;
-}
-
-double Config::getProfit() const
-{
-    return profit;
-}
-
-double Config::getMinSell() const
-{
-    return minSell;
-}
-
-QString Config::getPair() const
-{
-    return pair;
-}
-
-int Config::getNumWorkers() const
-{
-    return numWorkers;
-}
-
-int Config::getShortInterval() const
-{
-    return shortInterval;
-}
-
-int Config::getLongInterval() const
-{
-    return longInterval;
-}
-
-int Config::getLogLevel() const
-{
-    return logLevel;
-}
-
-bool Config::getSingleShot() const
-{
-    return singleShot;
-}
-
-int Config::getMode() const
-{
-    return mode;
-}
+QString Config::getApiKey        () const { return apiKey;        }
+QString Config::getApiSecret     () const { return apiSecret;     }
+QString Config::getCustomerID    () const { return customerID;    }
+double  Config::getAmount        () const { return amount;        }
+double  Config::getProfit        () const { return profit;        }
+double  Config::getMinSell       () const { return minSell;       }
+QString Config::getPair          () const { return pair;          }
+int     Config::getNumWorkers    () const { return numWorkers;    }
+int     Config::getShortInterval () const { return shortInterval; }
+int     Config::getLongInterval  () const { return longInterval;  }
+int     Config::getLogLevel      () const { return logLevel;      }
+bool    Config::getSingleShot    () const { return singleShot;    }
+int     Config::getMode          () const { return mode;          }
 
 /* Example:
   

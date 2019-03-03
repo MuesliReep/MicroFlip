@@ -3,24 +3,23 @@
 
 #include <QtGlobal>
 
-class Trade
-{
+class Trade {
 
 public:
-  Trade();
-  Trade(double Price, double Amount, uint TradeID, uint TimeStamp);
-  ~Trade();
+    Trade();
+    Trade(double Price, double Amount, uint TradeID, uint TimeStamp);
+   ~Trade();
 
-  double  getPrice();
-  double  getAmount();
-  uint    getTradeID();
-  uint    getTimeStamp();
+    double getPrice    ();
+    double getAmount   ();
+    uint   getTradeID  ();
+    uint   getTimeStamp();
 
 private:
-  double price;
-  double amount;
-  uint tradeID;
-  uint timeStamp;
+    double price;
+    double amount;
+    uint   tradeID;
+    uint   timeStamp;
 };
 
 #endif // TRADE_H

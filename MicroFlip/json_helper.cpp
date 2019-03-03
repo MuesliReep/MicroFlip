@@ -5,11 +5,11 @@
 
 bool JSON_Helper::getDocumentFromNetworkReply(QNetworkReply *reply, QJsonDocument *document) {
 
-    QJsonParseError parseResult;
+    QJsonParseError parseResult{};
 
     QString str = QString::fromUtf8(reply->readAll());
 
-    *document = QJsonDocument().fromJson(str.toLocal8Bit(), &parseResult);
+    *document = QJsonDocument::fromJson(str.toLocal8Bit(), &parseResult);
 
     if(parseResult.error == QJsonParseError::NoError) {
 
@@ -23,7 +23,11 @@ bool JSON_Helper::getDocumentFromNetworkReply(QNetworkReply *reply, QJsonDocumen
 
 bool JSON_Helper::getObjectFromString(QJsonObject *object, QString *string) {
 
+    // TODO
+    (void) object;
+    (void) string;
 //    QJsonObject val(&string);
+    return false;
 }
 
 bool JSON_Helper::getObjectFromDocument(QJsonDocument *document, QJsonObject *object) {

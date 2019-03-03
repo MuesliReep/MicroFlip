@@ -5,12 +5,12 @@
 #ifdef ISWIN
 #include <conio.h>
 #include <windows.h>
-#include <wchar.h>
+#include <cwchar>
 #else
 #include <sys/ioctl.h>
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 #include <iostream>
 
@@ -25,34 +25,24 @@ Display::Display() {
 
     getTerminalSize();
 
-    printf ("lines %d\n",   lines);
-    printf ("columns %d\n", columns);
+    std::cout << "lines "   << lines   << std::endl;
+    std::cout << "columns " << columns << std::endl;
 
     std::cout << "\x1b[31m" << std::endl;
     std::cout << "Test"     << std::endl;
 
     //std::cout << "\x1b[35m" << std::endl;
-    printf(CSI "35m");
-    printf("\n");
+    std::cout << CSI << "35m";
+    std::cout << std::endl;
 
     exchangeName = "";
     lastPrice    = 0.0;
     avgPrice     = 0.0;
 }
 
-void Display::setLogLevel(int value)
-{
-    logLevel = value;
-}
-
-void Display::setExchangeName(const QString &value)
-{
-    exchangeName = value;
-}
-
 #ifdef ISWIN
-bool Display::EnableVTMode()
-{
+bool Display::EnableVTMode() {
+
     // Set output mode to handle virtual terminal sequences
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE)
@@ -110,13 +100,13 @@ bool Display::getTerminalSize() {
     return windowChanged;
 }
 
-void Display::updateScreen()
-{
-  getTerminalSize();
-  clearScreen();
-  drawHeader();
-  drawWorkOrders();
-  drawLog();
+void Display::updateScreen() {
+
+    getTerminalSize();
+    clearScreen();
+    drawHeader();
+    drawWorkOrders();
+    drawLog();
 }
 
 void Display::addToLog(int workID, QString classID, QString logString, int severity) {
@@ -138,8 +128,8 @@ void Display::addToLog(int workID, QString classID, QString logString, int sever
     updateScreen();
 }
 
-void Display::updateExchangePrices(QString symbol, double lastPrice, double avgPrice)
-{
+void Display::updateExchangePrices(QString symbol, double lastPrice, double avgPrice) {
+
     this->symbol    = symbol;
     this->lastPrice = lastPrice;
     this->avgPrice  = avgPrice;
@@ -205,19 +195,21 @@ void Display::drawHeader() {
 void Display::drawWorkOrders() {
   resetAttributes();
 
-  for(int i = 0; i < woList.size(); i++) {
+  for(const auto &wo : woList) {
 
-    if(currentLine > lines)
-      break;
+    if(currentLine > lines) {
+        break;
+    }
 
-    QString wo = woList.at(i);
-
-    if(wo.contains("ERROR"))
-      setForegroundColour(RED);
-    else if(wo.contains("COMPLETE"))
-      setForegroundColour(GREEN);
-    else
-      setForegroundColour(WHITE);
+    if(wo.contains("ERROR")) {
+        setForegroundColour(RED);
+    }
+    else if(wo.contains("COMPLETE")) {
+        setForegroundColour(GREEN);
+    }
+    else {
+        setForegroundColour(WHITE);
+    }
 
     std::cout << wo.toStdString() << std::endl;
     currentLine++;
@@ -231,15 +223,15 @@ void Display::drawLog() {
     std::cout << std::endl;
     currentLine++;
 
-    for(int i = 0; i < logList.size(); i++) {
+    for(const auto &logItem : logList) {
 
-        if(currentLine > lines)
+        if(currentLine > lines) {
           break;
+        }
 
-        LogItem logItem = logList.at(i);
-
-        if(logItem.getSeverity() < this->logLevel)
+        if(logItem.getSeverity() < this->logLevel) {
             continue;
+        }
 
         // Set colour according to log severity
         switch(logItem.getSeverity()) {
@@ -330,8 +322,8 @@ void Display::setBackgroundColour(int colour, bool bright) {
     std::cout << code.toStdString();
 }
 
-LogItem::LogItem(QString time, int workID, QString classID, QString logString, int severity)
-{
+LogItem::LogItem(QString time, int workID, QString classID, QString logString, int severity) {
+
     this->time      = time;
     this->workID    = workID;
     this->classID   = classID;
@@ -339,27 +331,11 @@ LogItem::LogItem(QString time, int workID, QString classID, QString logString, i
     this->severity  = severity;
 }
 
-int LogItem::getSeverity() const
-{
-    return severity;
-}
+void Display::setLogLevel    (int   value)          { logLevel     = value; }
+void Display::setExchangeName(const QString &value) { exchangeName = value; }
 
-QString LogItem::getClassID() const
-{
-    return classID;
-}
-
-QString LogItem::getLogString() const
-{
-    return logString;
-}
-
-QString LogItem::getTime() const
-{
-    return time;
-}
-
-int LogItem::getWorkID() const
-{
-    return workID;
-}
+int     LogItem::getSeverity  () const { return severity ; }
+QString LogItem::getClassID   () const { return classID  ; }
+QString LogItem::getLogString () const { return logString; }
+QString LogItem::getTime      () const { return time     ; }
+int     LogItem::getWorkID    () const { return workID   ; }

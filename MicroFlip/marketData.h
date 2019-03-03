@@ -79,16 +79,15 @@ private:
   uint updated;
 };
 
-class MarketData
-{
+class MarketData {
 
 public:
   MarketData();
   MarketData(Config *C, bool loadFromFile = false);
   ~MarketData();
 
-  void parseRawTradeData(QJsonArray *rawData);
-  void parseRawDepthData(QJsonObject *rawData);
+  void parseRawTradeData (QJsonArray  *rawData);
+  void parseRawDepthData (QJsonObject *rawData);
   void parseRawTickerData(QJsonObject *rawData);
 
   bool loadTradeDataFromFile(uint maxAge);
@@ -99,24 +98,24 @@ public:
   uint findClosestBin();
   uint findClosestBin(uint desiredTime);
 
-  TradeDepth              getTradeDepth();
-  QList<Trade>            getTradeData();
-  QList<DataPoint>        getBinnedTradeData();
-  QList<QList<double> >   getMAList();
-  Ticker                  getTicker();
+  TradeDepth           getTradeDepth();
+  QList<Trade>         getTradeData();
+  QList<DataPoint>     getBinnedTradeData();
+  QList<QList<double>> getMAList();
+  Ticker               getTicker();
 
 private:
   Config *c;
   // Ticker t;
   QString tradeDataFileName;
 
-  TradeDepth    tradeDepth;
-  Ticker        ticker;
+  TradeDepth tradeDepth;
+  Ticker     ticker;
 
-  QList<Trade> tradeData;
+  QList<Trade>     tradeData;
   QList<DataPoint> binnedTradeData;
 
-  QList<QList<double> > MAList;
+  QList<QList<double>> MAList;
 
   int dataPoints;
   int binSize;

@@ -5,12 +5,10 @@ QObject(parent) {
 
 }
 
-Downloader::~Downloader() {
-
-}
+Downloader::~Downloader() = default;
 
 // Generates a network request based on the given url
-QNetworkRequest Downloader::generateRequest(QUrl url) {
+QNetworkRequest Downloader::generateRequest(const QUrl &url) {
 
   return QNetworkRequest(url);
 }
@@ -37,10 +35,9 @@ void Downloader::addHeaderToRequest(QNetworkRequest *request, QByteArray headerN
 //   return QNetworkRequest(url);
 // }
 
-//
 QNetworkAccessManager* Downloader::doDownload(QNetworkRequest request, QObject * receiver, const char * method) {
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    auto *manager = new QNetworkAccessManager(this);
 
     manager->get(request);
 
@@ -60,7 +57,7 @@ void Downloader::doDownload(QNetworkRequest request, QNetworkAccessManager *mana
 
 QNetworkAccessManager* Downloader::doPostDownload(QNetworkRequest request, QByteArray data, QObject * receiver, const char * method) {
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    auto *manager = new QNetworkAccessManager(this);
 
     connect(manager, SIGNAL(finished(QNetworkReply*)),
     receiver, method);
@@ -80,7 +77,7 @@ void Downloader::doPostDownload(QNetworkRequest request, QNetworkAccessManager *
 
 QNetworkAccessManager *Downloader::doDeleteRequest(QNetworkRequest request, QObject *receiver, const char *method) {
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    auto *manager = new QNetworkAccessManager(this);
 
     connect(manager, SIGNAL(finished(QNetworkReply*)),
     receiver, method);
@@ -97,66 +94,3 @@ void Downloader::doDeleteRequest(QNetworkRequest request, QNetworkAccessManager 
 
     manager->deleteResource(request);
 }
-
-// Checks the validity of a network reply
-bool Downloader::checkReply(QNetworkReply *reply) {
-
-  if(reply->error()) {
-
-    qDebug() << "ERROR!";
-    qDebug() << reply->errorString();
-
-    return false;
-  }
-  else {
-
-    qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
-    qDebug() << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();
-    qDebug() << reply->header(QNetworkRequest::ContentLengthHeader).toULongLong();
-    qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    qDebug() << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-
-    return true;
-  }
-}
-
-// //
-// void Downloader::doDownload(QNetworkRequest request) {
-//
-//   manager = new QNetworkAccessManager(this);
-//
-//   connect(manager, SIGNAL(finished(QNetworkReply*)),
-//   this, SLOT(replyFinished(QNetworkReply*)));
-//
-//   manager->get(request);
-// }
-//
-// //
-// void Downloader::replyFinished (QNetworkReply *reply) {
-//
-//   if(reply->error())
-//   {
-//     qDebug() << "ERROR!";
-//     qDebug() << reply->errorString();
-//   }
-//   else
-//   {
-//     qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
-//     qDebug() << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();
-//     qDebug() << reply->header(QNetworkRequest::ContentLengthHeader).toULongLong();
-//     qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-//     qDebug() << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-//
-//     QFile *file = new QFile("downloadedData.json");
-//     if(file->open(QFile::WriteOnly))
-//     {
-//       file->write(reply->readAll());
-//       file->flush();
-//       file->close();
-//     }
-//     delete file;
-//   }
-//
-//   reply->deleteLater();
-//   // delete reply;
-// }

@@ -46,8 +46,9 @@ class Balance {
 public:
   Balance(QString Currency, double Amount) { currency = Currency; amount = Amount; }
 
-  QString getCurrency()              { return currency; }
-  double  getAmount  ()              { return amount;   }
+  QString getCurrency() const { return currency; }
+  double  getAmount  () const { return amount;   }
+
   void    setAmount  (double Amount) { amount = Amount; }
 
 private:
@@ -107,13 +108,12 @@ Q_DECLARE_METATYPE(Ticker)
 ///
 /// \brief The Exchange interface
 ///
-class Exchange : public QObject
-{
-  Q_OBJECT
+class Exchange : public QObject {
+
+    Q_OBJECT
+
 public:
-  explicit Exchange(QObject *parent = 0);
-
-
+  explicit Exchange(QObject *parent = nullptr);
 
   void setConfig(Config *config);
 
@@ -139,11 +139,11 @@ private:
   virtual void   parseRawDepthData (QNetworkReply *reply) = 0;
   virtual void   parseRawTradesData(QNetworkReply *reply) = 0;
 
-  virtual void    parseRawBalancesData        (QNetworkReply *reply) = 0;
-  virtual qint64  parseRawOrderCreationData   (QNetworkReply *reply) = 0;
-  virtual void    parseRawOrderCancelationData(QNetworkReply *reply) = 0;
-  virtual void    parseRawActiveOrdersData    (QNetworkReply *reply) = 0;
-  virtual int     parseRawOrderInfoData       (QNetworkReply *reply) = 0;
+  virtual void   parseRawBalancesData        (QNetworkReply *reply) = 0;
+  virtual qint64 parseRawOrderCreationData   (QNetworkReply *reply) = 0;
+  virtual void   parseRawOrderCancelationData(QNetworkReply *reply) = 0;
+  virtual void   parseRawActiveOrdersData    (QNetworkReply *reply) = 0;
+  virtual int    parseRawOrderInfoData       (QNetworkReply *reply) = 0;
 
 protected:
   Config *config;
@@ -178,7 +178,7 @@ protected:
 public slots:
   virtual void startWork() = 0;
 
-  void receiveInitialiseSymbol  (QString symbol);
+  void receiveInitialiseSymbol  (const QString& symbol);
   void receiveRequestForTicker  (QString pair,    QObject *sender);
   void receiveUpdateMarketTicker(QString pair,    QObject *sender, int SenderID);
   void receiveUpdateMarketDepth (QString pair,    QObject *sender, int SenderID);
@@ -199,8 +199,8 @@ public slots:
   void updateOrderInfoReply   (QNetworkReply *reply);
 
 protected slots:
-  void updateTick ();
-  void updateTick2();
+  void updateTick   ();
+  void updateTick2  ();
   void updateTickers();
 
 signals:

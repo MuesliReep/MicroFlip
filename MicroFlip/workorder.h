@@ -24,88 +24,89 @@
 
 enum WorkState { ERROR = -1, INITIALISE, START, WAITINGFORTICKER, CREATESELL, WAITINGFORSELL, SELLORDER, SOLD, CREATEBUY, WAITINGFORBUY, BUYORDER, COMPLETE };
 
-class WorkOrder : public QObject
-{
-  Q_OBJECT
+class WorkOrder : public QObject {
+
+    Q_OBJECT
+
 public:
-  WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget,
+    WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget,
             int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice = 0.0, int sellTTL = 5, int buyTTL = 1440, bool highSpeed = false);
 
-  double  getSellPrice() { return sellPrice; }
-  int     getWorkID()    { return workID;    }
-  QString getPair()      { return pair;      }
-  int     getOrderSide() { return (workState == BUYORDER ? 0 : 1); }
+    double  getSellPrice() { return sellPrice; }
+    int     getWorkID   () { return workID;    }
+    QString getPair     () { return pair;      }
+    int     getOrderSide() { return (workState == BUYORDER ? 0 : 1); }
 
 private:
+    QString className = "WORKORDER";
 
-  QString className = "WORKORDER";
+    Exchange  *exchange;
+    WorkState  workState;
+    QTimer    *timer;
+    QThread   *workThread;
 
-  Exchange  *exchange;
-  WorkState  workState;
-  QTimer    *timer;
-  QThread   *workThread;
+    qint64  sellOrderID;
+    qint64  buyOrderID;
+    int     workID;
 
-  qint64 sellOrderID;
-  qint64 buyOrderID;
-  int    workID;
+    double  maxAmount;
+    double  profitTarget;
+    double  sellPrice;
+    double  buyPrice;
+    QString pair;
+    double  minSellPrice;
+    double  minimumPrice;
+    int     sellTTL;
+    int     buyTTL;
+    bool    highSpeed;
+    int     mode;
+    bool    singleShot;
 
-  double  maxAmount;
-  double  profitTarget;
-  double  sellPrice;
-  double  buyPrice;
-  QString pair;
-  double  minSellPrice;
-  double  minimumPrice;
-  int     sellTTL;
-  int     buyTTL;
-  bool    highSpeed;
-  int     mode;
-  bool    singleShot;
+    Ticker  currentTicker;
 
-  Ticker currentTicker;
+    int     intervalShort;
+    int     intervalLong;
+    bool    stdInterval;
+    bool    longIntervalRequest;
 
-  int  intervalShort;
-  int  intervalLong;
-  bool stdInterval;
-  bool longIntervalRequest;
+    QDateTime sellOrderTime;
+    QDateTime buyOrderTime;
 
-  QDateTime sellOrderTime;
-  QDateTime buyOrderTime;
+    void createSellOrder(double amount);
+    void createBuyOrder ();
 
-  void createSellOrder(double amount);
-  void createBuyOrder ();
+    void calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit);
 
-  void calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit);
-
-  void initialiseSymbol(QString symbol);
-  void requestUpdateMarketTicker();
-  void requestCreateOrder(int type, double rate, double amount);
-  void requestOrderInfo  (qint64 orderID);
-  void requestCancelOrder(qint64 orderID);
+    void initialiseSymbol(QString symbol);
+    void requestUpdateMarketTicker();
+    void requestCreateOrder(int type, double rate, double amount);
+    void requestOrderInfo  (qint64 orderID);
+    void requestCancelOrder(qint64 orderID);
 
 private slots:
-  void updateTick();
+    void updateTick();
 
 public slots:
-  void UpdateMarketTickerReply(Ticker ticker);
+    void UpdateMarketTickerReply(Ticker ticker);
 
-  void orderCreateReply(qint64 orderID);
-  void orderInfoReply  (int status);
-  void orderCancelReply(bool succes);
+    void orderCreateReply(qint64 orderID);
+    void orderInfoReply  (int status);
+    void orderCancelReply(bool succes);
 
-  void startOrder();
+    void startOrder();
 
 signals:
-  void sendInitialiseSymbol  (QString symbol);
-  void sendRequestForTicker  (QString pair,   QObject *sender);
-  void sendCreateOrder       (QString pair,   int type, double price, double amount, QObject *sender, int senderID);
-  void sendUpdateOrderInfo   (qint64 orderID, QObject *sender, int senderID);
-  void sendCancelOrder       (qint64 orderID, QObject *sender, int senderID);
+    void sendInitialiseSymbol  (QString symbol);
+    void sendRequestForTicker  (QString pair,   QObject *sender);
+    void sendCreateOrder       (QString pair,   int type, double price, double amount, QObject *sender, int senderID);
+    void sendUpdateOrderInfo   (qint64 orderID, QObject *sender, int senderID);
+    void sendCancelOrder       (qint64 orderID, QObject *sender, int senderID);
 
-  void updateLog  (int workID, QString classID, QString logString, int severity);
-  void updateState(int workID, QString state);
+    void updateLog  (int workID, QString classID, QString logString, int severity);
+    void updateState(int workID, QString state);
 
-  void updateExchangePrices(double lastPrice, double avgPrice);
+    void updateExchangePrices(double lastPrice, double avgPrice);
+
 };
 
 #endif // WORKORDER_H

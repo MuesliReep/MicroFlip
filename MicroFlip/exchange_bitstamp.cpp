@@ -3,55 +3,55 @@
 
 Exchange_bitstamp::Exchange_bitstamp() {
 
-  currentTask = ExchangeTask();
+    currentTask = ExchangeTask();
 
-  fee = 0.25;
-  this->exchangeName = "Bitstamp";
+    fee = 0.25;
+    this->exchangeName = "Bitstamp";
 
-  // Initiate download managers
-  tickerDownloadManager             = new QNetworkAccessManager(this);
-  updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
-  updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
-  updateBalancesDownloadManager     = new QNetworkAccessManager(this);
-  createTradeDownloadManager        = new QNetworkAccessManager(this);
-  orderInfoDownloadManager          = new QNetworkAccessManager(this);
-  cancelOrderDownloadManager        = new QNetworkAccessManager(this);
-  activeOrdersDownloadManager       = new QNetworkAccessManager(this);
+    // Initiate download managers
+    tickerDownloadManager             = new QNetworkAccessManager(this);
+    updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
+    updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
+    updateBalancesDownloadManager     = new QNetworkAccessManager(this);
+    createTradeDownloadManager        = new QNetworkAccessManager(this);
+    orderInfoDownloadManager          = new QNetworkAccessManager(this);
+    cancelOrderDownloadManager        = new QNetworkAccessManager(this);
+    activeOrdersDownloadManager       = new QNetworkAccessManager(this);
 
-  // Start the interval timers
-  timer  = new QTimer(this);
-  //timer2 = new QTimer(this);
+    // Start the interval timers
+    timer  = new QTimer(this);
+    //timer2 = new QTimer(this);
 
-  connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
-  //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
-
+    connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
+    //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
 }
 
 void Exchange_bitstamp::startWork() {
 
-  apiKey     = config->getApiKey();
-  apiSecret  = config->getApiSecret();
-  customerID = config->getCustomerID();
+    apiKey     = config->getApiKey();
+    apiSecret  = config->getApiSecret();
+    customerID = config->getCustomerID();
 
-  //timer->start(c->getCoolDownTime()*1100);
-  //timer2->start(1*1100); // TODO: determine correct amount
+    //timer->start(c->getCoolDownTime()*1100);
+    //timer2->start(1*1100); // TODO: determine correct amount
 
-  // TODO: bitstamp is 600 calls per 10mins
-  uint coolDownTime = 1010;
-  timer->start(coolDownTime);
+    // TODO: bitstamp is 600 calls per 10mins
+    uint coolDownTime = 1010;
+    timer->start(coolDownTime);
 }
 
 void Exchange_bitstamp::createNonce(QByteArray *nonce) {
 
-  uint now = QDateTime::currentDateTime().toMSecsSinceEpoch() / 250;
+    uint now = QDateTime::currentDateTime().toMSecsSinceEpoch() / 250;
 
-  if(lastNonce == now) {
-    lastNonce+=2;
-  }
-  else
-    lastNonce = now;
+    if(lastNonce == now) {
+        lastNonce+=2;
+    }
+    else {
+        lastNonce = now;
+    }
 
-  nonce->setNum(lastNonce);
+    nonce->setNum(lastNonce);
 }
 
 //----------------------------------//
@@ -60,26 +60,28 @@ void Exchange_bitstamp::createNonce(QByteArray *nonce) {
 
 void Exchange_bitstamp::updateMarketTicker(QString pair) {
 
-  // Create the request to download new data
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/v2/ticker/"+pair));
+    // Create the request to download new data
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://www.bitstamp.net/api/v2/ticker/"+pair));
 
-  // Execute the download
-  downloader.doDownload(request, tickerDownloadManager, this, SLOT(updateMarketTickerReply(QNetworkReply*)));
+    // Execute the download
+    downloader.doDownload(request, tickerDownloadManager, this, SLOT(updateMarketTickerReply(QNetworkReply*)));
 }
 
 void Exchange_bitstamp::updateMarketDepth(QString pair) {
-  (void) pair;
-  // TODO
+
+    // TODO
+    (void) pair;
 }
 
 void Exchange_bitstamp::updateMarketTrades(QString pair) {
-  (void) pair;
-  // TODO
+
+    // TODO
+    (void) pair;
 }
 
 void Exchange_bitstamp::updateBalances() {
 
-  // TODO
+    // TODO
 }
 
 void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double Amount) {
@@ -88,8 +90,9 @@ void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double 
     QByteArray type(Type == 0 ? "buy" : "sell");
 
     int precision = 2;
-    if(Pair == "xrpusd")
+    if(Pair == "xrpusd") {
         precision = 5;
+    }
 
     QByteArray price("price=");
     price.append(QString::number(Rate,'f',precision));
@@ -129,13 +132,15 @@ void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double 
 }
 
 void Exchange_bitstamp::cancelOrder(qint64 orderID) {
-  (void) orderID;
-  // TODO
+
+    // TODO
+    (void) orderID;
 }
 
 void Exchange_bitstamp::updateActiveOrders(QString pair) {
-  (void) pair;
-  // TODO
+
+    // TODO
+    (void) pair;
 }
 
 void Exchange_bitstamp::updateOrderInfo(qint64 OrderID) {
@@ -209,22 +214,22 @@ Ticker Exchange_bitstamp::parseRawTickerData(QNetworkReply *reply) {
     return ticker;
 }
 
-void Exchange_bitstamp::parseRawDepthData(QNetworkReply *reply)
-{
-    (void) reply;
+void Exchange_bitstamp::parseRawDepthData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
-void Exchange_bitstamp::parseRawTradesData(QNetworkReply *reply)
-{
-    (void) reply;
+void Exchange_bitstamp::parseRawTradesData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
-void Exchange_bitstamp::parseRawBalancesData(QNetworkReply *reply)
-{
-    (void) reply;
+void Exchange_bitstamp::parseRawBalancesData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
 qint64 Exchange_bitstamp::parseRawOrderCreationData(QNetworkReply *reply) {
@@ -254,16 +259,16 @@ qint64 Exchange_bitstamp::parseRawOrderCreationData(QNetworkReply *reply) {
     return orderID;
 }
 
-void Exchange_bitstamp::parseRawOrderCancelationData(QNetworkReply *reply)
-{
-    (void) reply;
+void Exchange_bitstamp::parseRawOrderCancelationData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
-void Exchange_bitstamp::parseRawActiveOrdersData(QNetworkReply *reply)
-{
-    (void) reply;
+void Exchange_bitstamp::parseRawActiveOrdersData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
 int Exchange_bitstamp::parseRawOrderInfoData(QNetworkReply *reply) {

@@ -3,8 +3,7 @@
 
 #include <QString>
 
-class Order
-{
+class Order {
 
 public:
   Order();
@@ -13,19 +12,19 @@ public:
   ~Order();
 
   QString getOrderName();
-  double getPair1();
-  double getPair2();
-  uint getOrderID();
-  uint getType();
-  uint getTimeStamp();
+  double  getPair1    ();
+  double  getPair2    ();
+  uint    getOrderID  ();
+  uint    getType     ();
+  uint    getTimeStamp();
 
 private:
   QString name;
-  double pair1;
-  double pair2;
-  uint orderID;
-  uint type;
-  uint timeStamp;
+  double  pair1;
+  double  pair2;
+  uint    orderID;
+  uint    type;
+  uint    timeStamp;
 
 };
 

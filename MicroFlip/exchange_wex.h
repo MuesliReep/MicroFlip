@@ -3,17 +3,17 @@
 
 #include "exchange.h"
 
-class Exchange_wex : public Exchange
-{
+class Exchange_wex : public Exchange {
+
     Q_OBJECT
-  public:
+
+public:
     Exchange_wex();
 
 public slots:
     void startWork();
 
-  private:
-
+private:
     Downloader downloader;
 
     QString apiKey;
@@ -43,6 +43,6 @@ public slots:
     int     parseRawOrderInfoData       (QNetworkReply *reply);
 
     bool    checkSuccess(QJsonObject *object);
-  };
+};
 
 #endif // EXCHANGE_WEX_H
