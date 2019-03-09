@@ -3,6 +3,7 @@
 #include "common.h"
 
 #include <QDateTime>
+#include <utility>
 
 Exchange::Exchange(QObject *parent) : QObject(parent)
 {
@@ -74,7 +75,7 @@ void Exchange::executeExchangeTask(ExchangeTask *exchangeTask) {
 //          Public Slots            //
 //----------------------------------//
 
-void Exchange::receiveRequestForTicker(QString pair, QObject *sender) {
+void Exchange::receiveRequestForTicker(const QString& pair, QObject *sender) {
 
     Ticker requestedTicker;
 
@@ -101,19 +102,19 @@ void Exchange::receiveInitialiseSymbol(const QString &symbol) {
 
 void Exchange::receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID) {
 
-    QList<QString> attr; attr.append(QString(pair));
+    QList<QString> attr; attr.append(QString(std::move(pair)));
     exchangeTasks.append(ExchangeTask(0, sender, SenderID, attr));
 }
 
 void Exchange::receiveUpdateMarketDepth(QString pair, QObject *sender, int SenderID) {
 
-    QList<QString> attr; attr.append(QString(pair));
+    QList<QString> attr; attr.append(QString(std::move(pair)));
     exchangeTasks.append(ExchangeTask(1, sender, SenderID, attr));
 }
 
 void Exchange::receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID) {
 
-    QList<QString> attr; attr.append(QString(pair));
+    QList<QString> attr; attr.append(QString(std::move(pair)));
     exchangeTasks.append(ExchangeTask(2, sender, SenderID, attr));
 }
 
@@ -124,7 +125,7 @@ void Exchange::receiveUpdateBalances(QObject *sender, int SenderID) {
 
 void Exchange::receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID) {
 
-    QList<QString> attr; attr.append(QString(pair));
+    QList<QString> attr; attr.append(QString(std::move(pair)));
     attr.append(QString(QString::number(type)));
     attr.append(QString(QString::number(rate)));
     attr.append(QString(QString::number(amount)));
@@ -139,7 +140,7 @@ void Exchange::receiveCancelOrder(qint64 orderID, QObject *sender, int SenderID)
 
 void Exchange::receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID) {
 
-    QList<QString> attr; attr.append(QString(pair));
+    QList<QString> attr; attr.append(QString(std::move(pair)));
     exchangeTasks.append(ExchangeTask(6, sender, SenderID, attr));
 }
 

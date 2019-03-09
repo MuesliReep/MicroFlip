@@ -28,7 +28,7 @@ MarketData::~MarketData() = default;
 // Formula: ClosestBin = CurrentTime - (CurrentTime % binSize) + binSize
 uint MarketData::findClosestBin() {
 
-  uint currentTime = QDateTime::currentDateTime().toTime_t();
+  uint currentTime = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
   return findClosestBin(currentTime);
 }
 
@@ -61,14 +61,15 @@ QList<double> MarketData::runSMA(int size) {
     for(int j = 0; j < size; j++) {
 
       // If we go outside dataset break so we can go to the next bin
-      if(i+j > dataPoints-1)
+      if(i+j > dataPoints-1) {
         break;
+      }
 
       // Add the closing price
       accumulator += binnedTradeData[i+j].getClose();
     }
 
-    SMAList.prepend(accumulator / (double)size);
+    SMAList.prepend(accumulator / static_cast<double>(size));
   }
 
   return SMAList;
@@ -81,7 +82,7 @@ void MarketData::binTradeData() {
   binnedTradeData.clear();
 
   // Determine the oldest allowed trade according to the number of data points & bin size
-  uint maxAge            = dataPoints * binSize;
+  uint maxAge            = static_cast<uint>(dataPoints * binSize);
   uint currentTimeStamp  = findClosestBin();
   uint maxTimeStamp      = currentTimeStamp - maxAge;
 
@@ -102,8 +103,8 @@ void MarketData::binTradeData() {
   // 1 is subtracted from i because either a timestamp was found older than allowed and the previous one needs to be used
   // Or, the for loop went through all the data in which case the last timestamp needs to be used which is the list size -1
 
-  uint minIntervalStamp = maxTimeStamp; // The youngest timestamp
-  uint maxIntervalStamp = maxTimeStamp; // The oldest timestamp
+  uint minIntervalStamp; // The youngest timestamp
+  uint maxIntervalStamp; // The oldest timestamp
 
   // For each bin calculate the opening and closing prices.
   // Also calculate the average price
@@ -113,16 +114,17 @@ void MarketData::binTradeData() {
     counter++; // Go to next bin
 
     // Determine the min and max timestamps for this time interval
-    minIntervalStamp = maxTimeStamp + (binSize * (counter+1));
-    maxIntervalStamp = maxTimeStamp + (binSize * counter);
+    minIntervalStamp = maxTimeStamp + static_cast<uint>(binSize * (counter+1));
+    maxIntervalStamp = maxTimeStamp + static_cast<uint>(binSize * counter);
 
     // Create a list with all the trades that occured in this time interval (bin)
     QList<Trade> intervalTrades;
 
     for( ; x >= 0; x--) {
 
-      if(tradeData[x].getTimeStamp() < maxIntervalStamp)
+      if(tradeData[x].getTimeStamp() < maxIntervalStamp) {
         qDebug() << "ERROR timestamp is older than max allowed: " << tradeData[x].getTimeStamp() << "\tMax: " << maxIntervalStamp;
+      }
 
       // If a timestamp is found that is not part of our search area break out of the for loop
       if(!(tradeData[x].getTimeStamp() >= maxIntervalStamp && tradeData[x].getTimeStamp() <= minIntervalStamp)) {
@@ -136,10 +138,10 @@ void MarketData::binTradeData() {
 
     // If no trades took place or no data is available for this time interval(bin)
     // use the previous value. If no previous value is available use zero.
-    if(!(intervalTrades.size()>0)) {
+    if(intervalTrades.empty()) {
 
       // Check if there is a previous value to use
-      if(!(binnedTradeData.size()>0)) {
+      if(binnedTradeData.empty()) {
 
         binnedTradeData.prepend(DataPoint(maxIntervalStamp,0,0,0,0,0,0)); // The list is empty, create a zero value datapoint
       } else { // Use the previous value
@@ -163,23 +165,26 @@ void MarketData::binTradeData() {
       double  volume    = 0;
 
       // Find High/Low values & calculate volume
-      for(int k = 0; k < intervalTrades.size(); k++) {
+      for(auto & intervalTrade : intervalTrades) {
 
-        if(intervalTrades[k].getPrice() > high)
-          high = intervalTrades[k].getPrice();
+        if(intervalTrade.getPrice() > high) {
+          high = intervalTrade.getPrice();
+        }
 
-        if(intervalTrades[k].getPrice() < low)
-          low = intervalTrades[k].getPrice();
+        if(intervalTrade.getPrice() < low) {
+          low = intervalTrade.getPrice();
+        }
 
-        volume += intervalTrades[k].getAmount();
+        volume += intervalTrade.getAmount();
       }
 
       // Calculate average over bin // TODO: should use median values for average
       double  average;
       double  sum = 0;
 
-      for(int k=0; k < intervalTrades.size(); k++)
-        sum += intervalTrades[k].getPrice();
+      for(auto intervalTrade : intervalTrades) {
+        sum += intervalTrade.getPrice();
+      }
 
       average = sum / intervalTrades.size();
 
@@ -200,22 +205,24 @@ void MarketData::parseRawTradeData(QJsonArray *rawData) {
   // Retrieve array form JSON object
   // jTrades = rawData->value("btc_usd").toArray();
 
-  if(!(rawData->size()>0))
+  if(rawData->empty()) {
     return;
+  }
 
   // Append new trades to the beginning of the trades list
   // Work through the list from oldest to newest
   for(int i = rawData->size(); i >= 0; i--) {
 
-    uint timeStamp = (uint)rawData->at(i).toObject().value("timestamp").toInt();
+    uint timeStamp = static_cast<uint>(rawData->at(i).toObject().value("timestamp").toInt());
 
     // Check if there is any existing data to begin with
-    if(tradeData.size() > 0) {
+    if(!tradeData.empty()) {
 
       // Check if the timestamp is newer than the first in the list
       // otherwise skip it and go to the next
-      if(timeStamp < tradeData[0].getTimeStamp())
+      if(timeStamp < tradeData[0].getTimeStamp()) {
         continue;
+      }
 
       // If timestamps are the same check the tradeIDs
       // Because more than two trades can happen in one second,
@@ -241,7 +248,7 @@ void MarketData::parseRawTradeData(QJsonArray *rawData) {
         // Next check the trade IDs
 
         // Trade ID of the trade we want to insert
-        uint tradeID = (uint)rawData->at(i).toObject().value("tid").toInt();
+        uint tradeID = static_cast<uint>(rawData->at(i).toObject().value("tid").toInt());
 
         bool duplicate = false;
 
@@ -254,8 +261,9 @@ void MarketData::parseRawTradeData(QJsonArray *rawData) {
           }
         }
 
-        if(duplicate)
+        if(duplicate) {
           continue;
+        }
       }
     }
 
@@ -266,7 +274,7 @@ void MarketData::parseRawTradeData(QJsonArray *rawData) {
     // uint type         = (uint)tradeObject.value("type").toInt();
     double price      = tradeObject.value("price").toDouble();
     double amount     = tradeObject.value("amount").toDouble();
-    uint tradeID      = (uint)tradeObject.value("tid").toInt();
+    uint tradeID      = static_cast<uint>(tradeObject.value("tid").toInt());
 
     Trade trade(price, amount, tradeID, timeStamp);
 
@@ -286,10 +294,12 @@ void MarketData::parseRawTradeData(QJsonArray *rawData) {
 
   for(int i = 0; i < 2; i++) { // TODO: Number of MAs should be variable
 
-      if(i==1)
+      if(i==1) {
         MAList.append(runSMA(7));
-      else
+      }
+      else {
         MAList.append(runSMA(30));
+      }
   }
 }
 
@@ -308,18 +318,18 @@ void MarketData::parseRawDepthData(QJsonObject *rawData) {
   QList<Order> bids;
 
   // Populate ask orders list
-  for(int i=0;i<jAsks.size();i++) {
+  for(auto ask : jAsks) {
 
-    double pair1 = jAsks[i].toArray()[0].toDouble();
-    double pair2 = jAsks[i].toArray()[1].toDouble();
+    double pair1 = ask.toArray()[0].toDouble();
+    double pair2 = ask.toArray()[1].toDouble();
     asks.append(Order("BTC/USD",pair1,pair2));
   }
 
   // Populate bid orders list
-  for(int i=0;i<jBids.size();i++) { // TODO: order should be in reverse
+  for(auto bid : jBids) { // TODO: order should be in reverse
 
-    double pair1 = jBids[i].toArray()[0].toDouble();
-    double pair2 = jBids[i].toArray()[1].toDouble();
+    double pair1 = bid.toArray()[0].toDouble();
+    double pair2 = bid.toArray()[1].toDouble();
     bids.append(Order("BTC/USD",pair1,pair2));
   }
 
@@ -347,13 +357,14 @@ bool MarketData::loadTradeDataFromFile(uint maxAge) {
 
     qDebug() << "Loading trade data from " << tradeDataFileName;
 
-    QJsonParseError error;
+    QJsonParseError error{};
 
-    json = QJsonDocument().fromJson(file.readAll(), &error);
+    json = QJsonDocument::fromJson(file.readAll(), &error);
 
     // Check if JSON was correctly parsed
-    if (error.error == QJsonParseError::NoError)
+    if (error.error == QJsonParseError::NoError) {
       result = true;
+    }
     else {
 
       qDebug() << error.errorString();
@@ -374,15 +385,15 @@ bool MarketData::loadTradeDataFromFile(uint maxAge) {
     QJsonArray marketData = object.value("marketData").toArray();
 
     // Convert the JSON array to a Trade List
-    for(int i = 0; i < marketData.size(); i++) {
+    for(auto tradeReference : marketData) {
 
       // Convert the JSON values
-      QJsonObject tradeObject = marketData[i].toObject();
+      QJsonObject tradeObject = tradeReference.toObject();
 
       double  price     = tradeObject.value("price").toDouble();
       double  amount    = tradeObject.value("amount").toDouble();
-      uint    tradeID   = (uint)tradeObject.value("tradeID").toInt();
-      uint    timeStamp = (uint)tradeObject.value("timeStamp").toInt();
+      uint    tradeID   = static_cast<uint>(tradeObject.value("tradeID").toInt());
+      uint    timeStamp = static_cast<uint>(tradeObject.value("timeStamp").toInt());
 
       // Check if the timeStamp is younger than max allowed
       if(timeStamp < maxTimeStamp) {
@@ -412,15 +423,13 @@ void MarketData::saveTradeDataToFile() {
   QJsonArray marketData;
 
   // Insert the currently stored trade data into the JSON array
-  for(int i = 0; i < tradeData.size(); i++) {
+  for(auto trade : tradeData) {
 
     QJsonObject tradeObject;
-    Trade trade = tradeData[i];
-
-    tradeObject.insert("price", QJsonValue(trade.getPrice()));
-    tradeObject.insert("amount", QJsonValue(trade.getAmount()));
-    tradeObject.insert("tradeID", QJsonValue((int)trade.getTradeID()));
-    tradeObject.insert("timeStamp", QJsonValue((int)trade.getTimeStamp()));
+    tradeObject.insert("price",     QJsonValue(trade.getPrice ()));
+    tradeObject.insert("amount",    QJsonValue(trade.getAmount()));
+    tradeObject.insert("tradeID",   QJsonValue(static_cast<int>(trade.getTradeID  ())));
+    tradeObject.insert("timeStamp", QJsonValue(static_cast<int>(trade.getTimeStamp())));
 
     marketData.append(tradeObject);
   }

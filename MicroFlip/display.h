@@ -41,15 +41,15 @@ public:
 
 private:
 
-  int columns;
-  int lines;
+  int columns{};
+  int lines  {};
 
   QList<LogItem> logList;
   QList<QString> woList;
 
-  int currentLine;
+  int currentLine{};
 
-  int logLevel;
+  int logLevel{};
   QString exchangeName;
 
   QString symbol;
@@ -75,7 +75,7 @@ private:
 
 public slots:
 
-  void stateUpdate(int workID, QString state);
+  void stateUpdate(int workID, const QString& state);
   void addToLog   (int workID, QString classID, QString logString, int severity = 1);
 
   void updateExchangePrices(QString symbol, double lastPrice, double avgPrice);

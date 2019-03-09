@@ -42,17 +42,17 @@ private:
 
     Exchange  *exchange;
     WorkState  workState;
-    QTimer    *timer;
-    QThread   *workThread;
+    QTimer    *timer{};
+    QThread   *workThread{};
 
-    qint64  sellOrderID;
-    qint64  buyOrderID;
+    qint64  sellOrderID{};
+    qint64  buyOrderID{};
     int     workID;
 
     double  maxAmount;
     double  profitTarget;
-    double  sellPrice;
-    double  buyPrice;
+    double  sellPrice{};
+    double  buyPrice{};
     QString pair;
     double  minSellPrice;
     double  minimumPrice;
@@ -87,7 +87,7 @@ private slots:
     void updateTick();
 
 public slots:
-    void UpdateMarketTickerReply(Ticker ticker);
+    void UpdateMarketTickerReply(const Ticker& ticker);
 
     void orderCreateReply(qint64 orderID);
     void orderInfoReply  (int status);

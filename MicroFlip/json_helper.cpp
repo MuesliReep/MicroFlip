@@ -38,7 +38,7 @@ bool JSON_Helper::getObjectFromDocument(QJsonDocument *document, QJsonObject *ob
         return true;
     }
 
-    qDebug() << "JSON Document does not contain object";
+    qDebug("JSON Document does not contain object");
 
     return false;
 }
@@ -51,7 +51,7 @@ bool JSON_Helper::getArrayFromDocument(QJsonDocument *document, QJsonArray *arra
         return true;
     }
 
-    qDebug() << "JSON Document does not contain array";
+    qDebug() << QString("JSON Document does not contain array");
 
     return false;
 }

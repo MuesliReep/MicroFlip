@@ -1,5 +1,7 @@
 #include "workorder.h"
 
+#include <utility>
+
 #include "common.h"
 
 ///
@@ -24,7 +26,7 @@ WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
     this->workID        = workID;
     this->maxAmount     = maxAmount;
     this->profitTarget  = profitTarget;
-    this->pair          = pair;
+    this->pair          = std::move(pair);
     this->minSellPrice  = minSellPrice;
     this->minimumPrice  = minSellPrice;
     this->sellTTL       = sellTTL;
@@ -240,7 +242,7 @@ void WorkOrder::requestCancelOrder(qint64 orderID) {
 //             Replies              //
 //----------------------------------//
 
-void WorkOrder::UpdateMarketTickerReply(Ticker ticker) {
+void WorkOrder::UpdateMarketTickerReply(const Ticker& ticker) {
 
     // Check ticker validity
     if (ticker.getAge() < 0) {

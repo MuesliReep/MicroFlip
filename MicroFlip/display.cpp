@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <iostream>
+#include <utility>
 
 #define ESC "\x1b"
 #define CSI "\x1b["
@@ -118,7 +119,7 @@ void Display::addToLog(int workID, QString classID, QString logString, int sever
 
     QString time = QDateTime::currentDateTime().toString("hh:mm:ss");
 
-    logList.prepend(LogItem(time, workID, classID, logString, severity));
+    logList.prepend(LogItem(time, workID, std::move(classID), std::move(logString), severity));
 
     // Clean up log
     while(logList.size() > 50){
@@ -130,36 +131,36 @@ void Display::addToLog(int workID, QString classID, QString logString, int sever
 
 void Display::updateExchangePrices(QString symbol, double lastPrice, double avgPrice) {
 
-    this->symbol    = symbol;
-    this->lastPrice = lastPrice;
-    this->avgPrice  = avgPrice;
+    this->symbol    = std::move(symbol   );
+    this->lastPrice = std::move(lastPrice);
+    this->avgPrice  = std::move(avgPrice );
 
     updateScreen();
 }
 
-void Display::stateUpdate(int workID, QString state) {
+void Display::stateUpdate(int workID, const QString& state) {
 
-  int listID = -1;
+    int listID = -1;
 
-  QString woLine = "ID:" + QString::number(workID) + " \t" + state;
+    QString woLine = "ID:" + QString::number(workID) + " \t" + state;
 
-  // Check if this workID already exists
-  for(int i = 0; i < woList.size(); i++) {
-    QString check = "ID:" + QString::number(workID) + " ";
-    if(woList.at(i).contains(check)) {
-      listID = i;
-      break;
+    // Check if this workID already exists
+    for(int i = 0; i < woList.size(); i++) {
+        QString check = "ID:" + QString::number(workID) + " ";
+        if(woList.at(i).contains(check)) {
+            listID = i;
+            break;
+        }
     }
-  }
 
-  // If already exists replace, else append
-  if(listID > -1) {
-    woList.replace(listID, woLine);
-  } else {
-    woList.append(woLine);
-  }
+    // If already exists replace, else append
+    if(listID > -1) {
+        woList.replace(listID, woLine);
+    } else {
+        woList.append(woLine);
+    }
 
-  updateScreen();
+    updateScreen();
 }
 
 void Display::drawHeader() {
@@ -324,10 +325,10 @@ void Display::setBackgroundColour(int colour, bool bright) {
 
 LogItem::LogItem(QString time, int workID, QString classID, QString logString, int severity) {
 
-    this->time      = time;
+    this->time      = std::move(time);
     this->workID    = workID;
-    this->classID   = classID;
-    this->logString = logString;
+    this->classID   = std::move(classID);
+    this->logString = std::move(logString);
     this->severity  = severity;
 }
 

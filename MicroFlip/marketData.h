@@ -67,11 +67,11 @@ private:
 class Ticker {
 
 public:
-  Ticker( double high = 0,    double low = 0,
-          double avg = 0,     double vol = 0,
+  Ticker( double high    = 0, double low  = 0,
+          double avg     = 0, double vol  = 0,
           double vol_cur = 0, double last = 0,
-          double buy = 0,     double sell = 0,
-          uint updated = 0 );
+          double buy     = 0, double sell = 0,
+          uint updated   = 0 );
 
 private:
   double high, low, avg, vol;
@@ -105,7 +105,7 @@ public:
   Ticker               getTicker();
 
 private:
-  Config *c;
+  Config *c{};
   // Ticker t;
   QString tradeDataFileName;
 
@@ -117,8 +117,8 @@ private:
 
   QList<QList<double>> MAList;
 
-  int dataPoints;
-  int binSize;
+  int dataPoints{};
+  int binSize{};
 
   void binTradeData();
   QList<double> runEMA(int weight);

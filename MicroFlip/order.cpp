@@ -1,22 +1,24 @@
 #include "order.h"
 
+#include <utility>
+
 Order::~Order() = default;
 
 Order::Order(QString Name, double Pair1, double Pair2) {
 
-  name  = Name;
+  name  = std::move(Name);
   pair1 = Pair1;
   pair2 = Pair2;
 }
 
 Order::Order(QString Name, double Amount, double Price, uint OrderID , uint Type , uint TimeStamp) {
 
-    name      = Name     ;
-    pair1     = Amount   ;
-    pair2     = Price    ;
-    orderID   = OrderID  ;
-    type      = Type     ; // Buy = 0, Sell = 1;
-    timeStamp = TimeStamp;
+    name      = std::move(Name) ;
+    pair1     = Amount          ;
+    pair2     = Price           ;
+    orderID   = OrderID         ;
+    type      = Type            ; // Buy = 0, Sell = 1;
+    timeStamp = TimeStamp       ;
 }
 
 QString Order::getOrderName () { return name;      } // The pairs name

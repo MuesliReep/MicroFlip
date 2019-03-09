@@ -179,7 +179,7 @@ public slots:
   virtual void startWork() = 0;
 
   void receiveInitialiseSymbol  (const QString& symbol);
-  void receiveRequestForTicker  (QString pair,    QObject *sender);
+  void receiveRequestForTicker  (const QString& pair,    QObject *sender);
   void receiveUpdateMarketTicker(QString pair,    QObject *sender, int SenderID);
   void receiveUpdateMarketDepth (QString pair,    QObject *sender, int SenderID);
   void receiveUpdateMarketTrades(QString pair,    QObject *sender, int SenderID);

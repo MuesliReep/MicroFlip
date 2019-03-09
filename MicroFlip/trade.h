@@ -16,10 +16,10 @@ public:
     uint   getTimeStamp();
 
 private:
-    double price;
-    double amount;
-    uint   tradeID;
-    uint   timeStamp;
+    double price{};
+    double amount{};
+    uint   tradeID{};
+    uint   timeStamp{};
 };
 
 #endif // TRADE_H
