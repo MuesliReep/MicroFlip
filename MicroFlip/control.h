@@ -3,16 +3,15 @@
 
 #include <QString>
 
-class Control
-{
+class Control {
+
 public:
   Control();
 
-  void setPair(QString pair);
-  void setMin(double min);
-  void setNumWorkOrders(int wo);
+  void setPair         (QString pair          );
+  void setMin          (double  min           );
+  void setNumWorkOrders(int     numWorkOrders );
 
-private:
 };
 
 #endif // CONTROL_H

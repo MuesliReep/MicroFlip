@@ -7,49 +7,50 @@
 
 Exchange_wex::Exchange_wex() {
 
-  currentTask = ExchangeTask();
+    currentTask = ExchangeTask();
 
-  fee = 0.2;
-  this->exchangeName = "Wex";
+    fee = 0.2;
+    this->exchangeName = "Wex";
 
-  // Initiate download managers
-  tickerDownloadManager             = new QNetworkAccessManager(this);
-  updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
-  updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
-  updateBalancesDownloadManager     = new QNetworkAccessManager(this);
-  createTradeDownloadManager        = new QNetworkAccessManager(this);
-  orderInfoDownloadManager          = new QNetworkAccessManager(this);
-  cancelOrderDownloadManager        = new QNetworkAccessManager(this);
-  activeOrdersDownloadManager       = new QNetworkAccessManager(this);
+    // Initiate download managers
+    tickerDownloadManager             = new QNetworkAccessManager(this);
+    updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
+    updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
+    updateBalancesDownloadManager     = new QNetworkAccessManager(this);
+    createTradeDownloadManager        = new QNetworkAccessManager(this);
+    orderInfoDownloadManager          = new QNetworkAccessManager(this);
+    cancelOrderDownloadManager        = new QNetworkAccessManager(this);
+    activeOrdersDownloadManager       = new QNetworkAccessManager(this);
 
-  // Start the interval timers
-  timer  = new QTimer(this);
-  //timer2 = new QTimer(this);
+    // Start the interval timers
+    timer  = new QTimer(this);
+    //timer2 = new QTimer(this);
 
-  connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
-  //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
+    connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
+    //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
 }
 
 void Exchange_wex::startWork() {
 
-  this->apiKey    = config->getApiKey();
-  this->apiSecret = config->getApiSecret();
+    this->apiKey    = config->getApiKey();
+    this->apiSecret = config->getApiSecret();
 
-  timer->start(2*1100);
-  //timer2->start(1*1100); // TODO: determine correct amount
+    timer->start(2*1100);
+    //timer2->start(1*1100); // TODO: determine correct amount
 }
 
 void Exchange_wex::createNonce(QByteArray *nonce) {
 
-  uint now = QDateTime::currentDateTime().toMSecsSinceEpoch() / 250;
+    uint now = QDateTime::currentDateTime().toMSecsSinceEpoch() / 250;
 
-  if(lastNonce == now) {
-    lastNonce+=2;
-  }
-  else
-    lastNonce = now;
+    if(lastNonce == now) {
+      lastNonce+=2;
+    }
+    else {
+      lastNonce = now;
+    }
 
-  nonce->setNum(lastNonce);
+    nonce->setNum(lastNonce);
 }
 
 //----------------------------------//
@@ -58,109 +59,113 @@ void Exchange_wex::createNonce(QByteArray *nonce) {
 
 void Exchange_wex::updateMarketTicker(QString pair) {
 
-  // Create the request to download new data
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/api/3/ticker/"+pair));
+    // Create the request to download new data
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/api/3/ticker/"+pair));
 
-  // Execute the download
-  downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
+    // Execute the download
+    downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
 }
 
 void Exchange_wex::updateMarketDepth(QString pair) {
-  (void) pair;
 
-  // TODO
+    // TODO
+    (void) pair;
 }
 
 void Exchange_wex::updateMarketTrades(QString pair) {
 
-  // Create the request to download new data
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/api/3/trades/"+pair+"?&limit=5000"));
+    // Create the request to download new data
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/api/3/trades/"+pair+"?&limit=5000"));
 
-  // Execute the download
-  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
+    // Execute the download
+    downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
 }
 
 void Exchange_wex::updateBalances() {
 
-  // TODO
+    // TODO
 }
 
 void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amount) {
 
-  // Create POST data from method and nonce
-  QByteArray method("method=Trade");
-  QByteArray nonce;
-  createNonce(&nonce);
-  nonce.prepend("nonce=");
+    // Create POST data from method and nonce
+    QByteArray method("method=Trade");
+    QByteArray nonce;
+    createNonce(&nonce);
+    nonce.prepend("nonce=");
 
-  QByteArray pair("pair=");
-  pair.append(Pair);
+    QByteArray pair("pair=");
+    pair.append(Pair);
 
-  QByteArray type("type=");
-  if(Type == 0)
-    type.append("buy");
-  else
-    type.append("sell");
+    QByteArray type("type=");
+    if(Type == 0) {
+        type.append("buy");
+    }
+    else {
+        type.append("sell");
+    }
 
-  QByteArray price("rate=");
-  price.append(QString::number(Rate,'f',3));
+    QByteArray price("rate=");
+    price.append(QString::number(Rate,'f',3));
 
-  QByteArray amount("amount=");
-  amount.append(QString::number(Amount,'f',8));
+    QByteArray amount("amount=");
+    amount.append(QString::number(Amount,'f',8));
 
-  QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount);
+    QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount);
 
-  // Sign the data
-  QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
+    // Sign the data
+    QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
 
-  // Create request
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/tapi/"));
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/tapi/"));
 
-  // Add headers
-  downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
-  downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
-  downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
-  // Execute the download
-  downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(createOrderReply(QNetworkReply*)));
+    // Execute the download
+    downloader.doPostDownload(request, createTradeDownloadManager, data, this, SLOT(createOrderReply(QNetworkReply*)));
 }
 
 void Exchange_wex::cancelOrder(qint64 orderID) {
-  (void) orderID;
-  // TODO
+
+    // TODO
+    (void) orderID;
 }
 
 void Exchange_wex::updateActiveOrders(QString pair) {
-  (void) pair;
-  // TODO
+
+    // TODO
+    (void) pair;
 }
 
 void Exchange_wex::updateOrderInfo(qint64 OrderID) {
 
-  // Create POST data from method and nonce
-  QByteArray method("method=OrderInfo");
-  QByteArray nonce;
-  createNonce(&nonce);
-  nonce.prepend("nonce=");
+    // Create POST data from method and nonce
+    QByteArray method("method=OrderInfo");
+    QByteArray nonce;
+    createNonce(&nonce);
+    nonce.prepend("nonce=");
 
-  QByteArray orderID("order_id=");
-  orderID.append(QString::number(OrderID));
+    QByteArray orderID("order_id=");
+    orderID.append(QString::number(OrderID));
 
-  QByteArray data(method +"&"+ nonce + "&" + orderID);
+    QByteArray data(method +"&"+ nonce + "&" + orderID);
 
-  // Sign the data
-  QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
+    // Sign the data
+    QByteArray sign = QMessageAuthenticationCode::hash(data, apiSecret.toUtf8(), QCryptographicHash::Sha512).toHex();
 
-  // Create request
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/tapi/"));
+    // Create request
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://wex.nz/tapi/"));
 
-  // Add headers
-  downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
-  downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
-  downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
+    // Add headers
+    downloader.addHeaderToRequest(&request, QByteArray("Content-type"), QByteArray("application/x-www-form-urlencoded"));
+    downloader.addHeaderToRequest(&request, QByteArray("Key"), apiKey.toUtf8());
+    downloader.addHeaderToRequest(&request, QByteArray("Sign"), sign);
 
-  // Execute the download
-  downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
+    // Execute the download
+    downloader.doPostDownload(request, orderInfoDownloadManager, data, this, SLOT(updateOrderInfoReply(QNetworkReply*)));
 }
 
 //----------------------------------//
@@ -196,8 +201,8 @@ Ticker Exchange_wex::parseRawTickerData(QNetworkReply *reply) {
     return ticker;
 }
 
-void Exchange_wex::parseRawDepthData(QNetworkReply *reply)
-{
+void Exchange_wex::parseRawDepthData(QNetworkReply *reply) {
+
     // TODO
     (void) reply;
 }
@@ -224,9 +229,9 @@ void Exchange_wex::parseRawTradesData(QNetworkReply *reply) {
                 // Extract the pair data we want
                 jsonArr = jsonObj.value(pair).toArray();
 
-                for(int i = 0; i < jsonArr.size(); i++) {
+                for(auto && i : jsonArr) {
 
-                    QJsonObject currentTrade = jsonArr.at(i).toObject();
+                    QJsonObject currentTrade = i.toObject();
 
                     marketTrades.append(Trade(currentTrade.value("price")    .toDouble(),
                                               currentTrade.value("amount")   .toDouble(),
@@ -244,8 +249,8 @@ void Exchange_wex::parseRawTradesData(QNetworkReply *reply) {
     //    return marketTrades;
 }
 
-void Exchange_wex::parseRawBalancesData(QNetworkReply *reply)
-{
+void Exchange_wex::parseRawBalancesData(QNetworkReply *reply) {
+
     // TODO
     (void) reply;
 }
@@ -283,20 +288,20 @@ qint64 Exchange_wex::parseRawOrderCreationData(QNetworkReply *reply) {
     return orderID;
 }
 
-void Exchange_wex::parseRawOrderCancelationData(QNetworkReply *reply)
-{
+void Exchange_wex::parseRawOrderCancelationData(QNetworkReply *reply) {
+
     // TODO
     (void) reply;
 }
 
-void Exchange_wex::parseRawActiveOrdersData(QNetworkReply *reply)
-{
+void Exchange_wex::parseRawActiveOrdersData(QNetworkReply *reply) {
+
     // TODO
     (void) reply;
 }
 
-int Exchange_wex::parseRawOrderInfoData(QNetworkReply *reply)
-{
+int Exchange_wex::parseRawOrderInfoData(QNetworkReply *reply) {
+
     int status = -1;
 
     QJsonDocument jsonDoc;
@@ -332,13 +337,15 @@ int Exchange_wex::parseRawOrderInfoData(QNetworkReply *reply)
 
 bool Exchange_wex::checkSuccess(QJsonObject *object) {
 
-  bool result = false;
+    bool result = false;
 
-  if(!object->contains("success"))
+    if(!object->contains("success")) {
+        return result;
+    }
+
+    if(object->value("success").toInt() == 1) {
+        result = true;
+    }
+
     return result;
-
-  if(object->value("success").toInt() == 1)
-    result = true;
-
-  return result;
 }

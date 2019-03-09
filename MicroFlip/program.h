@@ -13,31 +13,32 @@
 #include "workorder.h"
 #include "exchange.h"
 
-class Program : public QObject
-{
+class Program : public QObject {
+
   Q_OBJECT
+
 public:
-  explicit Program(QObject *parent = 0);
+    explicit Program(QObject *parent = nullptr);
 
 private:
-
     QString className = "PROGRAM";
 
-  Display  *display;
-  Config   *config;
-  Exchange *exchange;
-  QTimer   *startShot;
-  QList<WorkOrder*> workOrders;
-  QList<QThread*>   workOrderThreads;
+    Display  *display;
+    Config   *config;
+    Exchange *exchange;
 
-  bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, QString pair, int shortInterval, int longInterval, int mode, bool singleShot, double minSell = -1.0);
+    QList<WorkOrder*> workOrders;
+    QList<QThread*>   workOrderThreads;
+
+    bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, const QString& pair, int shortInterval, int longInterval, int mode, bool singleShot, double minSell = -1.0);
 
 signals:
-  void updateLog(int workID, QString className, QString log, int severity);
-  void startOrder();
+    void updateLog(int workID, QString className, QString log, int severity);
+    void startOrder();
 
 private slots:
-  void startShotReceived();
+    void startShotReceived();
+
 };
 
 #endif // PROGRAM_H

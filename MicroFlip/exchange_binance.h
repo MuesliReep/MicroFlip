@@ -3,18 +3,17 @@
 
 #include "exchange.h"
 
-class Exchange_Binance : public Exchange
-{
+class Exchange_Binance : public Exchange {
+
     Q_OBJECT
+
 public:
     Exchange_Binance();
 
-    // Exchange interface
 public slots:
     void startWork();
 
 private:
-
     Downloader downloader;
 
     QString apiKey;

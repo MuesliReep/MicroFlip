@@ -12,41 +12,27 @@
 #include <QDateTime>
 
 
-class Downloader : public QObject
-{
-  Q_OBJECT
+class Downloader : public QObject {
+
+    Q_OBJECT
 
 public:
-  explicit Downloader(QObject *parent = 0);
+  explicit Downloader(QObject *parent = nullptr);
   ~Downloader();
 
-
-  QNetworkRequest generateRequest(QUrl url);
+  QNetworkRequest generateRequest(const QUrl& url);
   void addHeaderToRequest(QNetworkRequest *request, QByteArray headerName, QByteArray headerValue);
 
   // QNetworkRequest generateGetRequest(QUrl url, QByteArray headerName, QByteArray headerValue);
   // QNetworkRequest generatePostRequest(QUrl url);
 
-  // void doDownload(QNetworkRequest request);
-  QNetworkAccessManager* doDownload(QNetworkRequest request, QObject* receiver, const char * method);
-  void doDownload(QNetworkRequest request, QNetworkAccessManager *manager, QObject * receiver, const char * method);
-
-  QNetworkAccessManager* doPostDownload(QNetworkRequest request, QByteArray data, QObject* receiver, const char * method);
-  void doPostDownload(QNetworkRequest request, QNetworkAccessManager *manager, QByteArray data, QObject * receiver, const char * method);
-
+  QNetworkAccessManager* doDownload     (QNetworkRequest request, QObject* receiver, const char * method);
+  QNetworkAccessManager* doPostDownload (QNetworkRequest request, QByteArray data, QObject* receiver, const char * method);
   QNetworkAccessManager* doDeleteRequest(QNetworkRequest request, QObject* receiver, const char * method);
+
+  void doDownload     (QNetworkRequest request, QNetworkAccessManager *manager, QObject * receiver, const char * method);
+  void doPostDownload (QNetworkRequest request, QNetworkAccessManager *manager, QByteArray data, QObject * receiver, const char * method);
   void doDeleteRequest(QNetworkRequest request, QNetworkAccessManager *manager, QObject * receiver, const char * method);
-
-  bool checkReply(QNetworkReply *reply);
-
-private:
-
-signals:
-
-public slots:
-  // void replyFinished (QNetworkReply *reply);
-
-
 
 };
 

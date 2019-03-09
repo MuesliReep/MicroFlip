@@ -6,8 +6,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-class JSON_Helper
-{
+class JSON_Helper {
+
 public:
     static bool getDocumentFromNetworkReply(QNetworkReply *reply,    QJsonDocument *document);
     static bool getObjectFromDocument      (QJsonDocument *document, QJsonObject *object);

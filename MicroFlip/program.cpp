@@ -1,3 +1,8 @@
+/*!
+  \class Program
+  \brief The Program class is the entry point for the whole program
+*/
+
 #include "program.h"
 
 #include "common.h"
@@ -12,39 +17,39 @@
 
 Program::Program(QObject *parent) : QObject(parent) {
 
-  // Load configuration from file (if any)
-  config = new Config();
-  config->loadConfigFromFile();
+    // Load configuration from file (if any)
+    config = new Config();
+    config->loadConfigFromFile();
 
-  // Create an exchange interface
-//  exchange = new Exchange_wex();
-//  exchange = new Exchange_bitfinex();
-//  exchange = new Exchange_bitstamp();
-  exchange = new Exchange_Binance();
-//  exchange = new Exchange_Sim();
-  exchange->setConfig(config);
+    // Create an exchange interface
+//    exchange = new Exchange_wex();
+//    exchange = new Exchange_bitfinex();
+//    exchange = new Exchange_bitstamp();
+    exchange = new Exchange_Binance();
+//    exchange = new Exchange_Sim();
+    exchange->setConfig(config);
 
-  qRegisterMetaType<Ticker>();
+    qRegisterMetaType<Ticker>();
 
-  // Create & setup display
-  display = new Display();
-  display->setLogLevel(config->getLogLevel());
-  display->setExchangeName(exchange->getExchangeName());
-  connect(this,     SIGNAL(updateLog(int, QString, QString, int)),          display, SLOT(addToLog(int, QString, QString, int)));
-  connect(exchange, SIGNAL(updateLog(int, QString, QString, int)),          display, SLOT(addToLog(int, QString, QString, int)));
-  connect(exchange, SIGNAL(updateExchangePrices(QString, double, double)),  display, SLOT(updateExchangePrices(QString, double, double)));
+    // Create & setup display
+    display = new Display();
+    display->setLogLevel(config->getLogLevel());
+    display->setExchangeName(exchange->getExchangeName());
+    connect(this,     &Program:: updateLog,            display, &Display::addToLog);
+    connect(exchange, &Exchange::updateLog,            display, &Display::addToLog);
+    connect(exchange, &Exchange::updateExchangePrices, display, &Display::updateExchangePrices);
 
-  // Setup threads
-  QThread *exchangeThread = new QThread();
-  QThread *displayThread  = new QThread();
-  exchange->moveToThread(exchangeThread);
-  display-> moveToThread(displayThread);
-  exchangeThread->start();
-  displayThread-> start();
+    // Setup threads
+    auto *exchangeThread = new QThread();
+    auto *displayThread  = new QThread();
+    exchange->moveToThread(exchangeThread);
+    display-> moveToThread(displayThread);
+    exchangeThread->start();
+    displayThread-> start();
 
-  // Create start shot, this is called when the main event loop is triggered
-  QTimer::singleShot(1, this,     &Program::startShotReceived);
-  QTimer::singleShot(1, exchange, &Exchange::startWork);
+    // Create start shot, this is called when the main event loop is triggered
+    QTimer::singleShot(1, this,     &Program::startShotReceived);
+    QTimer::singleShot(1, exchange, &Exchange::startWork);
 }
 
 void Program::startShotReceived() {
@@ -66,34 +71,34 @@ void Program::startShotReceived() {
 /// \param minSell Sets a static minimum sell price. To use a dynamic price, set to a negative number
 /// \return
 ///
-bool Program::workOrderFactory(int numWorkers,   Exchange *exchange, double amount,
-                               double profit,    QString pair,       int shortInterval,
-                               int longInterval, int mode,           bool singleShot,
+bool Program::workOrderFactory(int    numWorkers,   Exchange *exchange,  double amount,
+                               double profit,       const QString& pair, int    shortInterval,
+                               int    longInterval, int mode,            bool   singleShot,
                                double minSell) {
 
-  emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
+    emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
 
-  for(int i = 0; i < numWorkers; i++) {
+    for(int i = 0; i < numWorkers; i++) {
 
-    emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-    WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
+        emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
+        WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
 
-    QThread *workOrderThread = new QThread();
-    wo->moveToThread(workOrderThread);
+        auto *workOrderThread = new QThread();
+        wo->moveToThread(workOrderThread);
 
-    connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
-    connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
+        connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
+        connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
 
-    // Tell the newly created work order to start
-    connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
-    workOrderThread->start();
-    emit startOrder();
-    disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+        // Tell the newly created work order to start
+        connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+        workOrderThread->start();
+        emit startOrder();
+        disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
 
-    workOrders.append(wo);
-    workOrderThreads.append(workOrderThread);
-    QThread::sleep(1);
-  }
+        workOrders.append(wo);
+        workOrderThreads.append(workOrderThread);
+        QThread::sleep(1);
+    }
 
-  return true;
+    return true;
 }

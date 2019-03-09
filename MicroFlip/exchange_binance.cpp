@@ -1,14 +1,14 @@
 #include "exchange_binance.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "json_helper.h"
 #include "workorder.h"
 
 // Binance API: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md
 
-Exchange_Binance::Exchange_Binance()
-{
+Exchange_Binance::Exchange_Binance() {
+
     currentTask = ExchangeTask();
 
     this->fee = 0.1;
@@ -76,12 +76,12 @@ void Exchange_Binance::updateMarketTrades(QString pair) {
 
 void Exchange_Binance::updateBalances() {
 
-  "GET /api/v3/account";
+    // "GET /api/v3/account";
 }
 
 void Exchange_Binance::createOrder(QString pair, int type, double rate, double amount) {
 
-  "POST /api/v3/order";
+    // "POST /api/v3/order";
 
     QByteArray query;
 
@@ -147,23 +147,25 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
 
 void Exchange_Binance::cancelOrder(qint64 orderID) {
 
-  "DELETE /api/v3/order";
+    (void) orderID;
+//  "DELETE /api/v3/order";
 }
 
 void Exchange_Binance::updateActiveOrders(QString pair) {
 
-  "GET /api/v3/openOrders";
+    (void) pair;
+//  "GET /api/v3/openOrders";
 }
 
 void Exchange_Binance::updateOrderInfo(qint64 orderID) {
 
-  "GET /api/v3/order";
+//  "GET /api/v3/order";
 
     QByteArray query;
 
     // Symbol
     query.append("symbol=");
-    query.append(((WorkOrder*)currentTask.getSender())->getPair());
+    query.append((dynamic_cast<WorkOrder*>(currentTask.getSender()))->getPair());
 
 //    // Side
 //    query.append("&side=");
@@ -245,20 +247,20 @@ Ticker Exchange_Binance::parseRawTickerData(QNetworkReply *reply) {
     return ticker;
 }
 
-void Exchange_Binance::parseRawDepthData(QNetworkReply *reply)
-{
+void Exchange_Binance::parseRawDepthData(QNetworkReply *reply) {
+
     // TODO
     (void)reply;
 }
 
-void Exchange_Binance::parseRawTradesData(QNetworkReply *reply)
-{
+void Exchange_Binance::parseRawTradesData(QNetworkReply *reply) {
+
     // TODO
     (void)reply;
 }
 
-void Exchange_Binance::parseRawBalancesData(QNetworkReply *reply)
-{
+void Exchange_Binance::parseRawBalancesData(QNetworkReply *reply) {
+
     // TODO
     (void)reply;
 }
@@ -283,20 +285,20 @@ qint64 Exchange_Binance::parseRawOrderCreationData(QNetworkReply *reply) {
     return orderID;
 }
 
-void Exchange_Binance::parseRawOrderCancelationData(QNetworkReply *reply)
-{
+void Exchange_Binance::parseRawOrderCancelationData(QNetworkReply *reply) {
+
     // TODO
     (void)reply;
 }
 
-void Exchange_Binance::parseRawActiveOrdersData(QNetworkReply *reply)
-{
+void Exchange_Binance::parseRawActiveOrdersData(QNetworkReply *reply) {
+
     // TODO
     (void)reply;
 }
 
-int Exchange_Binance::parseRawOrderInfoData(QNetworkReply *reply)
-{
+int Exchange_Binance::parseRawOrderInfoData(QNetworkReply *reply) {
+
     int status = -1;
 
     QJsonDocument jsonDoc;
@@ -336,12 +338,12 @@ bool Exchange_Binance::exchangeErrorCheck(QJsonObject *jsonObj) {
     return result;
 }
 
-double Exchange_Binance::roundUp(double value)
-{
+double Exchange_Binance::roundUp(double value) {
+
     return ceil(value * 100) / 100;
 }
 
-double Exchange_Binance::roundDown(double value)
-{
+double Exchange_Binance::roundDown(double value) {
+
     return floor(value * 100) / 100;
 }

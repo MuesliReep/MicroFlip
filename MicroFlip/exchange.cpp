@@ -3,29 +3,32 @@
 #include "common.h"
 
 #include <QDateTime>
+#include <utility>
 
 Exchange::Exchange(QObject *parent) : QObject(parent)
 {
 
 }
 
-void Exchange::setConfig(Config *config)
-{
+void Exchange::setConfig(Config *config) {
+
   this->config = config;
 }
 
-double Exchange::getFee() const
-{
+double Exchange::getFee() const {
+
     return fee;
 }
 
-QList<Balance> Exchange::getBalances() const
-{
+QList<Balance> Exchange::getBalances() const {
+
     return balances;
 }
 
-double Exchange::getBalance(QString currency) const
-{
+double Exchange::getBalance(QString currency) const {
+
+    // TODO
+
     (void) currency;
     double amount = -1.0;
     /*
@@ -40,13 +43,13 @@ double Exchange::getBalance(QString currency) const
     return amount;
 }
 
-QString Exchange::getExchangeName() const
-{
+QString Exchange::getExchangeName() const {
+
     return exchangeName;
 }
 
-void Exchange::executeExchangeTask(ExchangeTask *exchangeTask)
-{
+void Exchange::executeExchangeTask(ExchangeTask *exchangeTask) {
+
     switch(exchangeTask->getTask()) {
 
     case 0: updateMarketTicker(exchangeTask->getAttributes().at(0)); break;
@@ -72,14 +75,12 @@ void Exchange::executeExchangeTask(ExchangeTask *exchangeTask)
 //          Public Slots            //
 //----------------------------------//
 
-void Exchange::receiveRequestForTicker(QString pair, QObject *sender)
-{
+void Exchange::receiveRequestForTicker(const QString& pair, QObject *sender) {
+
     Ticker requestedTicker;
 
     // Find correct ticker and copy it
-    for (int i = 0; i < tickers.size(); i++) {
-        Ticker queryTicker = tickers.at(i);
-
+    for (const auto &queryTicker : tickers) {
         if(queryTicker.getSymbol() == pair) {
             requestedTicker = queryTicker;
         }
@@ -91,62 +92,76 @@ void Exchange::receiveRequestForTicker(QString pair, QObject *sender)
     disconnect(this, SIGNAL(sendNewMarketTicker(Ticker)), sender, SLOT(UpdateMarketTickerReply(Ticker)));
 }
 
-void Exchange::receiveInitialiseSymbol(QString symbol)
-{
+void Exchange::receiveInitialiseSymbol(const QString &symbol) {
+
     // Add symbol if not already present
     if(!symbols.contains(symbol)) {
         symbols.append(symbol);
     }
 }
 
-void Exchange::receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(0, sender, SenderID, attr));
+void Exchange::receiveUpdateMarketTicker(QString pair, QObject *sender, int SenderID) {
+
+    QList<QString> attr; attr.append(QString(std::move(pair)));
+    exchangeTasks.append(ExchangeTask(0, sender, SenderID, attr));
 }
+
 void Exchange::receiveUpdateMarketDepth(QString pair, QObject *sender, int SenderID) {
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(1, sender, SenderID, attr));
-}
-void Exchange::receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(2, sender, SenderID, attr));
-}
-void Exchange::receiveUpdateBalances(QObject *sender, int SenderID){
-  exchangeTasks.append(ExchangeTask(3, sender, SenderID));
-}
-void Exchange::receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  attr.append(QString(QString::number(type)));
-  attr.append(QString(QString::number(rate)));
-  attr.append(QString(QString::number(amount)));
-  exchangeTasks.append(ExchangeTask(4, sender, SenderID, attr));
-}
-void Exchange::receiveCancelOrder(qint64 orderID, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString::number(orderID));
-  exchangeTasks.append(ExchangeTask(5, sender, SenderID, attr));
-}
-void Exchange::receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID){
-  QList<QString> attr; attr.append(QString(pair));
-  exchangeTasks.append(ExchangeTask(6, sender, SenderID, attr));
-}
-void Exchange::receiveUpdateOrderInfo(qint64 orderID, QObject *sender, int SenderID){
 
-  // TODO: beter way of doing this
-  // Check if task already exists in list
-  for(int i = 0; i < exchangeTasks.size(); i++) {
-    ExchangeTask task = exchangeTasks.at(i);
-    if(task.getTask() == 7) {
-      if(sender == task.getSender())
-        return;
+    QList<QString> attr; attr.append(QString(std::move(pair)));
+    exchangeTasks.append(ExchangeTask(1, sender, SenderID, attr));
+}
+
+void Exchange::receiveUpdateMarketTrades(QString pair, QObject *sender, int SenderID) {
+
+    QList<QString> attr; attr.append(QString(std::move(pair)));
+    exchangeTasks.append(ExchangeTask(2, sender, SenderID, attr));
+}
+
+void Exchange::receiveUpdateBalances(QObject *sender, int SenderID) {
+
+    exchangeTasks.append(ExchangeTask(3, sender, SenderID));
+}
+
+void Exchange::receiveCreateOrder(QString pair, int type, double rate, double amount, QObject *sender, int SenderID) {
+
+    QList<QString> attr; attr.append(QString(std::move(pair)));
+    attr.append(QString(QString::number(type)));
+    attr.append(QString(QString::number(rate)));
+    attr.append(QString(QString::number(amount)));
+    exchangeTasks.append(ExchangeTask(4, sender, SenderID, attr));
+}
+
+void Exchange::receiveCancelOrder(qint64 orderID, QObject *sender, int SenderID) {
+
+    QList<QString> attr; attr.append(QString::number(orderID));
+    exchangeTasks.append(ExchangeTask(5, sender, SenderID, attr));
+}
+
+void Exchange::receiveUpdateActiveOrders(QString pair, QObject *sender, int SenderID) {
+
+    QList<QString> attr; attr.append(QString(std::move(pair)));
+    exchangeTasks.append(ExchangeTask(6, sender, SenderID, attr));
+}
+
+void Exchange::receiveUpdateOrderInfo(qint64 orderID, QObject *sender, int SenderID) {
+
+    // TODO: beter way of doing this
+    // Check if task already exists in list
+    for(const auto &task : exchangeTasks) {
+      if(task.getTask() == 7) {
+        if(sender == task.getSender()) {
+          return;
+        }
+      }
     }
-  }
 
-  QList<QString> attr; attr.append(QString::number(orderID));
-  exchangeTasks.append(ExchangeTask(7, sender, SenderID, attr));
+    QList<QString> attr; attr.append(QString::number(orderID));
+    exchangeTasks.append(ExchangeTask(7, sender, SenderID, attr));
 }
 
-void Exchange::updateMarketTickerReply(QNetworkReply *reply)
-{
+void Exchange::updateMarketTickerReply(QNetworkReply *reply) {
+
     Ticker ticker;
 
     if(reply->error()) {
@@ -172,14 +187,14 @@ void Exchange::updateMarketTickerReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(tickerDownloadManager, 0, this, 0);
+    disconnect(tickerDownloadManager, nullptr, this, nullptr);
 
     // Mark this task complete
     currentTask = ExchangeTask();
 }
 
-void Exchange::updateMarketDepthReply(QNetworkReply *reply)
-{
+void Exchange::updateMarketDepthReply(QNetworkReply *reply) {
+
     // TODO
 
     if(reply->error()) {
@@ -191,14 +206,14 @@ void Exchange::updateMarketDepthReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(updateMarketDepthDownloadManager, 0, this, 0);
+    disconnect(updateMarketDepthDownloadManager, nullptr, this, nullptr);
 
     // Mark this task complete
     currentTask = ExchangeTask();
 }
 
-void Exchange::updateMarketTradesReply(QNetworkReply *reply)
-{
+void Exchange::updateMarketTradesReply(QNetworkReply *reply) {
+
     // TODO
 
     if(reply->error()) {
@@ -210,15 +225,16 @@ void Exchange::updateMarketTradesReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(updateMarketTradesDownloadManager, 0, this, 0);
+    disconnect(updateMarketTradesDownloadManager, nullptr, this, nullptr);
 
     // Mark this task complete
     currentTask = ExchangeTask();
 }
 
-void Exchange::updateBalancesReply(QNetworkReply *reply)
-{
+void Exchange::updateBalancesReply(QNetworkReply *reply) {
+
     // TODO
+
     if(reply->error()) {
         updateLog(currentTask.getSenderID(), className, "Balance Update Packet error: " + reply->errorString(), logSeverity::LOG_CRITICAL);
     } else {
@@ -228,14 +244,14 @@ void Exchange::updateBalancesReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(updateBalancesDownloadManager, 0, this, 0);
+    disconnect(updateBalancesDownloadManager, nullptr, this, nullptr);
 
     // Mark this task complete
     currentTask = ExchangeTask();
 }
 
-void Exchange::createOrderReply(QNetworkReply *reply)
-{
+void Exchange::createOrderReply(QNetworkReply *reply) {
+
     qint64 orderID = -1;
 
     if(reply->error()) {
@@ -247,7 +263,7 @@ void Exchange::createOrderReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(createTradeDownloadManager, 0, this, 0);
+    disconnect(createTradeDownloadManager, nullptr, this, nullptr);
 
     // Connect & send order ID to the initiator
     connect(this, SIGNAL(sendNewOrderID(qint64)), currentTask.getSender(), SLOT(orderCreateReply(qint64)));
@@ -258,8 +274,8 @@ void Exchange::createOrderReply(QNetworkReply *reply)
     currentTask = ExchangeTask();
 }
 
-void Exchange::cancelOrderReply(QNetworkReply *reply)
-{
+void Exchange::cancelOrderReply(QNetworkReply *reply) {
+
     // TODO
 
     if(reply->error()) {
@@ -271,14 +287,14 @@ void Exchange::cancelOrderReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(cancelOrderDownloadManager, 0, this, 0);
+    disconnect(cancelOrderDownloadManager, nullptr, this, nullptr);
 
     // Mark this task complete
     currentTask = ExchangeTask();
 }
 
-void Exchange::updateActiveOrdersReply(QNetworkReply *reply)
-{
+void Exchange::updateActiveOrdersReply(QNetworkReply *reply) {
+
     // TODO
 
     if(reply->error()) {
@@ -290,14 +306,14 @@ void Exchange::updateActiveOrdersReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(activeOrdersDownloadManager, 0, this, 0);
+    disconnect(activeOrdersDownloadManager, nullptr, this, nullptr);
 
     // Mark this task complete
     currentTask = ExchangeTask();
 }
 
-void Exchange::updateOrderInfoReply(QNetworkReply *reply)
-{
+void Exchange::updateOrderInfoReply(QNetworkReply *reply) {
+
     int status = -1;
 
     if(reply->error()) {
@@ -309,7 +325,7 @@ void Exchange::updateOrderInfoReply(QNetworkReply *reply)
     reply->deleteLater();
 
     // Disconnect the download signal and release
-    disconnect(orderInfoDownloadManager, 0, this, 0);
+    disconnect(orderInfoDownloadManager, nullptr, this, nullptr);
 
     // Connect & send order status to the initiator
     connect(this, SIGNAL(sendNewOrderInfo(int)), currentTask.getSender(), SLOT(orderInfoReply(int)));
@@ -326,19 +342,20 @@ void Exchange::updateOrderInfoReply(QNetworkReply *reply)
 
 void Exchange::updateTick() {
 
-  // While currentTask is not complete, do nothing
-  if(currentTask.getTask() != -1)
-    return;
+    // While currentTask is not complete, do nothing
+    if(currentTask.getTask() != -1) {
+        return;
+    }
 
-  // Get a new task and execute it
-  if(exchangeTasks.size() > 0) {
+    // Get a new task and execute it
+    if(!exchangeTasks.empty()) {
 
-    // Get a task and remove it from the list
-    currentTask = exchangeTasks.takeFirst();
+        // Get a task and remove it from the list
+        currentTask = exchangeTasks.takeFirst();
 
-    // Execute the task
-    executeExchangeTask(&currentTask);
-  }
+        // Execute the task
+        executeExchangeTask(&currentTask);
+    }
 }
 
 void Exchange::updateTick2() {
@@ -346,8 +363,8 @@ void Exchange::updateTick2() {
     // While currentTask is not complete, do nothing
 }
 
-void Exchange::updateTickers()
-{
+void Exchange::updateTickers() {
+
     // Create a task for each symbol
     foreach (QString symbol, symbols) {
 
@@ -367,7 +384,6 @@ void Exchange::updateTickers()
             receiveUpdateMarketTicker(symbol, this, 0);
         }
     }
-
 }
 
 //----------------------------------//
@@ -376,39 +392,27 @@ void Exchange::updateTickers()
 
 ExchangeTask::ExchangeTask(int Task, int senderID) {
 
-  this->task     = Task;
-  this->senderID = senderID;
+    this->task     = Task;
+    this->sender   = nullptr;
+    this->senderID = senderID;
 }
 
 ExchangeTask::ExchangeTask(int Task, QObject *Sender, int senderID) {
 
-  this->task     = Task;
-  this->sender   = Sender;
-  this->senderID = senderID;
+    this->task     = Task;
+    this->sender   = Sender;
+    this->senderID = senderID;
 }
 
 ExchangeTask::ExchangeTask(int Task, QObject *Sender, int senderID, QList<QString> Attributes) {
 
-  this->task       = Task;
-  this->sender     = Sender;
-  this->senderID   = senderID;
-  this->attributes = Attributes;
+    this->task       = Task;
+    this->sender     = Sender;
+    this->senderID   = senderID;
+    this->attributes = Attributes;
 }
 
-QObject *ExchangeTask::getSender() const
-{
-    return sender;
-}
-
-int ExchangeTask::getSenderID() const
-{
-    return senderID;
-}
-int ExchangeTask::getTask() const
-{
-  return task;
-}
-QList<QString> ExchangeTask::getAttributes() const
-{
-  return attributes;
-}
+QObject       *ExchangeTask::getSender    () const { return sender;     }
+int            ExchangeTask::getSenderID  () const { return senderID;   }
+int            ExchangeTask::getTask      () const { return task;       }
+QList<QString> ExchangeTask::getAttributes() const { return attributes; }

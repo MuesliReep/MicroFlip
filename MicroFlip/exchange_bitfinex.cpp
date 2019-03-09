@@ -6,50 +6,51 @@
 
 Exchange_bitfinex::Exchange_bitfinex() {
 
-  currentTask = ExchangeTask();
+    currentTask = ExchangeTask();
 
-  fee = 0.2;
-  this->exchangeName = "Bitfinex";
+    fee = 0.2;
+    this->exchangeName = "Bitfinex";
 
-  // Initiate download managers
-  tickerDownloadManager             = new QNetworkAccessManager(this);
-  updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
-  updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
-  updateBalancesDownloadManager     = new QNetworkAccessManager(this);
-  createTradeDownloadManager        = new QNetworkAccessManager(this);
-  orderInfoDownloadManager          = new QNetworkAccessManager(this);
-  cancelOrderDownloadManager        = new QNetworkAccessManager(this);
-  activeOrdersDownloadManager       = new QNetworkAccessManager(this);
+    // Initiate download managers
+    tickerDownloadManager             = new QNetworkAccessManager(this);
+    updateMarketDepthDownloadManager  = new QNetworkAccessManager(this);
+    updateMarketTradesDownloadManager = new QNetworkAccessManager(this);
+    updateBalancesDownloadManager     = new QNetworkAccessManager(this);
+    createTradeDownloadManager        = new QNetworkAccessManager(this);
+    orderInfoDownloadManager          = new QNetworkAccessManager(this);
+    cancelOrderDownloadManager        = new QNetworkAccessManager(this);
+    activeOrdersDownloadManager       = new QNetworkAccessManager(this);
 
-  // Start the interval timers
-  timer  = new QTimer(this);
-  //timer2 = new QTimer(this);
+    // Start the interval timers
+    timer  = new QTimer(this);
+    //timer2 = new QTimer(this);
 
-  connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
-  //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
+    connect(timer,  SIGNAL(timeout()), this, SLOT(updateTick()));
+    //connect(timer2, SIGNAL(timeout()), this, SLOT(updateTick2()));
 }
 
 void Exchange_bitfinex::startWork() {
 
-  this->apiKey    = config->getApiKey();
-  this->apiSecret = config->getApiSecret();
+    this->apiKey    = config->getApiKey();
+    this->apiSecret = config->getApiSecret();
 
-  // 30 requests per min
-  timer->start(2000);
-  //timer2->start(1*1100); // TODO: determine correct amount
+    // 30 requests per min
+    timer->start(2000);
+    //timer2->start(1*1100); // TODO: determine correct amount
 }
 
 QString Exchange_bitfinex::createNonce() {
 
-  uint now = QDateTime::currentDateTime().toMSecsSinceEpoch() / 250;
+    uint now = QDateTime::currentDateTime().toMSecsSinceEpoch() / 250;
 
-  if(lastNonce == now) {
-    lastNonce+=2;
-  }
-  else
-    lastNonce = now;
+    if(lastNonce == now) {
+      lastNonce+=2;
+    }
+    else {
+      lastNonce = now;
+    }
 
-  return QString::number(lastNonce);
+    return QString::number(lastNonce);
 }
 
 //----------------------------------//
@@ -58,28 +59,28 @@ QString Exchange_bitfinex::createNonce() {
 
 void Exchange_bitfinex::updateMarketTicker(QString pair) {
 
-  // Create the request to download new data
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/pubticker/"+pair));
+    // Create the request to download new data
+    QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/pubticker/"+pair));
 
-  // Execute the download
-  downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
+    // Execute the download
+    downloader.doDownload(request, tickerDownloadManager, this, SLOT(UpdateMarketTickerReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::updateMarketDepth(QString pair) {
 
+    // TODO
     (void) pair;
-  // TODO
 }
 
 void Exchange_bitfinex::updateMarketTrades(QString pair) {
 
-  // Create the request to download new data
-  // API v2 pair is in upper case and is preceded by a "t"
-  //QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v2/trades/t" + pair.toUpper() + "/hist?limit=999"));
-  QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/trades/" + pair));
+     // Create the request to download new data
+     // API v2 pair is in upper case and is preceded by a "t"
+     //QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v2/trades/t" + pair.toUpper() + "/hist?limit=999"));
+     QNetworkRequest request = downloader.generateRequest(QUrl("https://api.bitfinex.com/v1/trades/" + pair));
 
-  // Execute the download
-  downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
+     // Execute the download
+     downloader.doDownload(request, updateMarketTradesDownloadManager, this, SLOT(updateMarketTradesReply(QNetworkReply*)));
 }
 
 void Exchange_bitfinex::updateBalances() {
@@ -146,14 +147,14 @@ void Exchange_bitfinex::createOrder(QString Pair, int Type, double Rate, double 
 
 void Exchange_bitfinex::cancelOrder(qint64 orderID) {
 
+    // TODO
     (void) orderID;
-  // TODO
 }
 
 void Exchange_bitfinex::updateActiveOrders(QString pair) {
 
+    // TODO
     (void) pair;
-  // TODO
 }
 
 void Exchange_bitfinex::updateOrderInfo(qint64 OrderID) {
@@ -221,9 +222,10 @@ Ticker Exchange_bitfinex::parseRawTickerData(QNetworkReply *reply) {
     return ticker;
 }
 
-void Exchange_bitfinex::parseRawDepthData(QNetworkReply *reply)
-{
+void Exchange_bitfinex::parseRawDepthData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
 void Exchange_bitfinex::parseRawTradesData(QNetworkReply *reply) {
@@ -238,9 +240,10 @@ void Exchange_bitfinex::parseRawTradesData(QNetworkReply *reply) {
     }
 }
 
-void Exchange_bitfinex::parseRawBalancesData(QNetworkReply *reply)
-{
+void Exchange_bitfinex::parseRawBalancesData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
 qint64 Exchange_bitfinex::parseRawOrderCreationData(QNetworkReply *reply) {
@@ -271,14 +274,16 @@ qint64 Exchange_bitfinex::parseRawOrderCreationData(QNetworkReply *reply) {
     return orderID;
 }
 
-void Exchange_bitfinex::parseRawOrderCancelationData(QNetworkReply *reply)
-{
+void Exchange_bitfinex::parseRawOrderCancelationData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
-void Exchange_bitfinex::parseRawActiveOrdersData(QNetworkReply *reply)
-{
+void Exchange_bitfinex::parseRawActiveOrdersData(QNetworkReply *reply) {
+
     // TODO
+    (void) reply;
 }
 
 int Exchange_bitfinex::parseRawOrderInfoData(QNetworkReply *reply) {
