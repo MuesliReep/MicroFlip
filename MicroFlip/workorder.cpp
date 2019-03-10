@@ -395,6 +395,10 @@ void WorkOrder::orderCancelReply(bool succes) {
     updateLog(workID, className, "Order cancelled", logSeverity::LOG_INFO);
 }
 
+void WorkOrder::receivePriceAlert(Ticker ticker) {
+
+}
+
 void WorkOrder::startOrder() {
 
     updateLog(workID, className, "Workorder started", logSeverity::LOG_CRITICAL);

@@ -105,6 +105,26 @@ private:
 
 Q_DECLARE_METATYPE(Ticker)
 
+class PriceAlert {
+
+public:
+    PriceAlert(QObject *subscriber, QString symbol, double price) {
+
+        this->subscriber = subscriber;
+        this->symbol     = symbol    ;
+        this->price      = price     ;
+    }
+
+    QObject *getSubscriber() const { return subscriber; }
+    QString getSymbol     () const { return symbol;     }
+    double getPrice       () const { return price;      }
+
+private:
+    QObject *subscriber;
+    QString  symbol;
+    double   price;
+};
+
 ///
 /// \brief The Exchange interface
 ///
@@ -144,6 +164,9 @@ private:
   virtual void   parseRawOrderCancelationData(QNetworkReply *reply) = 0;
   virtual void   parseRawActiveOrdersData    (QNetworkReply *reply) = 0;
   virtual int    parseRawOrderInfoData       (QNetworkReply *reply) = 0;
+
+  QList<PriceAlert> priceAlerts;
+  void processPriceAlerts(const Ticker &ticker);
 
 protected:
   Config *config;
@@ -198,6 +221,8 @@ public slots:
   void updateActiveOrdersReply(QNetworkReply *reply);
   void updateOrderInfoReply   (QNetworkReply *reply);
 
+  void receiveNewPriceAlert(QObject *sender, QString symbol, double price);
+
 protected slots:
   void updateTick   ();
   void updateTick2  ();
@@ -212,6 +237,7 @@ signals:
   void sendNewCancelOrder ();
   void sendNewActiveOrders();
   void sendNewOrderInfo   (int);
+  void sendNewPriceAlert  (Ticker ticker);
 
   void updateLog           (int workID, QString classID, QString logString, int severity);
   void updateExchangePrices(QString, double, double);

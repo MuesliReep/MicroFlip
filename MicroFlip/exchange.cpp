@@ -48,6 +48,29 @@ QString Exchange::getExchangeName() const {
     return exchangeName;
 }
 
+void Exchange::processPriceAlerts(const Ticker &ticker) {
+
+    if(priceAlerts.isEmpty()) {
+        return;
+    }
+
+    for(auto priceAlert : priceAlerts) {
+
+        // Check if the tickers symbol is the same as the price alert's
+        if(priceAlert.getSymbol() != ticker.getSymbol()) {
+            continue;
+        }
+
+        // If last price was the same or higher than the set price alert, emit price alert signal
+        if(ticker.getLast() >= priceAlert.getPrice()) {
+
+            connect(this, SIGNAL(sendNewPriceAlert(Ticker)), priceAlert.getSubscriber(), SLOT(receivePriceAlert(Ticker)));
+            emit sendNewPriceAlert(ticker);
+            disconnect(this, SIGNAL(sendNewPriceAlert(Ticker)), priceAlert.getSubscriber(), SLOT(receivePriceAlert(Ticker)));
+        }
+    }
+}
+
 void Exchange::executeExchangeTask(ExchangeTask *exchangeTask) {
 
     switch(exchangeTask->getTask()) {
@@ -68,8 +91,6 @@ void Exchange::executeExchangeTask(ExchangeTask *exchangeTask) {
     default: qDebug() << "Bad exchange task received: " << exchangeTask->getTask(); break;
     }
 }
-
-
 
 //----------------------------------//
 //          Public Slots            //
@@ -169,6 +190,7 @@ void Exchange::updateMarketTickerReply(QNetworkReply *reply) {
     } else {
         // Parse the raw data
         ticker = parseRawTickerData(reply);
+        processPriceAlerts(ticker);
     }
 
     // Remove old ticker from ticker list
@@ -336,6 +358,20 @@ void Exchange::updateOrderInfoReply(QNetworkReply *reply) {
     currentTask = ExchangeTask();
 }
 
+void Exchange::receiveNewPriceAlert(QObject *sender, QString symbol, double price) {
+
+    // Check if this sender already has a price alert, if so remove it
+    for(auto priceAlert : priceAlerts) {
+
+        if(priceAlert.getSubscriber() == sender) {
+            priceAlerts.removeAll(priceAlert);
+        }
+    }
+
+    // Append new price alert to list
+    priceAlerts.append(PriceAlert(sender, symbol, price));
+}
+
 //----------------------------------//
 //          Private Slots           //
 //----------------------------------//
@@ -366,12 +402,12 @@ void Exchange::updateTick2() {
 void Exchange::updateTickers() {
 
     // Create a task for each symbol
-    foreach (QString symbol, symbols) {
+    for(QString symbol : symbols) {
 
         bool containsSymbol = false;
 
         // Do not add the symbol if it already exists
-        foreach (ExchangeTask task, exchangeTasks) {
+        for(ExchangeTask task : exchangeTasks) {
 
             if(task.getAttributes().at(0) == symbol) {
                 containsSymbol = true;

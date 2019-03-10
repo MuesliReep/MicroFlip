@@ -93,6 +93,8 @@ public slots:
     void orderInfoReply  (int status);
     void orderCancelReply(bool succes);
 
+    void receivePriceAlert(Ticker ticker);
+
     void startOrder();
 
 signals:
