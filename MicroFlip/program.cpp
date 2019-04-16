@@ -42,6 +42,8 @@ Program::Program(QObject *parent) : QObject(parent) {
     // Setup threads
     auto *exchangeThread = new QThread();
     auto *displayThread  = new QThread();
+    exchangeThread->setObjectName("Exch. Thread");
+    displayThread-> setObjectName("Disp. Thread");
     exchange->moveToThread(exchangeThread);
     display-> moveToThread(displayThread);
     exchangeThread->start();
