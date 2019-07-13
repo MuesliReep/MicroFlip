@@ -397,6 +397,7 @@ void WorkOrder::orderCancelReply(bool succes) {
 
 void WorkOrder::receivePriceAlert(Ticker ticker) {
 
+    (void) ticker;
 }
 
 void WorkOrder::startOrder() {

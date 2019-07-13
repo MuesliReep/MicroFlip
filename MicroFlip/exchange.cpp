@@ -360,11 +360,13 @@ void Exchange::updateOrderInfoReply(QNetworkReply *reply) {
 
 void Exchange::receiveNewPriceAlert(QObject *sender, QString symbol, double price) {
 
-    // Check if this sender already has a price alert, if so remove it
-    for(auto priceAlert : priceAlerts) {
+    // Check if this sender already has a price alert, if so remove it   
+    for (int i = 0; i < priceAlerts.length(); i++) {
+
+        auto priceAlert = priceAlerts.at(i);
 
         if(priceAlert.getSubscriber() == sender) {
-            priceAlerts.removeAll(priceAlert);
+            priceAlerts.removeAt(i);
         }
     }
 
