@@ -15,6 +15,8 @@
 #include "exchange_bitfinex.h"
 #include "exchange_sim.h"
 
+#include "remotecontrol_tcp.h"
+
 Program::Program(QObject *parent) : QObject(parent) {
 
     // Load configuration from file (if any)
@@ -38,6 +40,20 @@ Program::Program(QObject *parent) : QObject(parent) {
     connect(this,     &Program:: updateLog,            display, &Display::addToLog);
     connect(exchange, &Exchange::updateLog,            display, &Display::addToLog);
     connect(exchange, &Exchange::updateExchangePrices, display, &Display::updateExchangePrices);
+
+    // Setup logging
+    // TODO: all logging should go here and then distributed
+
+    // Create remote control
+    if(config->getUseRemote()) {
+
+        remoteControl = new RemoteControl_TCP();
+
+        connect(this, &Program::, remoteControl, &RemoteControl::logUpdate());
+        connect(this, &Program::, remoteControl, &RemoteControl::workorderStateUpdate());
+        connect(this, &Program::, remoteControl, &RemoteControl::exchangePricesUpdate());
+        QTimer::singleShot(1, remoteControl, &RemoteControl::open);
+    }
 
     // Setup threads
     auto *exchangeThread = new QThread();
@@ -63,13 +79,25 @@ void Program::startShotReceived() {
                      config->getMinSell());
 }
 
+void Program::addWorker() {
+
+    // Create work orders from remote control
+
+
+}
+
+void Program::removeWorker(uint workOrderID, bool force) {
+    (void) workOrderID;
+    (void) force;
+}
+
 ///
 /// \brief Program::workOrderFactory Creates a workorder and adds it to the list of workorders
 /// \param numWorkers The amount of workers to create
 /// \param exchange Pointer to the exchange interface
 /// \param amount The amount of currency to trade with
 /// \param profit The profit target this worker will aim for
-/// \param pair The currenct pair, example: btc_usd
+/// \param pair The currency pair, example: btc_usd
 /// \param minSell Sets a static minimum sell price. To use a dynamic price, set to a negative number
 /// \return
 ///
@@ -82,22 +110,24 @@ bool Program::workOrderFactory(int    numWorkers,   Exchange *exchange,  double 
 
     for(int i = 0; i < numWorkers; i++) {
 
-        emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-        WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
+        workOrderIdIterator++;
+
+        emit updateLog(00, className, "Creating Work Order: " + QString::number(workOrderIdIterator) + " with currency: " + pair, logSeverity::LOG_DEBUG);
+        WorkOrder *newWorkOrder = new WorkOrder(exchange, workOrderIdIterator,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
 
         auto *workOrderThread = new QThread();
-        wo->moveToThread(workOrderThread);
+        newWorkOrder->moveToThread(workOrderThread);
 
-        connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
-        connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
+        connect(newWorkOrder, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
+        connect(newWorkOrder, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
 
         // Tell the newly created work order to start
-        connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+        connect(this,SIGNAL(startOrder()), newWorkOrder, SLOT(startOrder()));
         workOrderThread->start();
         emit startOrder();
-        disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+        disconnect(this,SIGNAL(startOrder()), newWorkOrder, SLOT(startOrder()));
 
-        workOrders.append(wo);
+        workOrders.append(newWorkOrder);
         workOrderThreads.append(workOrderThread);
         QThread::sleep(1);
     }

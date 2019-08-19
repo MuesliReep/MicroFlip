@@ -27,6 +27,11 @@ bool Config::loadConfigFromFile(const QString& fileName) {
 
     static const int     DEFAULT_LOG_LEVEL = logSeverity::LOG_INFO;
 
+    static const bool    DEFAULT_USE_REMOTE          = false;
+    static const QString DEFAULT_REMOTE_API_KEY      = "";
+    static const QString DEFAULT_REMOTE_API_SECRET   = "";
+    static const QString DEFAULT_REMOTE_VERIFICATION = "";
+
     bool result = false;
 
     QFile file(fileName);
@@ -38,22 +43,27 @@ bool Config::loadConfigFromFile(const QString& fileName) {
         QSettings settings(fileName, QSettings::IniFormat);
 
         // Set default values
-        settings.setValue("Exchange/ApiKey",        DEFAULT_API_KEY        );
-        settings.setValue("Exchange/ApiSecret",     DEFAULT_API_SECRET     );
-        settings.setValue("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID    );
+        settings.setValue("Exchange/ApiKey",        DEFAULT_API_KEY             );
+        settings.setValue("Exchange/ApiSecret",     DEFAULT_API_SECRET          );
+        settings.setValue("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID         );
 
-        settings.setValue("Worker/Amount",          DEFAULT_AMOUNT         );
-        settings.setValue("Worker/Profit",          DEFAULT_PROFIT         );
-        settings.setValue("Worker/MinimumSell",     DEFAULT_MINSELL        );
-        settings.setValue("Worker/NumberOfWorkers", DEFAULT_WORKERS        );
-        settings.setValue("Worker/CurrencyPair",    DEFAULT_PAIR           );
-        settings.setValue("Worker/Mode",            DEFAULT_MODE           );
-        settings.setValue("Worker/SingleShot",      DEFAULT_SINGLESHOT     );
+        settings.setValue("Worker/Amount",          DEFAULT_AMOUNT              );
+        settings.setValue("Worker/Profit",          DEFAULT_PROFIT              );
+        settings.setValue("Worker/MinimumSell",     DEFAULT_MINSELL             );
+        settings.setValue("Worker/NumberOfWorkers", DEFAULT_WORKERS             );
+        settings.setValue("Worker/CurrencyPair",    DEFAULT_PAIR                );
+        settings.setValue("Worker/Mode",            DEFAULT_MODE                );
+        settings.setValue("Worker/SingleShot",      DEFAULT_SINGLESHOT          );
 
-        settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT );
-        settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  );
+        settings.setValue("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT      );
+        settings.setValue("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG       );
 
-        settings.setValue("System/LogLevel",        DEFAULT_LOG_LEVEL      );
+        settings.setValue("System/LogLevel",        DEFAULT_LOG_LEVEL           );
+
+        settings.setValue("Remote/useRemote",       DEFAULT_USE_REMOTE          );
+        settings.setValue("Remote/ApiKey",          DEFAULT_REMOTE_API_KEY      );
+        settings.setValue("Remote/ApiSecret",       DEFAULT_REMOTE_API_SECRET   );
+        settings.setValue("Remote/VerificationKey", DEFAULT_REMOTE_VERIFICATION );
 
         // Save settings
         settings.sync();
@@ -63,22 +73,27 @@ bool Config::loadConfigFromFile(const QString& fileName) {
 
     QSettings settings(fileName, QSettings::IniFormat);
 
-    this->apiKey        = settings.value("Exchange/ApiKey",        DEFAULT_API_KEY        ).toString ();
-    this->apiSecret     = settings.value("Exchange/ApiSecret",     DEFAULT_API_SECRET     ).toString ();
-    this->customerID    = settings.value("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID    ).toString ();
+    this->apiKey                = settings.value("Exchange/ApiKey",        DEFAULT_API_KEY                   ).toString ();
+    this->apiSecret             = settings.value("Exchange/ApiSecret",     DEFAULT_API_SECRET                ).toString ();
+    this->customerID            = settings.value("Exchange/CustomerID",    DEFAULT_CUSTOMER_ID               ).toString ();
 
-    this->amount        = settings.value("Worker/Amount",          DEFAULT_AMOUNT         ).toDouble ();
-    this->profit        = settings.value("Worker/Profit",          DEFAULT_PROFIT         ).toDouble ();
-    this->minSell       = settings.value("Worker/MinimumSell",     DEFAULT_MINSELL        ).toDouble ();
-    this->numWorkers    = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS        ).toInt    ();
-    this->pair          = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR           ).toString ();
-    this->mode          = settings.value("Worker/Mode",            DEFAULT_MODE           ).toInt    ();
-    this->singleShot    = settings.value("Worker/SingleShot",      DEFAULT_SINGLESHOT     ).toBool   ();
+    this->amount                = settings.value("Worker/Amount",          DEFAULT_AMOUNT                    ).toDouble ();
+    this->profit                = settings.value("Worker/Profit",          DEFAULT_PROFIT                    ).toDouble ();
+    this->minSell               = settings.value("Worker/MinimumSell",     DEFAULT_MINSELL                   ).toDouble ();
+    this->numWorkers            = settings.value("Worker/NumberOfWorkers", DEFAULT_WORKERS                   ).toInt    ();
+    this->pair                  = settings.value("Worker/CurrencyPair",    DEFAULT_PAIR                      ).toString ();
+    this->mode                  = settings.value("Worker/Mode",            DEFAULT_MODE                      ).toInt    ();
+    this->singleShot            = settings.value("Worker/SingleShot",      DEFAULT_SINGLESHOT                ).toBool   ();
 
-    this->shortInterval = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT ).toInt    ();
-    this->longInterval  = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG  ).toInt    ();
+    this->shortInterval         = settings.value("Worker/Interval/Short",  DEFAULT_INTERVAL_SHORT            ).toInt    ();
+    this->longInterval          = settings.value("Worker/Interval/Long",   DEFAULT_INTERVAL_LONG             ).toInt    ();
 
-    this->logLevel      = settings.value("System/LogLevel",        DEFAULT_LOG_LEVEL      ).toInt    ();
+    this->logLevel              = settings.value("System/LogLevel",        DEFAULT_LOG_LEVEL                 ).toInt    ();
+
+    this->useRemote             = settings.value("Remote/useRemote",       DEFAULT_USE_REMOTE                ).toBool   ();
+    this->remoteApiKey          = settings.value("Remote/ApiKey",          DEFAULT_REMOTE_API_KEY            ).toString ();
+    this->remoteApiSecret       = settings.value("Remote/ApiSecret",       DEFAULT_REMOTE_API_KEY            ).toString ();
+    this->remoteVerificationKey = settings.value("Remote/VerificationKey", DEFAULT_REMOTE_VERIFICATION       ).toString();
 
     result = true;
 
@@ -91,39 +106,48 @@ void Config::saveConfigToFile(const QString& fileName) {
 
     QSettings settings(fileName, QSettings::IniFormat);
 
-    settings.setValue("Exchange/ApiKey",        this->apiKey        );
-    settings.setValue("Exchange/ApiSecret",     this->apiSecret     );
-    settings.setValue("Exchange/CustomerID",    this->customerID    );
+    settings.setValue("Exchange/ApiKey",        this->apiKey                );
+    settings.setValue("Exchange/ApiSecret",     this->apiSecret             );
+    settings.setValue("Exchange/CustomerID",    this->customerID            );
 
-    settings.setValue("Worker/Amount",          this->amount        );
-    settings.setValue("Worker/Profit",          this->profit        );
-    settings.setValue("Worker/MinimumSell",     this->minSell       );
-    settings.setValue("Worker/NumberOfWorkers", this->numWorkers    );
-    settings.setValue("Worker/CurrencyPair",    this->pair          );
-    settings.setValue("Worker/Mode",            this->mode          );
-    settings.setValue("Worker/SingleShot",      this->singleShot    );
+    settings.setValue("Worker/Amount",          this->amount                );
+    settings.setValue("Worker/Profit",          this->profit                );
+    settings.setValue("Worker/MinimumSell",     this->minSell               );
+    settings.setValue("Worker/NumberOfWorkers", this->numWorkers            );
+    settings.setValue("Worker/CurrencyPair",    this->pair                  );
+    settings.setValue("Worker/Mode",            this->mode                  );
+    settings.setValue("Worker/SingleShot",      this->singleShot            );
 
-    settings.setValue("Worker/Interval/Short",  this->shortInterval );
-    settings.setValue("Worker/Interval/Long",   this->longInterval  );
+    settings.setValue("Worker/Interval/Short",  this->shortInterval         );
+    settings.setValue("Worker/Interval/Long",   this->longInterval          );
 
-    settings.setValue("System/LogLevel",        this->logLevel      );
+    settings.setValue("System/LogLevel",        this->logLevel              );
+
+    settings.setValue("Remote/useRemote",       this->useRemote             );
+    settings.setValue("Remote/ApiKey",          this->remoteApiKey          );
+    settings.setValue("Remote/ApiSecret",       this->remoteApiSecret       );
+    settings.setValue("Remote/VerificationKey", this->remoteVerificationKey );
 
     settings.sync();
 }
 
-QString Config::getApiKey        () const { return apiKey;        }
-QString Config::getApiSecret     () const { return apiSecret;     }
-QString Config::getCustomerID    () const { return customerID;    }
-double  Config::getAmount        () const { return amount;        }
-double  Config::getProfit        () const { return profit;        }
-double  Config::getMinSell       () const { return minSell;       }
-QString Config::getPair          () const { return pair;          }
-int     Config::getNumWorkers    () const { return numWorkers;    }
-int     Config::getShortInterval () const { return shortInterval; }
-int     Config::getLongInterval  () const { return longInterval;  }
-int     Config::getLogLevel      () const { return logLevel;      }
-bool    Config::getSingleShot    () const { return singleShot;    }
-int     Config::getMode          () const { return mode;          }
+QString Config::getApiKey               () const { return apiKey;                }
+QString Config::getApiSecret            () const { return apiSecret;             }
+QString Config::getCustomerID           () const { return customerID;            }
+double  Config::getAmount               () const { return amount;                }
+double  Config::getProfit               () const { return profit;                }
+double  Config::getMinSell              () const { return minSell;               }
+QString Config::getPair                 () const { return pair;                  }
+int     Config::getNumWorkers           () const { return numWorkers;            }
+int     Config::getShortInterval        () const { return shortInterval;         }
+int     Config::getLongInterval         () const { return longInterval;          }
+int     Config::getLogLevel             () const { return logLevel;              }
+bool    Config::getSingleShot           () const { return singleShot;            }
+bool    Config::getUseRemote            () const { return useRemote;             }
+QString Config::getRemoteApiKey         () const { return remoteApiKey;          }
+QString Config::getRemoteApiSecret      () const { return remoteApiSecret;       }
+QString Config::getRemoteVerificationKey() const { return remoteVerificationKey; }
+int     Config::getMode                 () const { return mode;                  }
 
 /* Example:
   

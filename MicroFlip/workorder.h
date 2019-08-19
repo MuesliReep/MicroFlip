@@ -29,7 +29,7 @@ class WorkOrder : public QObject {
     Q_OBJECT
 
 public:
-    WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget,
+    WorkOrder(Exchange *exchange, uint workID, QString pair, double maxAmount, double profitTarget,
             int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice = 0.0, int sellTTL = 5, int buyTTL = 1440, bool highSpeed = false);
 
     double  getSellPrice() { return sellPrice; }

@@ -16,7 +16,7 @@
 /// \param buyTTL Time in minutes a Buy order may live
 /// \param highSpeed
 ///
-WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
+WorkOrder::WorkOrder(Exchange *exchange,  uint workID,         QString pair,
                      double maxAmount,    double profitTarget, int shortInterval,
                      int longInterval,    int mode,            bool singleShot,
                      double minSellPrice, int sellTTL,         int buyTTL,

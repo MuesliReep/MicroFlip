@@ -20,6 +20,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     program.cpp \
+    remoteControl.cpp \
+    remotecontrol_tcp.cpp \
+    tcpauthsocket.cpp \
     workorder.cpp \
     downloader.cpp \
     marketData.cpp \
@@ -30,7 +33,6 @@ SOURCES += main.cpp\
     display.cpp \
     exchange.cpp \
 #    exchange_btce.cpp \
-    control.cpp \
 #    exchange_okcoin.cpp \
     exchange_wex.cpp \
     exchange_bitstamp.cpp \
@@ -40,6 +42,9 @@ SOURCES += main.cpp\
     json_helper.cpp
 
 HEADERS  += program.h \
+    remoteControl.h \
+    remotecontrol_tcp.h \
+    tcpauthsocket.h \
     workorder.h \
     downloader.h \
     marketData.h \
@@ -50,7 +55,6 @@ HEADERS  += program.h \
     display.h \
     exchange.h \
 #    exchange_btce.h \
-    control.h \
 #    exchange_okcoin.h \
     exchange_wex.h \
     exchange_bitstamp.h \
