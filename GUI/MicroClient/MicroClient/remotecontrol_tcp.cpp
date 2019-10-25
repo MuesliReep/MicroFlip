@@ -8,15 +8,20 @@ RemoteControl_TCP::RemoteControl_TCP(Config config) : RemoteControl (config) {
     this->privateKey    = config.getPrivateKey   ();
     this->serverAddress = config.getServerAdress ();
     this->serverPort    = config.getServerPort   ();
+
+    readBuffer.clear();
 }
 
 void RemoteControl_TCP::open() {
 
-    socket.connectToHost(QHostAddress(serverAddress), serverPort);
+    socket.connectToHost(QHostAddress(this->serverAddress), this->serverPort);
 }
 
 void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
 
+    readBuffer.append(rawData);
+
+    // Search for message prefix in buffer
 }
 
 bool RemoteControl_TCP::sendMessage(QString message) {

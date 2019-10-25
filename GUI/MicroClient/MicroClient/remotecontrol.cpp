@@ -158,6 +158,8 @@ bool RemoteControl::createRemoveWorkerMessage(uint workerID) {
 
     // Send
     sendMessage(message);
+
+    return true; // TODO: when is this false?
 }
 
 bool RemoteControl::parseHelloMessage() {
@@ -165,6 +167,8 @@ bool RemoteControl::parseHelloMessage() {
     // After a hello message, the sender can be authenticated and will receive updates from the server
 
     // TODO: send response to client
+
+    return false;
 }
 
 uint64_t RemoteControl::createNonce() {
