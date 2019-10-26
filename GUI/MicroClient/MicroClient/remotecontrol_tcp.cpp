@@ -14,7 +14,23 @@ RemoteControl_TCP::RemoteControl_TCP(Config config) : RemoteControl (config) {
 
 void RemoteControl_TCP::open() {
 
+    qDebug() << "Opening socket " << serverAddress << ":" << QString::number(serverPort);
+
+    // Connect to server
     socket.connectToHost(QHostAddress(this->serverAddress), this->serverPort);
+
+    // Wait for connection
+    if(!socket.waitForConnected(5000)) {
+
+        qDebug() << "Could not connect to server, timeout!";
+        return;
+    }
+
+    qDebug() << "Connected to server!";
+
+    connect(&socket, &QTcpSocket::connected,    this, &RemoteControl_TCP::onConnect    );
+    connect(&socket, &QTcpSocket::disconnected, this, &RemoteControl_TCP::onDisconnect );
+    connect(&socket, &QTcpSocket::readyRead,    this, &RemoteControl_TCP::onReadyRead  );
 }
 
 void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
@@ -36,4 +52,23 @@ bool RemoteControl_TCP::sendMessage(QString message) {
 void RemoteControl_TCP::onReadyRead() {
 
     parseRawMessage(socket.readAll());
+}
+
+void RemoteControl_TCP::onConnect() {
+
+    qDebug() << "Connected to server!";
+
+    this->connected = true;
+
+    emit isConnected(connected);
+
+    // Once connected send a hello message, to authenticate
+    createHelloMessage();
+}
+
+void RemoteControl_TCP::onDisconnect() {
+
+    this->connected = false;
+
+    emit isConnected(connected);
 }

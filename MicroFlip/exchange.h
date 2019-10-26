@@ -214,7 +214,7 @@ signals:
   void sendNewOrderInfo   (int);
 
   void updateLog           (int workID, QString classID, QString logString, int severity);
-  void updateExchangePrices(QString, double, double);
+  void updateExchangePrices(QString symbol, double lastPrice, double avgPrice);
 };
 
 #endif // EXCHANGE_H

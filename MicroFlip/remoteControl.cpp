@@ -11,6 +11,10 @@ bool RemoteControl::open() {
 
 bool RemoteControl::verifySignature(QString message, QString nonce, QString signature) {
 
+    (void) message;
+    (void) nonce;
+    (void) signature;
+
     return false;
 }
 
@@ -63,14 +67,15 @@ bool RemoteControl::parseHelloMessage() {
     // After a hello message, the sender can be authenticated and will receive updates from the server
 
     // TODO: send response to client
+    return false;
 }
 
 bool RemoteControl::parseCreateWorkerMessage() {
 
-
+    return false;
 }
 
 bool RemoteControl::parseRemoveWorkerMessage() {
 
-
+    return false;
 }

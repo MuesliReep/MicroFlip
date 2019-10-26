@@ -1,8 +1,8 @@
 #include "remotecontrol_tcp.h"
 
-RemoteControl_TCP::RemoteControl_TCP() {
+RemoteControl_TCP::RemoteControl_TCP(quint16 listenPort) {
 
-    listenPort = 10000;
+    this->listenPort = listenPort;
 }
 
 bool RemoteControl_TCP::open() {
@@ -53,23 +53,35 @@ void RemoteControl_TCP::onReadyRead() {
 
 }
 
-void RemoteControl_TCP::logUpdate() {
+void RemoteControl_TCP::logUpdate(int workID, QString className, QString log, int severity) {
+
+    (void) workID;
+    (void) className;
+    (void) log;
+    (void) severity;
 
     for (TcpAuthSocket* socket : sockets) {
         socket->write(QByteArray::fromStdString("log update"));
     }
 }
 
-void RemoteControl_TCP::workorderStateUpdate() {
+void RemoteControl_TCP::workorderStateUpdate(int workID, QString state) {
+
+    (void) workID;
+    (void) state;
 
     for (TcpAuthSocket* socket : sockets) {
-        socket->write(QByteArray::fromStdString("log update"));
+        socket->write(QByteArray::fromStdString("workorderStateUpdate"));
     }
 }
 
-void RemoteControl_TCP::exchangePricesUpdate() {
+void RemoteControl_TCP::exchangePricesUpdate(QString symbol, double lastPrice, double avgPrice) {
+
+    (void) symbol;
+    (void) lastPrice;
+    (void) avgPrice;
 
     for (TcpAuthSocket* socket : sockets) {
-        socket->write(QByteArray::fromStdString("log update"));
+        socket->write(QByteArray::fromStdString("exchangePricesUpdate"));
     }
 }

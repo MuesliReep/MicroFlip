@@ -31,6 +31,7 @@ bool Config::loadConfigFromFile(const QString& fileName) {
     static const QString DEFAULT_REMOTE_API_KEY      = "";
     static const QString DEFAULT_REMOTE_API_SECRET   = "";
     static const QString DEFAULT_REMOTE_VERIFICATION = "";
+    static const quint16 DEFAULT_REMOTE_LISTEN_PORT  = 33500;
 
     bool result = false;
 
@@ -64,6 +65,7 @@ bool Config::loadConfigFromFile(const QString& fileName) {
         settings.setValue("Remote/ApiKey",          DEFAULT_REMOTE_API_KEY      );
         settings.setValue("Remote/ApiSecret",       DEFAULT_REMOTE_API_SECRET   );
         settings.setValue("Remote/VerificationKey", DEFAULT_REMOTE_VERIFICATION );
+        settings.setValue("Remote/ListenPort",      DEFAULT_REMOTE_LISTEN_PORT  );
 
         // Save settings
         settings.sync();
@@ -94,6 +96,7 @@ bool Config::loadConfigFromFile(const QString& fileName) {
     this->remoteApiKey          = settings.value("Remote/ApiKey",          DEFAULT_REMOTE_API_KEY            ).toString ();
     this->remoteApiSecret       = settings.value("Remote/ApiSecret",       DEFAULT_REMOTE_API_KEY            ).toString ();
     this->remoteVerificationKey = settings.value("Remote/VerificationKey", DEFAULT_REMOTE_VERIFICATION       ).toString();
+    this->remoteListenPort      = settings.value("Remote/ListenPort",      DEFAULT_REMOTE_LISTEN_PORT        ).toUInt();
 
     result = true;
 
@@ -127,6 +130,7 @@ void Config::saveConfigToFile(const QString& fileName) {
     settings.setValue("Remote/ApiKey",          this->remoteApiKey          );
     settings.setValue("Remote/ApiSecret",       this->remoteApiSecret       );
     settings.setValue("Remote/VerificationKey", this->remoteVerificationKey );
+    settings.setValue("Remote/ListenPort",      this->remoteListenPort      );
 
     settings.sync();
 }
@@ -147,6 +151,7 @@ bool    Config::getUseRemote            () const { return useRemote;            
 QString Config::getRemoteApiKey         () const { return remoteApiKey;          }
 QString Config::getRemoteApiSecret      () const { return remoteApiSecret;       }
 QString Config::getRemoteVerificationKey() const { return remoteVerificationKey; }
+quint16 Config::getRemoteListenPort     () const { return remoteListenPort;      }
 int     Config::getMode                 () const { return mode;                  }
 
 /* Example:

@@ -33,6 +33,7 @@ public:
   QString getRemoteApiKey          () const;
   QString getRemoteApiSecret       () const;
   QString getRemoteVerificationKey () const;
+  quint16 getRemoteListenPort      () const;
 
 private:
 
@@ -57,6 +58,7 @@ private:
   QString remoteApiKey          {};
   QString remoteApiSecret       {};
   QString remoteVerificationKey {};
+  quint16 remoteListenPort      {};
 
 };
 

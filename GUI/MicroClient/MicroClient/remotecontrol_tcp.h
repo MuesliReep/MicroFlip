@@ -14,10 +14,10 @@ public:
     RemoteControl_TCP(Config config);
 
 private:
-    QString     serverAddress   {};
-    uint16_t    serverPort      {};
-    QTcpSocket  socket          {};
-    QByteArray  readBuffer      {};
+    QString     serverAddress {};
+    uint16_t    serverPort    {};
+    QTcpSocket  socket        {};
+    QByteArray  readBuffer    {};
 
     void parseRawMessage(QByteArray rawData);
 
@@ -25,13 +25,10 @@ protected:
     bool sendMessage(QString message);
 
 public slots:
-    void open();
-    void onReadyRead();
-
-
-
-
-public slots:
+    void open         ();
+    void onReadyRead  ();
+    void onConnect    ();
+    void onDisconnect ();
 
 };
 

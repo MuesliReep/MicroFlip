@@ -14,7 +14,7 @@ class RemoteControl_TCP : public RemoteControl {
     Q_OBJECT
 
 public:
-    RemoteControl_TCP();
+    RemoteControl_TCP(quint16 listenPort);
 
 private:    
     QTcpServer            server;
@@ -22,12 +22,6 @@ private:
     quint16               listenPort;
 
     void parseRawMessage(QByteArray rawData);
-
-public slots:
-    bool open                 ();
-    void logUpdate            ();
-    void workorderStateUpdate ();
-    void exchangePricesUpdate ();
 
 private slots:
     void onNewConnection      ();
@@ -37,6 +31,13 @@ private slots:
 signals:
     void updateLog            (int workID, QString className, QString log, int severity);
 
+
+    // RemoteControl interface
+public slots:
+    bool open                 ();
+    void logUpdate            (int workID, QString className, QString log, int severity);
+    void workorderStateUpdate (int workID, QString state);
+    void exchangePricesUpdate (QString symbol, double lastPrice, double avgPrice);
 };
 
 #endif // REMOTECONTROL_TCP_H

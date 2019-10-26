@@ -166,7 +166,12 @@ bool RemoteControl::parseHelloMessage() {
 
     // After a hello message, the sender can be authenticated and will receive updates from the server
 
-    // TODO: send response to client
+    // TODO
+    if(true) {
+        this->authenticated = true;
+        emit isAuthenticated(authenticated);
+        return true;
+    }
 
     return false;
 }
