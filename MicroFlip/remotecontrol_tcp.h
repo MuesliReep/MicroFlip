@@ -17,9 +17,9 @@ public:
     RemoteControl_TCP(quint16 listenPort);
 
 private:    
-    QTcpServer            server;
-    QList<TcpAuthSocket*> sockets;
-    quint16               listenPort;
+    QTcpServer            *server;
+    QList<TcpAuthSocket*>  sockets;
+    quint16                listenPort;
 
     void parseRawMessage(QByteArray rawData);
 

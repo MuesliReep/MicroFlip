@@ -9,10 +9,12 @@ bool RemoteControl_TCP::open() {
 
     bool openResult = false;
 
-    openResult = server.listen(QHostAddress::Any, listenPort);
+    server = new QTcpServer();
+
+    openResult = server->listen(QHostAddress::Any, listenPort);
 
     if(openResult) {
-        connect(&server, &QTcpServer::newConnection, this, &RemoteControl_TCP::onNewConnection);
+        connect(server, &QTcpServer::newConnection, this, &RemoteControl_TCP::onNewConnection);
     }
 
     return openResult;
@@ -24,7 +26,7 @@ void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
 
 void RemoteControl_TCP::onNewConnection() {
 
-    TcpAuthSocket *clientSocket = static_cast<TcpAuthSocket *>(server.nextPendingConnection());
+    TcpAuthSocket *clientSocket = static_cast<TcpAuthSocket *>(server->nextPendingConnection());
     connect(clientSocket, &QTcpSocket::readyRead,    this, &RemoteControl_TCP::onReadyRead);
     connect(clientSocket, &QTcpSocket::stateChanged, this, &RemoteControl_TCP::onSocketStateChanged);
 
