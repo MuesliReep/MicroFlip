@@ -30,9 +30,8 @@ public:
   bool    getSingleShot            () const;
 
   bool    getUseRemote             () const;
-  QString getRemoteApiKey          () const;
-  QString getRemoteApiSecret       () const;
-  QString getRemoteVerificationKey () const;
+  QString getRemoteServerKey       () const;
+  QString getRemotePrivateKey      () const;
   quint16 getRemoteListenPort      () const;
 
 private:
@@ -55,8 +54,8 @@ private:
   int     longInterval          {};
 
   bool    useRemote             {};
-  QString remoteApiKey          {};
-  QString remoteApiSecret       {};
+  QString remoteServerKey       {};
+  QString remotePrivateKey      {};
   QString remoteVerificationKey {};
   quint16 remoteListenPort      {};
 

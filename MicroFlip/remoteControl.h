@@ -10,8 +10,15 @@ class RemoteControl : public QObject {
 public:
     RemoteControl();
 
+private:
+    uint64_t   lastNonce              {0};
+
+    QByteArray createSignature        (QString message, QString key);
+
 protected:
-    QString className = "REMOTECONTROL";
+    QString className                 {"REMOTECONTROL"};
+    QString serverKey                 {};
+    QString privateKey                {};
 
     bool verifySignature              (QString message, QString nonce, QString signature); //TODO: server should send verification key so client can check if server is valid
 
@@ -19,6 +26,7 @@ protected:
     bool parseHelloMessage            ();
     bool parseCreateWorkerMessage     ();
     bool parseRemoveWorkerMessage     ();
+    void createHelloMessage           ();
 
 public slots:
     virtual bool open                 () = 0;
@@ -29,6 +37,7 @@ public slots:
 signals:
     void createWorker                 ();
     void removeWorker                 (uint workOrderID, bool force = false);
+    void updateLog                    (int workID, QString className, QString log, int severity);
 };
 
 #endif // REMOTECONTROL_H

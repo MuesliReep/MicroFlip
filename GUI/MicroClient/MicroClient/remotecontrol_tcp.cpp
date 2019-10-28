@@ -28,9 +28,12 @@ void RemoteControl_TCP::open() {
 
     qDebug() << "Connected to server!";
 
-    connect(&socket, &QTcpSocket::connected,    this, &RemoteControl_TCP::onConnect    );
+// Does nothing:    connect(&socket, &QTcpSocket::connected,    this, &RemoteControl_TCP::onConnect    );
     connect(&socket, &QTcpSocket::disconnected, this, &RemoteControl_TCP::onDisconnect );
     connect(&socket, &QTcpSocket::readyRead,    this, &RemoteControl_TCP::onReadyRead  );
+
+    // Send hello message to authenticate
+    createHelloMessage();
 }
 
 void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {

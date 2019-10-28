@@ -2,20 +2,36 @@
 
 #include "common.h"
 
+#include <QCryptographicHash>
+#include <QMessageAuthenticationCode>
+
 RemoteControl::RemoteControl() = default;
-
-bool RemoteControl::open() {
-
-    return false;
-}
 
 bool RemoteControl::verifySignature(QString message, QString nonce, QString signature) {
 
-    (void) message;
-    (void) nonce;
-    (void) signature;
+    bool ok = false;
+    uint64_t currentNonce = static_cast<uint64_t>(nonce.toULongLong(&ok));
 
-    return false;
+    // Check if nonce is valid
+    if(!ok) { return false; }
+    if(currentNonce > lastNonce) {
+        lastNonce = currentNonce;
+    } else {
+        return false;
+    }
+
+    QString createdSignature = createSignature(message, privateKey);
+
+    if(createdSignature != signature) {
+        return false;
+    }
+
+    return true;
+}
+
+QByteArray RemoteControl::createSignature(QString message, QString key) {
+
+    return QMessageAuthenticationCode::hash(message.toUtf8(), key.toUtf8(), QCryptographicHash::Sha256).toHex();
 }
 
 // Returns true if message is valid
@@ -31,12 +47,16 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
 
     // Split message into components
     QStringList messageComponents = message.split(MESSAGE_SPLITTER);
-    // TODO: check number of components
+
+    // Check number of message components is correct
+    if(messageComponents.length() != 6) {
+        return false;
+    }
 
     // First verify signature
-    QString nonce = messageComponents.at(messageComponents.length() -2);
-    QString signature = messageComponents.last();
-    if(verifySignature(message, nonce, signature)) {
+    QString nonce     = messageComponents.at(3);
+    QString signature = messageComponents.at(4);
+    if(verifySignature(messageComponents.mid(0,4).join(MESSAGE_SPLITTER).append(MESSAGE_SPLITTER), nonce, signature)) {
         *verified = true;
     } else {
         *verified = false;
@@ -50,13 +70,13 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
 
     if (messageCommand == HELLO_MESSAGE) {
 
-        parseHelloMessage();
+        parseResult = parseHelloMessage();
     } else if (messageCommand == CREATE_WORKER_MESSAGE) {
 
-        parseCreateWorkerMessage();
+        parseResult = parseCreateWorkerMessage();
     } else if (messageCommand == REMOVE_WORKER_MESSAGE) {
 
-        parseRemoveWorkerMessage();
+        parseResult = parseRemoveWorkerMessage();
     }
 
     return parseResult;
@@ -66,8 +86,10 @@ bool RemoteControl::parseHelloMessage() {
 
     // After a hello message, the sender can be authenticated and will receive updates from the server
 
-    // TODO: send response to client
-    return false;
+    // Send response to client
+    createHelloMessage();
+
+    return true;
 }
 
 bool RemoteControl::parseCreateWorkerMessage() {
@@ -78,4 +100,7 @@ bool RemoteControl::parseCreateWorkerMessage() {
 bool RemoteControl::parseRemoveWorkerMessage() {
 
     return false;
+}
+
+void RemoteControl::createHelloMessage() {
 }

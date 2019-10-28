@@ -1,8 +1,10 @@
 #include "remotecontrol_tcp.h"
 
-RemoteControl_TCP::RemoteControl_TCP(quint16 listenPort) {
+RemoteControl_TCP::RemoteControl_TCP(quint16 listenPort, QString serverKey, QString privateKey) {
 
     this->listenPort = listenPort;
+    this->serverKey  = serverKey;
+    this->privateKey = privateKey;
 }
 
 bool RemoteControl_TCP::open() {
@@ -20,8 +22,25 @@ bool RemoteControl_TCP::open() {
     return openResult;
 }
 
-void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
+void RemoteControl_TCP::parseRawMessage(QByteArray rawData, TcpAuthSocket *sender) {
 
+    // Send the raw data message to be parsed
+    // If message is valid but verification failed, disconnect this client
+
+    bool verified     = false;
+    bool messageValid = parseNewMessage(QString(rawData), &verified);
+
+    if(messageValid && !verified) {
+
+        emit updateLog(00, className, "Could not verify remote client " + sender->peerAddress().toString(), logSeverity::LOG_INFO);
+
+        sender->disconnectFromHost();
+    } else if(messageValid && verified) {
+
+        sender->setAuthenticated(true);
+
+        emit updateLog(00, className, "Verified remote client " + sender->peerAddress().toString(), logSeverity::LOG_INFO);
+    }
 }
 
 void RemoteControl_TCP::onNewConnection() {
@@ -51,7 +70,7 @@ void RemoteControl_TCP::onReadyRead() {
 
     TcpAuthSocket* sender = static_cast<TcpAuthSocket*>(QObject::sender());
 
-    parseRawMessage(sender->readAll());
+    parseRawMessage(sender->readAll(), sender);
 
 }
 

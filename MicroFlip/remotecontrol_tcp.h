@@ -14,23 +14,19 @@ class RemoteControl_TCP : public RemoteControl {
     Q_OBJECT
 
 public:
-    RemoteControl_TCP(quint16 listenPort);
+    RemoteControl_TCP(quint16 listenPort, QString serverKey, QString privateKey);
 
 private:    
     QTcpServer            *server;
     QList<TcpAuthSocket*>  sockets;
     quint16                listenPort;
 
-    void parseRawMessage(QByteArray rawData);
+    void parseRawMessage(QByteArray rawData, TcpAuthSocket *sender);
 
 private slots:
     void onNewConnection      ();
     void onSocketStateChanged (QAbstractSocket::SocketState socketState);
     void onReadyRead          ();
-
-signals:
-    void updateLog            (int workID, QString className, QString log, int severity);
-
 
     // RemoteControl interface
 public slots:

@@ -84,6 +84,9 @@ void RemoteControl::createHelloMessage() {
     message.append(HELLO_MESSAGE);
     message.append(MESSAGE_SPLITTER);
 
+    // Create payload
+    message.append(MESSAGE_SPLITTER);
+
     // Create nonce
     uint64_t nonce = createNonce();
     message.append(QString::number(nonce));

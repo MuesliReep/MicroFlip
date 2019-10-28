@@ -6,8 +6,8 @@
 enum logSeverity { LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_CRITICAL, LOG_FATAL };
 enum workerMode  { MINSELL, TICKERAVG };
 
-static const QString MESSAGE_PREFIX   = "";
-static const QString MESSAGE_SUFFIX   = "";
+static const QString MESSAGE_PREFIX   = "FLIP";
+static const QString MESSAGE_SUFFIX   = "FLOP";
 static const QString MESSAGE_SPLITTER = ":";
 
 static const QString HELLO_MESSAGE         = "HELLO";

@@ -48,12 +48,15 @@ Program::Program(QObject *parent) : QObject(parent) {
     if(config->getUseRemote()) {
 
         // Create new remote control
-        remoteControl = new RemoteControl_TCP(config->getRemoteListenPort());
+        remoteControl = new RemoteControl_TCP(config->getRemoteListenPort(),
+                                              config->getRemoteServerKey(),
+                                              config->getRemotePrivateKey());
 
         // Setup new connections
-        connect(this,     &Program::updateLog,             remoteControl, &RemoteControl::logUpdate);
-        connect(exchange, &Exchange::updateLog,            remoteControl, &RemoteControl::logUpdate);
-        connect(exchange, &Exchange::updateExchangePrices, remoteControl, &RemoteControl::exchangePricesUpdate);
+        connect(this,          &Program::updateLog,             remoteControl, &RemoteControl::logUpdate);
+        connect(exchange,      &Exchange::updateLog,            remoteControl, &RemoteControl::logUpdate);
+        connect(exchange,      &Exchange::updateExchangePrices, remoteControl, &RemoteControl::exchangePricesUpdate);
+        connect(remoteControl, &RemoteControl::updateLog,       display,       &Display::addToLog);
 
         // Create thread for remote control
         auto *remoteControlThread = new QThread();
