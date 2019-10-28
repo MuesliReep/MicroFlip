@@ -8,23 +8,26 @@
 
 RemoteControl::RemoteControl(Config config) { (void) config; }
 
-bool RemoteControl::verifySignature(QString message, uint64_t nonce, QString signature, QString key) {
+bool RemoteControl::verifySignature(QString message, QString nonce, QString signature) {
 
-    // First check if nonce is valid
-    if (nonce <= lastReceivedNonce) {
+    bool ok = false;
+    uint64_t currentNonce = static_cast<uint64_t>(nonce.toULongLong(&ok));
+
+    // Check if nonce is valid
+    if(!ok) { return false; }
+    if(currentNonce > lastNonce) {
+        lastNonce = currentNonce;
+    } else {
         return false;
     }
 
-    lastReceivedNonce = nonce;
+    QString createdSignature = createSignature(message, privateKey);
 
-    // TODO: verify nonce is higher than the one we sent
-
-    // Create a signature from the message and compare it to the received signature
-    if(signature.toUtf8().compare(createSignature(message, key), Qt::CaseInsensitive) == 0) {
-        return true;
+    if(createdSignature != signature) {
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 QByteArray RemoteControl::createSignature(QString message, QString key) {
@@ -41,34 +44,41 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
     // Message components:
     // PREFIX:COMMAND:COMMAND_COMPONENTS:NONCE:SIGNATURE:SUFFIX
 
-    // Remove suffix
-    //TODO: message.remove(message.length() - 1 - MESSAGE_SUFFIX.length(), MESSAGE_SUFFIX.length());
-
     // Split message into components
     QStringList messageComponents = message.split(MESSAGE_SPLITTER);
-    // TODO: check number of components
+
+    // Check number of message components is correct
+    if(messageComponents.length() != MESSAGE_COMPONENTS) {
+        return false;
+    }
 
     // First verify signature
-    uint64_t nonce = static_cast<uint64_t>(messageComponents.at(messageComponents.length() -2).toUInt());
-    QString signature = messageComponents.last();
-    if(verifySignature(message, nonce, signature, serverKey)) {
+    QString nonce     = messageComponents.at(NONCE_POSITION);
+    QString signature = messageComponents.at(SIGNATURE_POSITION);
+    if(verifySignature(messageComponents.mid(0,SIGNATURE_POSITION).join(MESSAGE_SPLITTER).append(MESSAGE_SPLITTER), nonce, signature)) {
         *verified = true;
     } else {
         *verified = false;
         return true;
     }
 
-    // Remove prefix
-    messageComponents.removeFirst();
+    // Extract payload
+    QString payload = messageComponents.at(PAYLOAD_POSITION);
 
-    // Next send message to correct parser
+    // Next send payload to correct parser
     bool parseResult = false;
 
     QString messageCommand = messageComponents.first();
 
     if (messageCommand == HELLO_MESSAGE) {
 
-        return parseHelloMessage();
+        parseResult = parseHelloMessage();
+    } else if (messageCommand == LOG_UPDATE_MESSAGE) {
+        parseResult = parseLogUpdateMessage(payload);
+    } else if (messageCommand == WORKORDER_UPDATE_MESSAGE) {
+        parseResult = parseWorkorderUpdateMessage(payload);
+    } else if (messageCommand == EXCHANGE_PRICE_UPDATE_MESSAGE) {
+        parseResult = parseExchangePriceUpdateMessage(payload);
     }
 
     return parseResult;
@@ -179,7 +189,26 @@ bool RemoteControl::parseHelloMessage() {
     return false;
 }
 
-uint64_t RemoteControl::createNonce() {
+bool RemoteControl::parseLogUpdateMessage(QString message) {
 
-    return static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
+    // Split payload into components
+    QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
+
+    return false;
+}
+
+bool RemoteControl::parseWorkorderUpdateMessage(QString message) {
+
+    // Split payload into components
+    QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
+
+    return false;
+}
+
+bool RemoteControl::parseExchangePriceUpdateMessage(QString message) {
+
+    // Split payload into components
+    QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
+
+    return false;
 }

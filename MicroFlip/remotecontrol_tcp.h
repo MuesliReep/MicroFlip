@@ -31,9 +31,9 @@ private slots:
     // RemoteControl interface
 public slots:
     bool open                 ();
-    void logUpdate            (int workID, QString className, QString log, int severity);
-    void workorderStateUpdate (int workID, QString state);
-    void exchangePricesUpdate (QString symbol, double lastPrice, double avgPrice);
+
+protected:
+    bool sendMessage(QString message);
 };
 
 #endif // REMOTECONTROL_TCP_H

@@ -74,35 +74,11 @@ void RemoteControl_TCP::onReadyRead() {
 
 }
 
-void RemoteControl_TCP::logUpdate(int workID, QString className, QString log, int severity) {
-
-    (void) workID;
-    (void) className;
-    (void) log;
-    (void) severity;
+bool RemoteControl_TCP::sendMessage(QString message) {
 
     for (TcpAuthSocket* socket : sockets) {
-        socket->write(QByteArray::fromStdString("log update"));
+        socket->write(message.toUtf8());
     }
-}
 
-void RemoteControl_TCP::workorderStateUpdate(int workID, QString state) {
-
-    (void) workID;
-    (void) state;
-
-    for (TcpAuthSocket* socket : sockets) {
-        socket->write(QByteArray::fromStdString("workorderStateUpdate"));
-    }
-}
-
-void RemoteControl_TCP::exchangePricesUpdate(QString symbol, double lastPrice, double avgPrice) {
-
-    (void) symbol;
-    (void) lastPrice;
-    (void) avgPrice;
-
-    for (TcpAuthSocket* socket : sockets) {
-        socket->write(QByteArray::fromStdString("exchangePricesUpdate"));
-    }
+    return true;
 }
