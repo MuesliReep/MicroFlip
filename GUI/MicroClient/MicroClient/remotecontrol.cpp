@@ -21,7 +21,7 @@ bool RemoteControl::verifySignature(QString message, QString nonce, QString sign
         return false;
     }
 
-    QString createdSignature = createSignature(message, privateKey);
+    QString createdSignature = createSignature(message, serverKey);
 
     if(createdSignature != signature) {
         return false;
@@ -68,7 +68,7 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
     // Next send payload to correct parser
     bool parseResult = false;
 
-    QString messageCommand = messageComponents.first();
+    QString messageCommand = messageComponents.at(COMMAND_POSITION);
 
     if (messageCommand == HELLO_MESSAGE) {
 
@@ -191,24 +191,75 @@ bool RemoteControl::parseHelloMessage() {
 
 bool RemoteControl::parseLogUpdateMessage(QString message) {
 
+    int     workID;
+    QString className;
+    QString log;
+    int     severity;
+
     // Split payload into components
     QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
 
-    return false;
+    int numPayloadComponents = 4;
+
+    // Check number of components is correct
+    if (payloadComponents.size() != numPayloadComponents) {
+        return false;
+    }
+
+    workID    = payloadComponents.at(0).toInt();
+    className = payloadComponents.at(1);
+    log       = payloadComponents.at(2);
+    severity  = payloadComponents.at(3).toInt();
+
+    emit logUpdate(workID, className, log, severity);
+
+    return true;
 }
 
 bool RemoteControl::parseWorkorderUpdateMessage(QString message) {
 
+    int     workID;
+    QString state;
+
     // Split payload into components
     QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
 
-    return false;
+    int numPayloadComponents = 2;
+
+    // Check number of components is correct
+    if (payloadComponents.size() != numPayloadComponents) {
+        return false;
+    }
+
+    workID = payloadComponents.at(0).toInt();
+    state  = payloadComponents.at(1);
+
+    emit newWorkerStatus(workID, state);
+
+    return true;
 }
 
 bool RemoteControl::parseExchangePriceUpdateMessage(QString message) {
 
+    QString symbol;
+    double  lastPrice;
+    double  avgPrice;
+
     // Split payload into components
     QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
 
-    return false;
+    int numPayloadComponents = 3;
+
+    // Check number of components is correct
+    if (payloadComponents.size() != numPayloadComponents) {
+        return false;
+    }
+
+    symbol    = payloadComponents.at(0);
+    avgPrice  = payloadComponents.at(1).toDouble();
+    lastPrice = payloadComponents.at(2).toDouble();
+
+    emit newExchangeInformation(symbol, avgPrice, lastPrice);
+
+    return true;
 }

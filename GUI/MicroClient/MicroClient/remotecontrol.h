@@ -23,6 +23,7 @@ private:
     QByteArray   createSignature             (QString message, QString key);
 
 protected:
+    QString      className                   {"REMOTECONTROL"};
     QString      serverKey                   {};
     QString      privateKey                  {};
     bool         connected                   {false};
@@ -37,12 +38,13 @@ public slots:
     bool         createRemoveWorkerMessage   (uint workerID);
 
 signals:
-    void         newWorkerStatus             ();
+    void         newWorkerStatus             (int workID, QString state);
     void         newBalanceValues            ();
-    void         newExchangeInformation      ();
-    void         logUpdate                   ();
+    void         newExchangeInformation      (QString symbol, double lastPrice, double avgPrice);
+    void         logUpdate                   (int workID, QString className, QString log, int severity);
     void         isConnected                 (bool state);
     void         isAuthenticated             (bool state);
+    void         updateLog                   (int workID, QString className, QString log, int severity);
 };
 
 #endif // REMOTECONTROL_H
