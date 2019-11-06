@@ -59,7 +59,7 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
     // Next send payload to correct parser
     bool parseResult = false;
 
-    QString messageCommand = messageComponents.first();
+    QString messageCommand = messageComponents.at(COMMAND_POSITION);
 
     if (messageCommand == HELLO_MESSAGE) {
 
@@ -87,16 +87,64 @@ bool RemoteControl::parseHelloMessage() {
 
 bool RemoteControl::parseCreateWorkerMessage(QString message) {
 
-    (void) message;
+    QString pair;
+    double  maxAmount;
+    double  profitTarget;
+    int     shortInterval;
+    int     longInterval;
+    int     mode;
+    bool    singleShot;
+    double  minSellPrice;
 
-    return false;
+    QStringList payloadComponents = message.split(PAYLOAD_SPLITTER);
+
+    int numPayloadComponents = 8;
+
+    // Check number of components is correct
+    if (payloadComponents.size() != numPayloadComponents) {
+        return false;
+    }
+
+    // Parse each individual value
+    pair          = payloadComponents.at(0);
+    maxAmount     = payloadComponents.at(1).toDouble();
+    profitTarget  = payloadComponents.at(2).toDouble();
+    shortInterval = payloadComponents.at(3).toInt();
+    longInterval  = payloadComponents.at(4).toInt();
+    mode          = payloadComponents.at(5).toInt();
+    singleShot    = payloadComponents.at(6).toInt();
+    minSellPrice  = payloadComponents.at(7).toDouble();
+
+    emit createWorker(pair, maxAmount, profitTarget, shortInterval,
+                      longInterval, mode, singleShot, minSellPrice);
+
+    return true;
 }
 
 bool RemoteControl::parseRemoveWorkerMessage(QString message) {
 
-    (void) message;
+    uint workOrderID;
+    bool force;
 
-    return false;
+    QStringList payloadComponents = message.split(PAYLOAD_SPLITTER);
+
+    int numPayloadComponents = payloadComponents.size();
+
+    if (numPayloadComponents == 1) {
+
+        workOrderID = payloadComponents.at(0).toUInt();
+        emit removeWorker(workOrderID);
+    } else if (numPayloadComponents == 2) {
+
+        workOrderID = payloadComponents.at(0).toUInt();
+        force       = payloadComponents.at(1).toInt();
+        emit removeWorker(workOrderID, force);
+    } else {
+
+        return false;
+    }
+
+    return true;
 }
 
 void RemoteControl::createHelloMessage() {

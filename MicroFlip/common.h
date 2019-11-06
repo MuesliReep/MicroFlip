@@ -25,6 +25,7 @@ static const QString LOG_UPDATE_MESSAGE            = "LOG";
 static const QString WORKORDER_UPDATE_MESSAGE      = "WORKORDER";
 static const QString EXCHANGE_PRICE_UPDATE_MESSAGE = "EXCHPRICE";
 
+static const uint8_t COMMAND_POSITION   = 1;
 static const uint8_t PAYLOAD_POSITION   = 2;
 static const uint8_t NONCE_POSITION     = 3;
 static const uint8_t SIGNATURE_POSITION = 4;
