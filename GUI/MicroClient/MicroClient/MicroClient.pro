@@ -1,4 +1,5 @@
 QT += quick
+QT += quickcontrols2
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -14,10 +15,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         config.cpp \
+        logitem.cpp \
+        logitemcontroller.cpp \
         main.cpp \
         program.cpp \
         remotecontrol.cpp \
-        remotecontrol_tcp.cpp
+        remotecontrol_tcp.cpp \
+        workeritemcontroller.cpp
 
 RESOURCES += qml.qrc
 
@@ -35,9 +39,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     ../../../MicroFlip/common.h \
     config.h \
+    logitem.h \
+    logitemcontroller.h \
     program.h \
     remotecontrol.h \
-    remotecontrol_tcp.h
+    remotecontrol_tcp.h \
+    workeritemcontroller.h
 
 DISTFILES += \
     loginForm.qml

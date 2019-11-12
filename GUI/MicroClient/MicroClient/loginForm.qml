@@ -1,6 +1,10 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material 2.0
+import QtQuick.Templates 2.5
+
+
 
 Item {
     width: 505
@@ -10,27 +14,31 @@ Item {
         x: 0
         y: 0
         width: parent.width
-        height: parent.height
+        height: 25
 
-        Text {
-            id: element
-            text: qsTr("Text")
-            font.pixelSize: 12
-        }
-
-        TextField {
-            id: textField
-            text: qsTr("Text Field")
+        Label {
+            id: labelExchangeName
+            text: qsTr("Exchange Name")
         }
 
         Label {
-            id: label
-            text: qsTr("Label")
+            id: labelLastPrice
+            text: qsTr("Last Price:")
         }
 
-        TextField {
-            id: textField1
-            text: qsTr("Text Field")
+        Label {
+            id: labelLastPriceValue
+            text: qsTr("0.00")
+        }
+
+        Label {
+            id: labelAvgPrice
+            text: qsTr("Avg. Price:")
+        }
+
+        Label {
+            id: labelAvgPriceValue
+            text: qsTr("0.00")
         }
 
     }

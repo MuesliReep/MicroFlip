@@ -211,7 +211,7 @@ bool RemoteControl::parseLogUpdateMessage(QString message) {
     log       = payloadComponents.at(2);
     severity  = payloadComponents.at(3).toInt();
 
-    emit logUpdate(workID, className, log, severity);
+    emit newLogUpdate(workID, className, log, severity);
 
     return true;
 }
