@@ -57,50 +57,9 @@ Program::Program(QObject *parent) : QObject(parent) {
 void Program::startShotReceived() {
 
     // Create work orders
-    workOrderFactory(config->getNumWorkers(),   exchange,          config->getAmount(),
+    workOrderController.factory(config->getNumWorkers(),   exchange,          config->getAmount(),
                      config->getProfit(),       config->getPair(), config->getShortInterval(),
                      config->getLongInterval(), config->getMode(), config->getSingleShot(),
                      config->getMinSell());
 }
 
-///
-/// \brief Program::workOrderFactory Creates a workorder and adds it to the list of workorders
-/// \param numWorkers The amount of workers to create
-/// \param exchange Pointer to the exchange interface
-/// \param amount The amount of currency to trade with
-/// \param profit The profit target this worker will aim for
-/// \param pair The currenct pair, example: btc_usd
-/// \param minSell Sets a static minimum sell price. To use a dynamic price, set to a negative number
-/// \return
-///
-bool Program::workOrderFactory(int    numWorkers,   Exchange *exchange,  double amount,
-                               double profit,       const QString& pair, int    shortInterval,
-                               int    longInterval, int mode,            bool   singleShot,
-                               double minSell) {
-
-    emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
-
-    for(int i = 0; i < numWorkers; i++) {
-
-        emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-        WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
-
-        auto *workOrderThread = new QThread();
-        wo->moveToThread(workOrderThread);
-
-        connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
-        connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
-
-        // Tell the newly created work order to start
-        connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
-        workOrderThread->start();
-        emit startOrder();
-        disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
-
-        workOrders.append(wo);
-        workOrderThreads.append(workOrderThread);
-        QThread::sleep(1);
-    }
-
-    return true;
-}

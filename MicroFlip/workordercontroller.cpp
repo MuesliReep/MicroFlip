@@ -1,0 +1,71 @@
+#include "workordercontroller.h"
+
+WorkOrderController::WorkOrderController(QObject *parent) : QObject(parent)
+{
+
+}
+
+///
+/// \brief Program::workOrderFactory Creates a workorder and adds it to the list of workorders
+/// \param numWorkers The amount of workers to create
+/// \param exchange Pointer to the exchange interface
+/// \param amount The amount of currency to trade with
+/// \param profit The profit target this worker will aim for
+/// \param pair The currenct pair, example: btc_usd
+/// \param minSell Sets a static minimum sell price. To use a dynamic price, set to a negative number
+/// \return
+///
+bool WorkOrderController::factory(int    numWorkers,   Exchange *exchange,  double amount,
+                                  double profit,       const QString& pair, int    shortInterval,
+                                  int    longInterval, int mode,            bool   singleShot,
+                                  double minSell) {
+
+    emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
+
+    for(int i = 0; i < numWorkers; i++) {
+
+        emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
+        WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
+
+        auto *workOrderThread = new QThread();
+        wo->moveToThread(workOrderThread);
+
+        connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
+        connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
+
+        // Tell the newly created work order to start
+        connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+        workOrderThread->start();
+        emit startOrder();
+        disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+
+        workOrders.append(wo);
+        workOrderThreads.append(workOrderThread);
+        QThread::sleep(1);
+    }
+
+    return true;
+}
+
+bool WorkOrderController::remove(int workID, bool force) {
+
+    bool result = false;
+
+    for (int i = 0; i < workOrders.length(); i++) {
+
+        if(workOrders.at(i)->getWorkID() == workID) {
+
+            if(force) {
+
+                if(workOrderThreads.at(i)->exit()) {
+
+                }
+            } else {
+
+                QMetaObject::invokeMethod(workOrders.at(i), "stopOrder");
+            }
+        }
+    }
+
+    return result;
+}
