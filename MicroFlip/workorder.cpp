@@ -2,8 +2,6 @@
 
 #include <utility>
 
-#include "common.h"
-
 ///
 /// \brief WorkOrder::WorkOrder
 /// \param exchange Pointer to the exchange interface
@@ -124,8 +122,13 @@ void WorkOrder::updateTick() {
           }
 
           break;
+      case REMOVING:
+
+        break;
+      case REMOVED:
+
+        break;
       case ERROR:
-      default:
           emit updateState(workID, "ERROR");
           timer->stop();
           break;
@@ -391,7 +394,7 @@ void WorkOrder::orderCancelReply(bool succes) {
         return;
     }
 
-    workState = START;
+    workState = WorkState::REMOVED;
     updateLog(workID, className, "Order cancelled", logSeverity::LOG_INFO);
 }
 
@@ -413,4 +416,23 @@ void WorkOrder::startOrder() {
 //    QObject::connect(workThread, SIGNAL(started()), timer, SLOT(start()));
 //    workThread->start();
     timer->start();
+}
+
+void WorkOrder::stopOrder() {
+
+    // Skip if already removing
+    if(this->workState == REMOVING || this->workState == REMOVED) {
+        return;
+    }
+
+    //
+    this->workState = WorkState::REMOVING;
+
+    updateLog(workID, className, "Workorder stopping", logSeverity::LOG_CRITICAL);
+
+    //
+    if(workState == WorkState::ERROR) {
+
+        workState = WorkState::REMOVED;
+    }
 }

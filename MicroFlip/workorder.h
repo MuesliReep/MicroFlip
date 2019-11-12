@@ -10,6 +10,7 @@
 #include <QThread>
 
 #include "exchange.h"
+#include "common.h"
 
 // START            : New workorder, setup sell order
 // WAITINGFORTICKER :
@@ -21,8 +22,6 @@
 // WAITINGFORBUY    : Waiting for order to be processed
 // BUYORDER         : Order processed, waiting for execution
 // COMPLETE         : Order executed, workorder complete
-
-enum WorkState { ERROR = -1, INITIALISE, START, WAITINGFORTICKER, CREATESELL, WAITINGFORSELL, SELLORDER, SOLD, CREATEBUY, WAITINGFORBUY, BUYORDER, COMPLETE };
 
 class WorkOrder : public QObject {
 
@@ -77,11 +76,11 @@ private:
 
     void calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit);
 
-    void initialiseSymbol(QString symbol);
-    void requestUpdateMarketTicker();
-    void requestCreateOrder(int type, double rate, double amount);
-    void requestOrderInfo  (qint64 orderID);
-    void requestCancelOrder(qint64 orderID);
+    void initialiseSymbol          (QString symbol);
+    void requestUpdateMarketTicker ();
+    void requestCreateOrder        (int type, double rate, double amount);
+    void requestOrderInfo          (qint64 orderID);
+    void requestCancelOrder        (qint64 orderID);
 
 private slots:
     void updateTick();
@@ -89,11 +88,12 @@ private slots:
 public slots:
     void UpdateMarketTickerReply(const Ticker& ticker);
 
-    void orderCreateReply(qint64 orderID);
-    void orderInfoReply  (int status);
-    void orderCancelReply(bool succes);
+    void orderCreateReply (qint64 orderID);
+    void orderInfoReply   (int status);
+    void orderCancelReply (bool succes);
 
     void startOrder();
+    void stopOrder ();
 
 signals:
     void sendInitialiseSymbol  (QString symbol);
