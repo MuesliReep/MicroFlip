@@ -10,6 +10,7 @@
 #include <QThread>
 
 #include "exchange.h"
+#include "common.h"
 
 // START            : New workorder, setup sell order
 // WAITINGFORTICKER :
@@ -22,8 +23,6 @@
 // BUYORDER         : Order processed, waiting for execution
 // COMPLETE         : Order executed, workorder complete
 
-enum WorkState { ERROR = -1, INITIALISE, START, WAITINGFORTICKER, CREATESELL, WAITINGFORSELL, SELLORDER, SOLD, CREATEBUY, WAITINGFORBUY, BUYORDER, COMPLETE };
-
 class WorkOrder : public QObject {
 
     Q_OBJECT
@@ -32,45 +31,45 @@ public:
     WorkOrder(Exchange *exchange, uint workID, QString pair, double maxAmount, double profitTarget,
             int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice = 0.0, int sellTTL = 5, int buyTTL = 1440, bool highSpeed = false);
 
-    double  getSellPrice() { return sellPrice; }
-    int     getWorkID   () { return workID;    }
-    QString getPair     () { return pair;      }
-    int     getOrderSide() { return (workState == BUYORDER ? 0 : 1); }
+    double       getSellPrice() { return sellPrice; }
+    int          getWorkID   () { return workID;    }
+    QString      getPair     () { return pair;      }
+    int          getOrderSide() { return (workerState == BUYORDER ? 0 : 1); }
 
 private:
-    QString className = "WORKORDER";
+    QString      className   {"WORKORDER"};
 
-    Exchange  *exchange;
-    WorkState  workState;
-    QTimer    *timer{};
-    QThread   *workThread{};
+    Exchange    *exchange    {};
+    WorkerState  workerState {WorkerState::INITIALISE};
+    QTimer      *timer       {};
+    QThread     *workThread  {};
 
-    qint64  sellOrderID{};
-    qint64  buyOrderID{};
-    int     workID;
+    qint64       sellOrderID {};
+    qint64       buyOrderID  {};
+    int          workID      ;
 
-    double  maxAmount;
-    double  profitTarget;
-    double  sellPrice{};
-    double  buyPrice{};
-    QString pair;
-    double  minSellPrice;
-    double  minimumPrice;
-    int     sellTTL;
-    int     buyTTL;
-    bool    highSpeed;
-    int     mode;
-    bool    singleShot;
+    double       maxAmount;
+    double       profitTarget;
+    double       sellPrice{};
+    double       buyPrice{};
+    QString      pair;
+    double       minSellPrice;
+    double       minimumPrice;
+    int          sellTTL;
+    int          buyTTL;
+    bool         highSpeed;
+    int          mode;
+    bool         singleShot;
 
-    Ticker  currentTicker;
+    Ticker       currentTicker;
 
-    int     intervalShort;
-    int     intervalLong;
-    bool    stdInterval;
-    bool    longIntervalRequest;
+    int          intervalShort;
+    int          intervalLong;
+    bool         stdInterval;
+    bool         longIntervalRequest;
 
-    QDateTime sellOrderTime;
-    QDateTime buyOrderTime;
+    QDateTime    sellOrderTime;
+    QDateTime    buyOrderTime;
 
     void createSellOrder(double amount);
     void createBuyOrder ();
@@ -90,8 +89,8 @@ public slots:
     void UpdateMarketTickerReply(const Ticker& ticker);
 
     void orderCreateReply(qint64 orderID);
-    void orderInfoReply  (int status);
-    void orderCancelReply(bool succes);
+    void orderInfoReply  (int    status);
+    void orderCancelReply(bool   succes);
 
     void startOrder();
 
