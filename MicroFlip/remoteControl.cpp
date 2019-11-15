@@ -185,7 +185,7 @@ void RemoteControl::logUpdate(int workID, QString className, QString log, int se
     // Create header
     message.append(MESSAGE_PREFIX);
     message.append(MESSAGE_SPLITTER);
-    message.append(REMOVE_WORKER_MESSAGE);
+    message.append(LOG_UPDATE_MESSAGE);
     message.append(MESSAGE_SPLITTER);
 
     // Add payload
@@ -205,7 +205,7 @@ void RemoteControl::logUpdate(int workID, QString className, QString log, int se
     message.append(MESSAGE_SPLITTER);
 
     // Create signature
-    message.append(createSignature(message, privateKey));
+    message.append(createSignature(message, serverKey));
     message.append(MESSAGE_SPLITTER);
 
     // Add suffix
@@ -222,7 +222,7 @@ void RemoteControl::workorderStateUpdate(int workID, QString state) {
     // Create header
     message.append(MESSAGE_PREFIX);
     message.append(MESSAGE_SPLITTER);
-    message.append(REMOVE_WORKER_MESSAGE);
+    message.append(WORKORDER_UPDATE_MESSAGE);
     message.append(MESSAGE_SPLITTER);
 
     // Add payload
@@ -238,7 +238,7 @@ void RemoteControl::workorderStateUpdate(int workID, QString state) {
     message.append(MESSAGE_SPLITTER);
 
     // Create signature
-    message.append(createSignature(message, privateKey));
+    message.append(createSignature(message, serverKey));
     message.append(MESSAGE_SPLITTER);
 
     // Add suffix
@@ -255,7 +255,7 @@ void RemoteControl::exchangePricesUpdate(QString symbol, double lastPrice, doubl
     // Create header
     message.append(MESSAGE_PREFIX);
     message.append(MESSAGE_SPLITTER);
-    message.append(REMOVE_WORKER_MESSAGE);
+    message.append(EXCHANGE_PRICE_UPDATE_MESSAGE);
     message.append(MESSAGE_SPLITTER);
 
     // Add payload
@@ -273,7 +273,7 @@ void RemoteControl::exchangePricesUpdate(QString symbol, double lastPrice, doubl
     message.append(MESSAGE_SPLITTER);
 
     // Create signature
-    message.append(createSignature(message, privateKey));
+    message.append(createSignature(message, serverKey));
     message.append(MESSAGE_SPLITTER);
 
     // Add suffix
