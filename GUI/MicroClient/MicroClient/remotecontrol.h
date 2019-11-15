@@ -34,8 +34,8 @@ protected:
 
 public slots:
     virtual void open                            () = 0;
-    void         createWorkerMessage             ();
-    bool         createRemoveWorkerMessage       (uint workerID);
+    void         createWorkerMessage             (int numWorkers, QString pair, double maxAmount, double profitTarget, int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice);
+    bool         createRemoveWorkerMessage       (uint workerID, bool force);
 
 signals:
     void         newWorkerStatus                 (int workID, QString state);

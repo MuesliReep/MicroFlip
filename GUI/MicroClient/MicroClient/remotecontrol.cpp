@@ -113,7 +113,9 @@ void RemoteControl::createHelloMessage() {
     sendMessage(message);
 }
 
-void RemoteControl::createWorkerMessage() {
+void RemoteControl::createWorkerMessage(int    numWorkers,   QString pair,          double maxAmount,
+                                        double profitTarget, int     shortInterval, int    longInterval,
+                                        int    mode,         bool    singleShot,    double minSellPrice) {
 
     QString message;
 
@@ -124,7 +126,23 @@ void RemoteControl::createWorkerMessage() {
     message.append(MESSAGE_SPLITTER);
 
     // Add payload
-    // TODO: payload
+    message.append(QString::number(numWorkers));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(pair);
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(maxAmount));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(profitTarget));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(shortInterval));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(longInterval));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(mode));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(singleShot));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(minSellPrice));
     message.append(MESSAGE_SPLITTER);
 
     // Create nonce
@@ -143,7 +161,7 @@ void RemoteControl::createWorkerMessage() {
     sendMessage(message);
 }
 
-bool RemoteControl::createRemoveWorkerMessage(uint workerID) {
+bool RemoteControl::createRemoveWorkerMessage(uint workerID, bool force) {
 
     QString message;
 
@@ -155,6 +173,8 @@ bool RemoteControl::createRemoveWorkerMessage(uint workerID) {
 
     // Add payload
     message.append(QString::number(workerID));
+    message.append(PAYLOAD_SPLITTER);
+    message.append(QString::number(force));
     message.append(MESSAGE_SPLITTER);
 
     // Create nonce
