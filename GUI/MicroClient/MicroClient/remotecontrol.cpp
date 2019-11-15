@@ -14,20 +14,40 @@ bool RemoteControl::verifySignature(QString message, QString nonce, QString sign
     uint64_t currentNonce = static_cast<uint64_t>(nonce.toULongLong(&ok));
 
     // Check if nonce is valid
-    if(!ok) { return false; }
+    if(!ok) {
+
+        emit updateLog(00, className, "Failed to parse Nonce", logSeverity::LOG_INFO);
+        return false; }
     if(currentNonce > lastNonce) {
         lastNonce = currentNonce;
     } else {
+        emit updateLog(00, className, "Invalid nonce received", logSeverity::LOG_INFO);
         return false;
     }
 
     QString createdSignature = createSignature(message, serverKey);
 
     if(createdSignature != signature) {
+        emit updateLog(00, className, "Signature invalid!", logSeverity::LOG_INFO);
         return false;
     }
 
     return true;
+}
+
+uint64_t RemoteControl::createNonce() {
+
+    uint64_t newNonce = static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
+
+    // If alot of messages are sent at once, there wont be enough time between nonces
+    // To work around this, just one up the last nonce
+    if(newNonce <= ourLastNonce) {
+        newNonce = ourLastNonce + 1;
+    }
+
+    ourLastNonce = newNonce;
+
+    return newNonce;
 }
 
 QByteArray RemoteControl::createSignature(QString message, QString key) {
@@ -217,7 +237,7 @@ bool RemoteControl::parseLogUpdateMessage(QString message) {
     int     severity;
 
     // Split payload into components
-    QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
+    QStringList payloadComponents = message.split(PAYLOAD_SPLITTER);
 
     int numPayloadComponents = 4;
 
@@ -242,7 +262,7 @@ bool RemoteControl::parseWorkorderUpdateMessage(QString message) {
     QString state;
 
     // Split payload into components
-    QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
+    QStringList payloadComponents = message.split(PAYLOAD_SPLITTER);
 
     int numPayloadComponents = 2;
 
@@ -266,7 +286,7 @@ bool RemoteControl::parseExchangePriceUpdateMessage(QString message) {
     double  avgPrice;
 
     // Split payload into components
-    QStringList payloadComponents = message.split(MESSAGE_SPLITTER);
+    QStringList payloadComponents = message.split(PAYLOAD_SPLITTER);
 
     int numPayloadComponents = 3;
 

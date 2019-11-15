@@ -14,6 +14,8 @@ public:
 
 private:
     uint64_t     lastNonce                       {0};
+    uint64_t     ourLastNonce                    {0};
+    uint64_t     createNonce                     ();
     bool         parseNewMessage                 ();
     bool         parseHelloMessage               ();
     bool         parseLogUpdateMessage           (QString message);
@@ -40,7 +42,7 @@ public slots:
 signals:
     void         newWorkerStatus                 (int workID, QString state);
     void         newBalanceValues                ();
-    void         newExchangeInformation          (QString symbol, double lastPrice, double avgPrice);
+    void         newExchangeInformation          (QString exchangeName, double lastPrice, double avgPrice);
     void         newLogUpdate                    (int workID, QString className, QString log, int severity);
     void         isConnected                     (bool state);
     void         isAuthenticated                 (bool state);

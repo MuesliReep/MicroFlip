@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 
 
 
-    Program p;
+    Program p(&engine);
 
     return app.exec();
 }

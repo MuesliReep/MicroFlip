@@ -19,6 +19,8 @@ ApplicationWindow {
 
     property variant paneWidthMultiplier: 0.95
 
+    //property alias exchangeNameValue: labelExchangeName.text
+
     Column {
         id: column
 
@@ -26,64 +28,102 @@ ApplicationWindow {
         height: parent.height
         spacing: 20
 
-        Rectangle {
+        Pane {
             id: header
             height: 50
             width: parent.width
-            Material.foreground: Material.Pink
-            color: Material.color(Material.Orange)
+            Material.foreground: Material.Orange
+//            color: Material.color(Material.Orange)
+            Material.elevation: 7
 
             Row {
-                id: headerRow
-                height: parent.height
-                width: parent.width
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: column.horizontalCenter
 
-                Item {
-                    id: name
+                spacing: 20
 
-                    Rectangle {
-
-                        id: exchangeNameRectangle
-                        height: parent.height
-                        width: exchangeName.width + 15
-
-                        color: Material.color(Material.DeepOrange)
-
-                        Label {
-                            id: exchangeName
-                            text: qsTr("Exchange Name")
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            color: "white"
-                        }
-                    }
+                Rectangle {
+                    height: header.height
+                    width: 22
+                    color: Material.color(Material.Blue)
                 }
 
-                Item {
+            Label {
+                id: labelSymbol
+//                text: qsTr("Exchange Name")
+                text: exchangeInfo.symbol
+            }
 
-                    Rectangle {
+            Label {
+                id: labelLastPrice
+                text: qsTr("Last Price: ")
+            }
 
-                        id: lastPriceRectangle
-                        height: parent.height
-                        width: (parent.width - exchangeNameRectangle) / 2
-    //                    anchors.left: exchangeNameRectangle.anchors.right
+            Label {
+                id: labelLastPriceValue
+                text: exchangeInfo.price
+            }
 
-                        Label {
-                            id: labelLastPrice
-                            text: qsTr("Last Price: ")
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
+            Label {
+                id: labelAvgPrice
+                text: qsTr("Avg. Price: ")
+            }
 
-                        Label {
-                            id: labelLastPriceValue
-                            text: qsTr("0.00")
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
+            Label {
+                id: labelAvgPriceValue
+                text: exchangeInfo.avgPrice
+            }
 
-                }
+}
+//            Row {
+//                id: headerRow
+//                height: parent.height
+//                width: parent.width
+//                anchors.verticalCenter: header.verticalCenter
+//                anchors.horizontalCenter: header.horizontalCenter
+
+//                Item {
+//                    id: name
+
+//                    Rectangle {
+
+//                        id: exchangeNameRectangle
+//                        height: parent.height
+//                        width: exchangeName.width + 15
+
+//                        color: Material.color(Material.DeepOrange)
+
+//                        Label {
+//                            id: exchangeName
+//                            text: qsTr("Exchange Name")
+//                            anchors.verticalCenter: parent.verticalCenter
+//                            anchors.horizontalCenter: parent.horizontalCenter
+//                            color: "white"
+//                        }
+//                    }
+//                }
+
+//                Item {
+
+//                    Rectangle {
+
+//                        id: lastPriceRectangle
+//                        height: parent.height
+//                        width: (parent.width - exchangeNameRectangle) / 2
+//    //                    anchors.left: exchangeNameRectangle.anchors.right
+
+//                        Label {
+//                            id: labelLastPrice
+//                            text: qsTr("Last Price: ")
+//                            anchors.verticalCenter: parent.verticalCenter
+//                        }
+
+//                        Label {
+//                            id: labelLastPriceValue
+//                            text: qsTr("0.00")
+//                            anchors.verticalCenter: parent.verticalCenter
+//                        }
+//                    }
+
+//                }
 
 
 
@@ -106,7 +146,7 @@ ApplicationWindow {
 //                        anchors.verticalCenter: parent.verticalCenter
 //                    }
 //                }
-            }
+//            }
         }
 
         Pane {

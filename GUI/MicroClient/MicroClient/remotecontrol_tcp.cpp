@@ -47,7 +47,7 @@ void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
 
     if(messageValid && !verified) {
 
-        emit updateLog(00, className, "Could not verify Server", logSeverity::LOG_INFO);
+        emit updateLog(00, className, "Could not verify Server", logSeverity::LOG_CRITICAL);
 
         socket.disconnectFromHost();
     } else if(messageValid && verified) {
