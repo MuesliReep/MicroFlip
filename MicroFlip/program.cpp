@@ -58,12 +58,12 @@ Program::Program(QObject *parent) : QObject(parent) {
                                               config->getRemotePrivateKey());
 
         // Setup new connections
-        connect(this,                 &Program::updateLog,               remoteControl, &RemoteControl::logUpdate);
-        connect(exchange,             &Exchange::updateLog,              remoteControl, &RemoteControl::logUpdate);
-        connect(exchange,             &Exchange::updateExchangePrices,   remoteControl, &RemoteControl::exchangePricesUpdate);
-        connect(&workOrderController, &WorkOrderController::updateLog,   remoteControl, &remoteControl::addToLog);
-        connect(&workOrderController, &WorkOrderController::updateState, remoteControl, &remoteControl::stateUpdate);
-        connect(remoteControl,        &RemoteControl::updateLog,         display,       &Display::addToLog);
+        connect(this,                 &Program            ::updateLog,            remoteControl, &RemoteControl::logUpdate);
+        connect(exchange,             &Exchange           ::updateLog,            remoteControl, &RemoteControl::logUpdate);
+        connect(exchange,             &Exchange           ::updateExchangePrices, remoteControl, &RemoteControl::exchangePricesUpdate);
+        connect(&workOrderController, &WorkOrderController::updateLog,            remoteControl, &RemoteControl::logUpdate);
+        connect(&workOrderController, &WorkOrderController::updateState,          remoteControl, &RemoteControl::workorderStateUpdate);
+        connect(remoteControl,        &RemoteControl      ::updateLog,            display,       &Display      ::addToLog);
 
         // Create thread for remote control
         auto *remoteControlThread = new QThread();

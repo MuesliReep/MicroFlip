@@ -10,7 +10,7 @@ class WorkOrderController : public QObject {
     Q_OBJECT
 
 public:
-    explicit WorkOrderController(QObject *parent = nullptr) = default;
+    explicit WorkOrderController(QObject *parent = nullptr);
 
     bool factory(int numWorkers, Exchange *exchange, double amount, double profit,
                  const QString& pair, int shortInterval, int longInterval,

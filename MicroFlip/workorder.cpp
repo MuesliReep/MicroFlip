@@ -396,7 +396,7 @@ void WorkOrder::orderCancelReply(bool succes) {
         return;
     }
 
-    workState = WorkState::REMOVED;
+    workerState = WorkerState::REMOVED;
     updateLog(workID, className, "Order cancelled", logSeverity::LOG_INFO);
 }
 
@@ -423,19 +423,19 @@ void WorkOrder::startOrder() {
 void WorkOrder::stopOrder() {
 
     // Skip if already removing
-    if(this->workState == REMOVING || this->workState == REMOVED) {
+    if(this->workerState == REMOVING || this->workerState == REMOVED) {
         return;
     }
 
     //
-    this->workState = WorkState::REMOVING;
+    this->workerState = WorkerState::REMOVING;
 
     updateLog(workID, className, "Workorder stopping", logSeverity::LOG_CRITICAL);
 
     //
-    if(workState == ERROR == INITIALISE || workState == START ||
-       workState == COMPLETE || workState == ERROR) {
+    if(workerState == ERROR == INITIALISE || workerState == START ||
+       workerState == COMPLETE || workerState == ERROR) {
 
-        workState = WorkState::REMOVED;
+        workerState = WorkerState::REMOVED;
     }
 }
