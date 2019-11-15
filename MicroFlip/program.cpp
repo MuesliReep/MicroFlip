@@ -41,8 +41,13 @@ Program::Program(QObject *parent) : QObject(parent) {
     connect(exchange, &Exchange::updateLog,            display, &Display::addToLog);
     connect(exchange, &Exchange::updateExchangePrices, display, &Display::updateExchangePrices);
 
+
     // Setup logging
     // TODO: all logging should go here and then distributed
+
+    // Setup WorkOrder Controller
+    connect(&workOrderController, &WorkOrderController::updateLog,   display, &Display::addToLog);
+    connect(&workOrderController, &WorkOrderController::updateState, display, &Display::stateUpdate);
 
     // Create remote control
     if(config->getUseRemote()) {
@@ -53,10 +58,12 @@ Program::Program(QObject *parent) : QObject(parent) {
                                               config->getRemotePrivateKey());
 
         // Setup new connections
-        connect(this,          &Program::updateLog,             remoteControl, &RemoteControl::logUpdate);
-        connect(exchange,      &Exchange::updateLog,            remoteControl, &RemoteControl::logUpdate);
-        connect(exchange,      &Exchange::updateExchangePrices, remoteControl, &RemoteControl::exchangePricesUpdate);
-        connect(remoteControl, &RemoteControl::updateLog,       display,       &Display::addToLog);
+        connect(this,                 &Program::updateLog,               remoteControl, &RemoteControl::logUpdate);
+        connect(exchange,             &Exchange::updateLog,              remoteControl, &RemoteControl::logUpdate);
+        connect(exchange,             &Exchange::updateExchangePrices,   remoteControl, &RemoteControl::exchangePricesUpdate);
+        connect(&workOrderController, &WorkOrderController::updateLog,   remoteControl, &remoteControl::addToLog);
+        connect(&workOrderController, &WorkOrderController::updateState, remoteControl, &remoteControl::stateUpdate);
+        connect(remoteControl,        &RemoteControl::updateLog,         display,       &Display::addToLog);
 
         // Create thread for remote control
         auto *remoteControlThread = new QThread();
@@ -67,6 +74,8 @@ Program::Program(QObject *parent) : QObject(parent) {
         // Start after main event loop
         QTimer::singleShot(1, remoteControl, &RemoteControl::open);
     }
+
+
 
     // Setup threads
     auto *exchangeThread = new QThread();
@@ -86,7 +95,7 @@ Program::Program(QObject *parent) : QObject(parent) {
 void Program::startShotReceived() {
 
     // Create work orders
-    workOrderFactory(config->getNumWorkers(),   exchange,          config->getAmount(),
+    workOrderController.factory(config->getNumWorkers(),   exchange,          config->getAmount(),
                      config->getProfit(),       config->getPair(), config->getShortInterval(),
                      config->getLongInterval(), config->getMode(), config->getSingleShot(),
                      config->getMinSell());
@@ -106,55 +115,4 @@ void Program::addWorker() {
 void Program::removeWorker(uint workOrderID, bool force) {
     (void) workOrderID;
     (void) force;
-}
-
-///
-/// \brief Program::workOrderFactory Creates a workorder and adds it to the list of workorders
-/// \param numWorkers The amount of workers to create
-/// \param exchange Pointer to the exchange interface
-/// \param amount The amount of currency to trade with
-/// \param profit The profit target this worker will aim for
-/// \param pair The currency pair, example: btc_usd
-/// \param minSell Sets a static minimum sell price. To use a dynamic price, set to a negative number
-/// \return
-///
-bool Program::workOrderFactory(int    numWorkers,   Exchange *exchange,  double amount,
-                               double profit,       const QString& pair, int    shortInterval,
-                               int    longInterval, int mode,            bool   singleShot,
-                               double minSell) {
-
-    emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
-
-    for(int i = 0; i < numWorkers; i++) {
-
-        workOrderIdIterator++;
-
-        emit updateLog(00, className, "Creating Work Order: " + QString::number(workOrderIdIterator) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-        WorkOrder *newWorkOrder = new WorkOrder(exchange, workOrderIdIterator,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
-
-        // Create a new thread for the newly created worker and move it there
-        auto *workOrderThread = new QThread();
-        newWorkOrder->moveToThread(workOrderThread);
-
-        connect(newWorkOrder, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
-        connect(newWorkOrder, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
-
-        //
-        if(config->getUseRemote()) {
-            connect(newWorkOrder, &WorkOrder::updateLog,   remoteControl, &RemoteControl::logUpdate);
-            connect(newWorkOrder, &WorkOrder::updateState, remoteControl, &RemoteControl::workorderStateUpdate);
-        }
-
-        // Tell the newly created work order to start
-        connect(this,SIGNAL(startOrder()), newWorkOrder, SLOT(startOrder()));
-        workOrderThread->start();
-        emit startOrder();
-        disconnect(this,SIGNAL(startOrder()), newWorkOrder, SLOT(startOrder()));
-
-        workOrders.append(newWorkOrder);
-        workOrderThreads.append(workOrderThread);
-        QThread::sleep(1);
-    }
-
-    return true;
 }

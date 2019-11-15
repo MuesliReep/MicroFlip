@@ -76,11 +76,11 @@ private:
 
     void calculateMinimumBuyTrade(double sellPrice, double sellAmount, double fee, double *buyPrice, double *buyAmount, double *buyTotal, double profit);
 
-    void initialiseSymbol(QString symbol);
-    void requestUpdateMarketTicker();
-    void requestCreateOrder(int type, double rate, double amount);
-    void requestOrderInfo  (qint64 orderID);
-    void requestCancelOrder(qint64 orderID);
+    void initialiseSymbol          (QString symbol);
+    void requestUpdateMarketTicker ();
+    void requestCreateOrder        (int type, double rate, double amount);
+    void requestOrderInfo          (qint64 orderID);
+    void requestCancelOrder        (qint64 orderID);
 
 private slots:
     void updateTick();
@@ -88,11 +88,12 @@ private slots:
 public slots:
     void UpdateMarketTickerReply(const Ticker& ticker);
 
-    void orderCreateReply(qint64 orderID);
-    void orderInfoReply  (int    status);
-    void orderCancelReply(bool   succes);
+    void orderCreateReply (qint64 orderID);
+    void orderInfoReply   (int status);
+    void orderCancelReply (bool succes);
 
     void startOrder();
+    void stopOrder ();
 
 signals:
     void sendInitialiseSymbol  (QString symbol);

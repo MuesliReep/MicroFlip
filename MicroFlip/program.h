@@ -10,9 +10,10 @@
 
 #include "display.h"
 #include "config.h"
-#include "workorder.h"
 #include "exchange.h"
 #include "remoteControl.h"
+#include "workordercontroller.h"
+
 
 class Program : public QObject {
 
@@ -22,22 +23,22 @@ public:
     explicit Program(QObject *parent = nullptr);
 
 private:
-    QString className = "PROGRAM";
+    QString              className {"PROGRAM"};
 
-    Display       *display;
-    Config        *config;
-    Exchange      *exchange;
-    RemoteControl *remoteControl;
+    Display             *display;
+    Config              *config;
+    Exchange            *exchange;
+    WorkOrderController  workOrderController;
+    RemoteControl       *remoteControl;
 
-    QList<WorkOrder*> workOrders;
-    QList<QThread*>   workOrderThreads;
-    uint              workOrderIdIterator;
+    QList<WorkOrder*>    workOrders;
+    QList<QThread*>      workOrderThreads;
+    uint                 workOrderIdIterator;
 
     bool workOrderFactory(int numWorkers, Exchange *exchange, double amount, double profit, const QString& pair, int shortInterval, int longInterval, int mode, bool singleShot, double minSell = -1.0);
 
 signals:
     void updateLog(int workID, QString className, QString log, int severity);
-    void startOrder();
 
 public slots:
     void addWorker();

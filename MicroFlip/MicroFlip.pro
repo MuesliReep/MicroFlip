@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     exchange_bitfinex.cpp \
     exchange_sim.cpp \
     exchange_binance.cpp \
-    json_helper.cpp
+    json_helper.cpp \
+    workordercontroller.cpp
 
 HEADERS  += program.h \
     remoteControl.h \
@@ -62,7 +63,8 @@ HEADERS  += program.h \
     exchange_sim.h \
     exchange_binance.h \
     json_helper.h \
-    common.h
+    common.h \
+    workordercontroller.h
 
 CONFIG += console
 
