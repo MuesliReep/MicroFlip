@@ -34,7 +34,7 @@ public slots:
     void         exchangePricesUpdate     (QString symbol, double lastPrice, double avgPrice);
 
 signals:
-    void         createWorker             (QString pair, double maxAmount, double profitTarget, int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice);
+    void         createWorker             (int numWorkers, QString pair, double maxAmount, double profitTarget, int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice);
     void         removeWorker             (uint workOrderID, bool force = false);
     void         updateLog                (int workID, QString className, QString log, int severity);
 };

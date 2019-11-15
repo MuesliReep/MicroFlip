@@ -41,10 +41,6 @@ Program::Program(QObject *parent) : QObject(parent) {
     connect(exchange, &Exchange::updateLog,            display, &Display::addToLog);
     connect(exchange, &Exchange::updateExchangePrices, display, &Display::updateExchangePrices);
 
-
-    // Setup logging
-    // TODO: all logging should go here and then distributed
-
     // Setup WorkOrder Controller
     connect(&workOrderController, &WorkOrderController::updateLog,   display, &Display::addToLog);
     connect(&workOrderController, &WorkOrderController::updateState, display, &Display::stateUpdate);
@@ -63,6 +59,8 @@ Program::Program(QObject *parent) : QObject(parent) {
         connect(exchange,             &Exchange           ::updateExchangePrices, remoteControl, &RemoteControl::exchangePricesUpdate);
         connect(&workOrderController, &WorkOrderController::updateLog,            remoteControl, &RemoteControl::logUpdate);
         connect(&workOrderController, &WorkOrderController::updateState,          remoteControl, &RemoteControl::workorderStateUpdate);
+        connect(remoteControl,        &RemoteControl      ::createWorker,         this,          &Program      ::addWorker);
+        connect(remoteControl,        &RemoteControl      ::removeWorker,         this,          &Program      ::removeWorker);
         connect(remoteControl,        &RemoteControl      ::updateLog,            display,       &Display      ::addToLog);
 
         // Create thread for remote control
@@ -74,8 +72,6 @@ Program::Program(QObject *parent) : QObject(parent) {
         // Start after main event loop
         QTimer::singleShot(1, remoteControl, &RemoteControl::open);
     }
-
-
 
     // Setup threads
     auto *exchangeThread = new QThread();
@@ -96,15 +92,29 @@ void Program::startShotReceived() {
 
     // Create work orders
     workOrderController.factory(config->getNumWorkers(),   exchange,          config->getAmount(),
-                     config->getProfit(),       config->getPair(), config->getShortInterval(),
-                     config->getLongInterval(), config->getMode(), config->getSingleShot(),
-                     config->getMinSell());
+                                config->getProfit(),       config->getPair(), config->getShortInterval(),
+                                config->getLongInterval(), config->getMode(), config->getSingleShot(),
+                                config->getMinSell());
 }
 
-void Program::addWorker() {
+void Program::addWorker(int numWorkers, QString pair, double maxAmount, double profitTarget,
+                        int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice) {
 
-    // Create work orders from remote control
+    // Long and short interval can be left blank, if they are use config values
+    if(shortInterval == 0 || shortInterval < 0) {
+        shortInterval = config->getShortInterval();
+    }
 
+    if(longInterval == 0 || longInterval < 0) {
+        longInterval = config->getLongInterval();
+    }
+
+    if(numWorkers < 1) {
+        emit updateLog(00, className, "Could not create worker, invalid number of workers requested: " + QString::number(numWorkers), logSeverity::LOG_WARNING);
+        return;
+    }
+
+    workOrderController.factory(numWorkers, exchange, maxAmount, profitTarget, pair, shortInterval, longInterval, mode, singleShot, minSellPrice);
 }
 
 ///
@@ -113,6 +123,11 @@ void Program::addWorker() {
 /// \param force Set to true to be effective immediately, otherwise it wil wait until complete to remove
 ///
 void Program::removeWorker(uint workOrderID, bool force) {
-    (void) workOrderID;
-    (void) force;
+
+    if(workOrderID < 1) {
+        emit updateLog(00, className, "Could not remove worker, invalid workOrderID: " + QString::number(workOrderID), logSeverity::LOG_WARNING);
+        return;
+    }
+
+    workOrderController.remove(workOrderID, force);
 }

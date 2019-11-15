@@ -87,6 +87,7 @@ bool RemoteControl::parseHelloMessage() {
 
 bool RemoteControl::parseCreateWorkerMessage(QString message) {
 
+    int     numWorkers;
     QString pair;
     double  maxAmount;
     double  profitTarget;
@@ -98,7 +99,7 @@ bool RemoteControl::parseCreateWorkerMessage(QString message) {
 
     QStringList payloadComponents = message.split(PAYLOAD_SPLITTER);
 
-    int numPayloadComponents = 8;
+    int numPayloadComponents = 9;
 
     // Check number of components is correct
     if (payloadComponents.size() != numPayloadComponents) {
@@ -106,16 +107,17 @@ bool RemoteControl::parseCreateWorkerMessage(QString message) {
     }
 
     // Parse each individual value
-    pair          = payloadComponents.at(0);
-    maxAmount     = payloadComponents.at(1).toDouble();
-    profitTarget  = payloadComponents.at(2).toDouble();
-    shortInterval = payloadComponents.at(3).toInt();
-    longInterval  = payloadComponents.at(4).toInt();
-    mode          = payloadComponents.at(5).toInt();
-    singleShot    = payloadComponents.at(6).toInt();
-    minSellPrice  = payloadComponents.at(7).toDouble();
+    numWorkers    = payloadComponents.at(0).toInt();
+    pair          = payloadComponents.at(1);
+    maxAmount     = payloadComponents.at(2).toDouble();
+    profitTarget  = payloadComponents.at(3).toDouble();
+    shortInterval = payloadComponents.at(4).toInt();
+    longInterval  = payloadComponents.at(5).toInt();
+    mode          = payloadComponents.at(6).toInt();
+    singleShot    = payloadComponents.at(7).toInt();
+    minSellPrice  = payloadComponents.at(8).toDouble();
 
-    emit createWorker(pair, maxAmount, profitTarget, shortInterval,
+    emit createWorker(numWorkers, pair, maxAmount, profitTarget, shortInterval,
                       longInterval, mode, singleShot, minSellPrice);
 
     return true;

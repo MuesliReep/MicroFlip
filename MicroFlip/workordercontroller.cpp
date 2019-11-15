@@ -23,8 +23,10 @@ bool WorkOrderController::factory(int    numWorkers,   Exchange *exchange,  doub
 
     for(int i = 0; i < numWorkers; i++) {
 
+        workOrderIterator++;
+
         emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-        WorkOrder *newWorkOrder = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
+        WorkOrder *newWorkOrder = new WorkOrder(exchange, workOrderIterator,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
 
         // Create thread for each workorder
         auto *workOrderThread = new QThread();
