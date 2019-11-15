@@ -55,6 +55,7 @@ void WorkOrder::updateTick() {
 
     switch(workState) {
       case INITIALISE:
+          emit updateState(workID, INITIALISE_STRING);
           initialiseSymbol(this->getPair());
 
           workState = START;
@@ -123,10 +124,11 @@ void WorkOrder::updateTick() {
 
           break;
       case REMOVING:
-
+        emit updateState(workID, "REMOVING");
         break;
       case REMOVED:
-
+        emit updateState(workID, "REMOVED");
+        timer->stop();
         break;
       case ERROR:
           emit updateState(workID, "ERROR");
@@ -431,7 +433,8 @@ void WorkOrder::stopOrder() {
     updateLog(workID, className, "Workorder stopping", logSeverity::LOG_CRITICAL);
 
     //
-    if(workState == WorkState::ERROR) {
+    if(workState == ERROR == INITIALISE || workState == START ||
+       workState == COMPLETE || workState == ERROR) {
 
         workState = WorkState::REMOVED;
     }

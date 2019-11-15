@@ -1,7 +1,6 @@
 #include "workordercontroller.h"
 
-WorkOrderController::WorkOrderController(QObject *parent) : QObject(parent)
-{
+WorkOrderController::WorkOrderController(QObject *parent) : QObject(parent) {
 
 }
 
@@ -20,26 +19,29 @@ bool WorkOrderController::factory(int    numWorkers,   Exchange *exchange,  doub
                                   int    longInterval, int mode,            bool   singleShot,
                                   double minSell) {
 
-    emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work orders", logSeverity::LOG_INFO);
+    emit updateLog(00, className, "User requested " + QString::number(numWorkers) + " work order(s)", logSeverity::LOG_INFO);
 
     for(int i = 0; i < numWorkers; i++) {
 
         emit updateLog(00, className, "Creating Work Order: " + QString::number(i+1) + " with currency: " + pair, logSeverity::LOG_DEBUG);
-        WorkOrder *wo = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
+        WorkOrder *newWorkOrder = new WorkOrder(exchange,i+1,pair,amount,profit, shortInterval, longInterval, mode, singleShot, minSell);
 
+        // Create thread for each workorder
         auto *workOrderThread = new QThread();
-        wo->moveToThread(workOrderThread);
+        newWorkOrder->moveToThread(workOrderThread);
 
-        connect(wo, SIGNAL(updateLog(int, QString, QString, int)), display, SLOT(addToLog(int, QString, QString, int)));
-        connect(wo, SIGNAL(updateState(int,QString)),              display, SLOT(stateUpdate(int,QString)));
+        //
+        connect(newWorkOrder, &WorkOrder::updateLog  , this, &WorkOrderController::updateLog);
+        connect(newWorkOrder, &WorkOrder::updateState, this, &WorkOrderController::updateState);
 
         // Tell the newly created work order to start
-        connect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+        connect(this, &WorkOrderController::startOrder, newWorkOrder, &WorkOrder::startOrder);
         workOrderThread->start();
         emit startOrder();
-        disconnect(this,SIGNAL(startOrder()), wo, SLOT(startOrder()));
+        disconnect(this, &WorkOrderController::startOrder, newWorkOrder, &WorkOrder::startOrder);
 
-        workOrders.append(wo);
+        // Store the workorder and its thread
+        workOrders.append(newWorkOrder);
         workOrderThreads.append(workOrderThread);
         QThread::sleep(1);
     }
@@ -57,12 +59,11 @@ bool WorkOrderController::remove(int workID, bool force) {
 
             if(force) {
 
-                if(workOrderThreads.at(i)->exit()) {
-
-                }
+//                if(workOrderThreads.at(i)->exit()) { }
             } else {
 
                 QMetaObject::invokeMethod(workOrders.at(i), "stopOrder");
+                result = true;
             }
         }
     }

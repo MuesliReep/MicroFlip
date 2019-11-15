@@ -39,6 +39,10 @@ Program::Program(QObject *parent) : QObject(parent) {
     connect(exchange, &Exchange::updateLog,            display, &Display::addToLog);
     connect(exchange, &Exchange::updateExchangePrices, display, &Display::updateExchangePrices);
 
+    // Setup WorkOrder Controller
+    connect(&workOrderController, &WorkOrderController::updateLog,   display, &Display::addToLog);
+    connect(&workOrderController, &WorkOrderController::updateState, display, &Display::stateUpdate);
+
     // Setup threads
     auto *exchangeThread = new QThread();
     auto *displayThread  = new QThread();
