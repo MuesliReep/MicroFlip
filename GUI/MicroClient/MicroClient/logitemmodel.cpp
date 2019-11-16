@@ -46,6 +46,14 @@ QHash<int, QByteArray> LogItemModel::roleNames() const
     return roles;
 }
 
+LogItem::LogItem(const int &workId, const QString &className, const QString &log, const int &severity)
+{
+    m_workId = workId;
+    m_className = className;
+    m_log = log;
+    m_severity = severity;
+}
+
 int LogItem::workId() const
 {
     return m_workId;

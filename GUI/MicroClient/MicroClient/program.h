@@ -5,7 +5,7 @@
 #include <QQmlApplicationEngine>
 
 #include "remotecontrol.h"
-#include "logitemcontroller.h"
+#include "logitemmodel.h"
 
 class ExchangeInfo : public QObject {
 
@@ -44,8 +44,10 @@ public:
 
 private:
     RemoteControl            *remoteControl;
-//    QList<logItemController>  logItems;
     ExchangeInfo exchangeInfo;
+
+    QList<QObject*> workersModel  {};
+    LogItemModel logItemModel;
 
     void startUp();
 
@@ -59,6 +61,8 @@ public slots:
     void         onConsoleLog             (int workID, QString className, QString log, int severity);
 
 private slots:
+
+    void loadDummyData();
 };
 
 #endif // PROGRAM_H

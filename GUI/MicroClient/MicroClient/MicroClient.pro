@@ -15,8 +15,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         config.cpp \
-        logitem.cpp \
-        logitemcontroller.cpp \
+        logitemmodel.cpp \
         main.cpp \
         program.cpp \
         remotecontrol.cpp \
@@ -39,8 +38,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     ../../../MicroFlip/common.h \
     config.h \
-    logitem.h \
-    logitemcontroller.h \
+    logitemmodel.h \
     program.h \
     remotecontrol.h \
     remotecontrol_tcp.h \

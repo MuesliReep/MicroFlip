@@ -73,86 +73,13 @@ ApplicationWindow {
             }
 
 }
-//            Row {
-//                id: headerRow
-//                height: parent.height
-//                width: parent.width
-//                anchors.verticalCenter: header.verticalCenter
-//                anchors.horizontalCenter: header.horizontalCenter
 
-//                Item {
-//                    id: name
-
-//                    Rectangle {
-
-//                        id: exchangeNameRectangle
-//                        height: parent.height
-//                        width: exchangeName.width + 15
-
-//                        color: Material.color(Material.DeepOrange)
-
-//                        Label {
-//                            id: exchangeName
-//                            text: qsTr("Exchange Name")
-//                            anchors.verticalCenter: parent.verticalCenter
-//                            anchors.horizontalCenter: parent.horizontalCenter
-//                            color: "white"
-//                        }
-//                    }
-//                }
-
-//                Item {
-
-//                    Rectangle {
-
-//                        id: lastPriceRectangle
-//                        height: parent.height
-//                        width: (parent.width - exchangeNameRectangle) / 2
-//    //                    anchors.left: exchangeNameRectangle.anchors.right
-
-//                        Label {
-//                            id: labelLastPrice
-//                            text: qsTr("Last Price: ")
-//                            anchors.verticalCenter: parent.verticalCenter
-//                        }
-
-//                        Label {
-//                            id: labelLastPriceValue
-//                            text: qsTr("0.00")
-//                            anchors.verticalCenter: parent.verticalCenter
-//                        }
-//                    }
-
-//                }
-
-
-
-//                Rectangle {
-
-//                    id: avgPriceRectangle
-//                    height: parent.height
-//                    width: (parent.width - exchangeNameRectangle) / 2
-//                    anchors.left: lastPriceRectangle.anchors.right
-
-//                    Label {
-//                        id: labelAvgPrice
-//                        text: qsTr("Avg. Price: ")
-//                        anchors.verticalCenter: parent.verticalCenter
-//                    }
-
-//                    Label {
-//                        id: labelAvgPriceValue
-//                        text: qsTr("0.00")
-//                        anchors.verticalCenter: parent.verticalCenter
-//                    }
-//                }
-//            }
         }
 
         Pane {
             id: workerPane
             width: parent.width * paneWidthMultiplier
-            height: 150
+            height: window.height / 2
             anchors.horizontalCenter: parent.horizontalCenter
             Layout.alignment: Qt.AlignCenter
 
@@ -233,29 +160,37 @@ ApplicationWindow {
         Pane {
             id: serverLogPane
             width: parent.width * paneWidthMultiplier
-            height: 50
+            height: window.height / 2
             anchors.horizontalCenter: parent.horizontalCenter
             Layout.alignment: Qt.AlignCenter
 
             Material.elevation: 6
 
-            ListModel {
-                id: logModel
-            }
+//            Component {
+//                id: logDelegate
 
-            Component {
-                id: logDelegate
-
-                Item {
-                    id: logDelegateItem
-                    width: logView.width; height: 80
-                }
-            }
+//                Item {
+//                    id: logDelegateItem
+//                    width: logView.width; height: 25
+//                    Text: log
+//                }
+//            }
 
             ListView {
                 id: logView
-                model: logModel
-                delegate: logDelegate
+                width: 120
+                height: 100
+
+                model: logItemModel
+//                delegate: logDelegate
+
+                delegate: Rectangle {
+                    width: 55
+                    height: 25
+                    color: "yellow"
+                    Text { text: log
+                    color: Material.color(Material.Blue)}
+                }
             }
         }
     }

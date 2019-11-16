@@ -6,6 +6,7 @@
 
 #include "remotecontrol_tcp.h"
 #include "config.h"
+#include "logitemmodel.h"
 
 Program::Program(QQmlApplicationEngine *engine, QObject *parent) : QObject(parent) {
 
@@ -19,12 +20,26 @@ Program::Program(QQmlApplicationEngine *engine, QObject *parent) : QObject(paren
 
     engine->rootContext()->setContextProperty("exchangeInfo", &exchangeInfo);
 
+    // Dummy data
+    logItemModel.addLogItem(LogItem(112, "classname", "TEST TEST TEST", 1));
+    logItemModel.addLogItem(LogItem(113, "classname", "TEST TEST TEST", 1));
+
+    // Bind data models
+    engine->rootContext()->setContextProperty("workersModel",  QVariant::fromValue(workersModel));
+    engine->rootContext()->setContextProperty("logItemModel", &logItemModel);
+
+
     // Create start shot, this is called when the main event loop is triggered
     QTimer::singleShot(100, remoteControl, &RemoteControl::open);
+//    QTimer::singleShot(1200, this,          &Program::loadDummyData);
 
     connect(remoteControl, &RemoteControl::newExchangeInformation, this, &Program::onNewExchangeInformation);
+    connect(remoteControl, &RemoteControl::newLogUpdate,           this, &Program::onNewLogUpdate);
     connect(remoteControl, &RemoteControl::updateLog,              this, &Program::onConsoleLog);
+
 }
+
+
 
 void Program::onNewWorkerStatus(int workID, QString state) {
 
@@ -42,11 +57,8 @@ void Program::onNewExchangeInformation(QString symbol, double lastPrice, double 
 
 void Program::onNewLogUpdate(int workID, QString className, QString log, int severity) {
 
-    // Append new log
-//    logItems.append(logItemController(workID, className, log, severity));
-
-    // Notify GUI
-    // TODO
+    // Append new log item, gui will be notified through model binding
+    logItemModel.addLogItem(LogItem(workID, className, log, severity));
 }
 
 void Program::onConsoleLog(int workID, QString className, QString log, int severity) {
@@ -59,4 +71,11 @@ void Program::onConsoleLog(int workID, QString className, QString log, int sever
 
     qDebug() << message;
 
+}
+
+void Program::loadDummyData()
+{
+    // Dummy data
+    logItemModel.addLogItem(LogItem(110, "classname", "TEST TEST TEST", 1));
+    logItemModel.addLogItem(LogItem(111, "classname", "TEST TEST TEST", 1));
 }
