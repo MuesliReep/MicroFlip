@@ -23,10 +23,12 @@ Program::Program(QQmlApplicationEngine *engine, QObject *parent) : QObject(paren
     // Dummy data
     logItemModel.addLogItem(LogItem(112, "classname", "TEST TEST TEST", 1));
     logItemModel.addLogItem(LogItem(113, "classname", "TEST TEST TEST", 1));
+    workOrderModel.addWorkOrderItem(WorkOrderItem(112, "TEST_STATE"));
+    workOrderModel.addWorkOrderItem(WorkOrderItem(113, "TEST_STATE"));
 
     // Bind data models
-    engine->rootContext()->setContextProperty("workersModel",  QVariant::fromValue(workersModel));
-    engine->rootContext()->setContextProperty("logItemModel", &logItemModel);
+    engine->rootContext()->setContextProperty("workOrderModel", &workOrderModel);
+    engine->rootContext()->setContextProperty("logItemModel",   &logItemModel);
 
 
     // Create start shot, this is called when the main event loop is triggered
@@ -35,14 +37,13 @@ Program::Program(QQmlApplicationEngine *engine, QObject *parent) : QObject(paren
 
     connect(remoteControl, &RemoteControl::newExchangeInformation, this, &Program::onNewExchangeInformation);
     connect(remoteControl, &RemoteControl::newLogUpdate,           this, &Program::onNewLogUpdate);
+    connect(remoteControl, &RemoteControl::newWorkerStatus,        this, &Program::onNewWorkerStatus);
     connect(remoteControl, &RemoteControl::updateLog,              this, &Program::onConsoleLog);
-
 }
-
-
 
 void Program::onNewWorkerStatus(int workID, QString state) {
 
+    workOrderModel.addWorkOrderItem(WorkOrderItem(workID, state));
 }
 
 void Program::onNewBalanceValues() {

@@ -6,6 +6,7 @@
 
 #include "remotecontrol.h"
 #include "logitemmodel.h"
+#include "workordermodel.h"
 
 class ExchangeInfo : public QObject {
 
@@ -46,8 +47,8 @@ private:
     RemoteControl            *remoteControl;
     ExchangeInfo exchangeInfo;
 
-    QList<QObject*> workersModel  {};
-    LogItemModel logItemModel;
+    WorkOrderModel workOrderModel;
+    LogItemModel   logItemModel;
 
     void startUp();
 

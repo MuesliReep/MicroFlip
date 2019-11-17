@@ -19,8 +19,6 @@ ApplicationWindow {
 
     property variant paneWidthMultiplier: 0.95
 
-    //property alias exchangeNameValue: labelExchangeName.text
-
     Column {
         id: column
 
@@ -46,38 +44,35 @@ ApplicationWindow {
                     color: Material.color(Material.Blue)
                 }
 
-            Label {
-                id: labelSymbol
-//                text: qsTr("Exchange Name")
-                text: exchangeInfo.symbol
+                Label {
+                    id: labelSymbol
+                    text: exchangeInfo.symbol
+                }
+
+                Label {
+                    id: labelLastPrice
+                    text: qsTr("Last Price: ")
+                }
+
+                Label {
+                    id: labelLastPriceValue
+                    text: exchangeInfo.price
+                }
+
+                Label {
+                    id: labelAvgPrice
+                    text: qsTr("Avg. Price: ")
+                }
+
+                Label {
+                    id: labelAvgPriceValue
+                    text: exchangeInfo.avgPrice
+                }
             }
-
-            Label {
-                id: labelLastPrice
-                text: qsTr("Last Price: ")
-            }
-
-            Label {
-                id: labelLastPriceValue
-                text: exchangeInfo.price
-            }
-
-            Label {
-                id: labelAvgPrice
-                text: qsTr("Avg. Price: ")
-            }
-
-            Label {
-                id: labelAvgPriceValue
-                text: exchangeInfo.avgPrice
-            }
-
-}
-
         }
 
         Pane {
-            id: workerPane
+            id: workOrderPane
             width: parent.width * paneWidthMultiplier
             height: window.height / 2
             anchors.horizontalCenter: parent.horizontalCenter
@@ -85,74 +80,40 @@ ApplicationWindow {
 
             Material.elevation: 6
 
-            ListModel {
-                id: workerModel
+            ListView {
+                id: workOrderView
+                model: workOrderModel
+                width: workOrderPane.width
+                height: workOrderPane.height
 
-                ListElement {
-                    workID: 11
-                    workerStatus: "TEST"
-                }
-                ListElement {
-                    workID: 12
-                    workerStatus: "TEST2"
-                }
-                ListElement {
-                    workID: 13
-                    workerStatus: "TEST3"
-                }
-            }
+                delegate: Rectangle {
+                    id: wordOrderRectangle
+                    height: 25
+                    width: workOrderView.width
 
-            Component {
-                id: workerDelegate
+                    color: workerMouseArea.containsMouse ? Material.color(Material.Blue) : Material.color(Material.DeepOrange)
 
-                Item {
-                    id: workerDelegateItem
-                    width: workerView.width; height: 50
-
-                    Rectangle {
-
-//                        anchors {
-//                            left: parent.left; top: parent.top;
-//                            right: parent.right; bottom: parent.bottom
-//                        }
-
-                        height: parent.height
-                        width: parent.width
-
-                        color: workerMouseArea.containsMouse ? Material.color(Material.Blue) : Material.color(Material.DeepOrange)
-
-                        MouseArea {
-                            id: workerMouseArea
-                            anchors {
-                                left: parent.left; top: parent.top;
-                                right: parent.right; bottom: parent.bottom
-                            }
-                            hoverEnabled: true
+                    MouseArea {
+                        id: workerMouseArea
+                        anchors {
+                            left: wordOrderRectangle.left; top: wordOrderRectangle.top;
+                            right: wordOrderRectangle.right; bottom: wordOrderRectangle.bottom
                         }
+                        hoverEnabled: true
+                    }
 
-                        Row {
-                            spacing: 10
-                            Text {
-                                text: Number(workID)
-                                font.pixelSize: 15
-                            }
-                            Text {
-                                text: workerStatus
-                                font.pixelSize: 15
-                            }
+                    Row {
+                        spacing: 10
+                        Text {
+                            text: Number(workId)
+                            font.pixelSize: 15
+                        }
+                        Text {
+                            text: workState
+                            font.pixelSize: 15
                         }
                     }
-                }
-            }
 
-            ListView {
-                id: workerView
-                model: workerModel
-                delegate: workerDelegate
-                anchors {
-                    left: parent.left; top: parent.top;
-                    right: parent.right; bottom: parent.bottom
-                    margins: 5
                 }
             }
         }
@@ -166,23 +127,12 @@ ApplicationWindow {
 
             Material.elevation: 6
 
-//            Component {
-//                id: logDelegate
-
-//                Item {
-//                    id: logDelegateItem
-//                    width: logView.width; height: 25
-//                    Text: log
-//                }
-//            }
-
             ListView {
                 id: logView
                 width: 120
                 height: 100
 
                 model: logItemModel
-//                delegate: logDelegate
 
                 delegate: Rectangle {
                     width: 55
