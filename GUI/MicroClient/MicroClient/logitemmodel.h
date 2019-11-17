@@ -11,17 +11,19 @@ public:
             const QString &log,
             const int &severity);
 
-    int     workId()    const;
-    QString className() const;
-    QString log()       const;
-    int     severity()  const;
+    int     workId     () const;
+    QString className  () const;
+    QString log        () const;
+    int     severity   () const;
+    QString reportTime () const;
 
 private:
 
-    int m_workId;
+    int     m_workId;
     QString m_className;
     QString m_log;
-    int m_severity;
+    int     m_severity;
+    QString m_reportTime;
 };
 
 class LogItemModel : public QAbstractListModel {
@@ -33,7 +35,8 @@ public:
         WorkIdRole = Qt::UserRole + 1,
         ClassNameRole,
         LogRole,
-        SeverityRole
+        SeverityRole,
+        ReportTimeRole
     };
 
     LogItemModel(QObject *parent = nullptr);

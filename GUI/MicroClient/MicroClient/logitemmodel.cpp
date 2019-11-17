@@ -1,5 +1,7 @@
 #include "logitemmodel.h"
 
+#include <QDateTime>
+
 LogItemModel::LogItemModel(QObject *parent) : QAbstractListModel(parent)
 {
 
@@ -33,25 +35,29 @@ QVariant LogItemModel::data(const QModelIndex &index, int role) const
         return logItem.log();
     else if (role == SeverityRole)
         return logItem.severity();
+    else if (role == ReportTimeRole)
+        return logItem.reportTime();
     return QVariant();
 }
 
 QHash<int, QByteArray> LogItemModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
-    roles[WorkIdRole]    = "workId";
-    roles[ClassNameRole] = "className";
-    roles[LogRole]       = "log";
-    roles[SeverityRole]  = "severity";
+    roles[WorkIdRole]     = "workId";
+    roles[ClassNameRole]  = "className";
+    roles[LogRole]        = "log";
+    roles[SeverityRole]   = "severity";
+    roles[ReportTimeRole] = "reportTime";
     return roles;
 }
 
 LogItem::LogItem(const int &workId, const QString &className, const QString &log, const int &severity)
 {
-    m_workId = workId;
-    m_className = className;
-    m_log = log;
-    m_severity = severity;
+    m_workId     = workId;
+    m_className  = className;
+    m_log        = log;
+    m_severity   = severity;
+    m_reportTime = QDateTime::currentDateTime().toString("hh:mm:ss");
 }
 
 int LogItem::workId() const
@@ -72,4 +78,9 @@ QString LogItem::log() const
 int LogItem::severity() const
 {
     return m_severity;
+}
+
+QString LogItem::reportTime() const
+{
+    return m_reportTime;
 }

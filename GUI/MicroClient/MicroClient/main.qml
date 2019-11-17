@@ -138,7 +138,7 @@ ApplicationWindow {
                     width: 55
                     height: 25
                     color: "yellow"
-                    Text { text: log
+                    Text { text: "[" + reportTime + "]" + "[ID " + workId + "]" + "[" + className + "] " + log
                     color: Material.color(Material.Blue)}
                 }
             }
