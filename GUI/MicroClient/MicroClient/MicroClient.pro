@@ -20,7 +20,7 @@ SOURCES += \
         program.cpp \
         remotecontrol.cpp \
         remotecontrol_tcp.cpp \
-        workeritemcontroller.cpp
+        workordermodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -42,7 +42,7 @@ HEADERS += \
     program.h \
     remotecontrol.h \
     remotecontrol_tcp.h \
-    workeritemcontroller.h
+    workordermodel.h
 
 DISTFILES += \
     loginForm.qml

@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>workerItem.qml</file>
-        <file>logItem.qml</file>
     </qresource>
 </RCC>
