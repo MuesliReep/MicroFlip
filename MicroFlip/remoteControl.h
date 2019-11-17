@@ -12,6 +12,8 @@ public:
 
 private:
     uint64_t     lastNonce                {0};
+    uint64_t     ourLastNonce             {0};
+    uint64_t     createNonce              ();
 
 protected:
     QString      className                {"REMOTECONTROL"};

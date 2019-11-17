@@ -26,6 +26,21 @@ bool RemoteControl::verifySignature(QString message, QString nonce, QString sign
     return true;
 }
 
+uint64_t RemoteControl::createNonce() {
+
+    uint64_t newNonce = static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
+
+    // If alot of messages are sent at once, there wont be enough time between nonces
+    // To work around this, just one up the last nonce
+    if(newNonce <= ourLastNonce) {
+        newNonce = ourLastNonce + 1;
+    }
+
+    ourLastNonce = newNonce;
+
+    return newNonce;
+}
+
 // Returns true if message is valid
 // Verified is true when signiture is valid
 // Message can be valid but signature invalid

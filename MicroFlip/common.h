@@ -32,10 +32,10 @@ static const uint8_t NONCE_POSITION     = 3;
 static const uint8_t SIGNATURE_POSITION = 4;
 static const uint8_t MESSAGE_COMPONENTS = 6;
 
-static uint64_t createNonce() {
+//static uint64_t createNonce() {
 
-    return static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
-}
+//    return static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
+//}
 
 static QByteArray createSignature(QString message, QString key) {
 
