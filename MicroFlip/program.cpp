@@ -37,12 +37,12 @@ Program::Program(QObject *parent) : QObject(parent) {
     display = new Display();
     display->setLogLevel(config->getLogLevel());
     display->setExchangeName(exchange->getExchangeName());
-    connect(this,     &Program:: updateLog,            display, &Display::addToLog);
-    connect(exchange, &Exchange::updateLog,            display, &Display::addToLog);
+    connect(this,     &Program ::updateLog,            display, &Display::addToLog);
+    connect(exchange, &Exchange::updateLog,            this,    &Program::updateLog);
     connect(exchange, &Exchange::updateExchangePrices, display, &Display::updateExchangePrices);
 
     // Setup WorkOrder Controller
-    connect(&workOrderController, &WorkOrderController::updateLog,   display, &Display::addToLog);
+    connect(&workOrderController, &WorkOrderController::updateLog,   this,    &Program::updateLog);
     connect(&workOrderController, &WorkOrderController::updateState, display, &Display::stateUpdate);
 
     // Create remote control
@@ -55,13 +55,13 @@ Program::Program(QObject *parent) : QObject(parent) {
 
         // Setup new connections
         connect(this,                 &Program            ::updateLog,            remoteControl, &RemoteControl::logUpdate);
-        connect(exchange,             &Exchange           ::updateLog,            remoteControl, &RemoteControl::logUpdate);
+//        connect(exchange,             &Exchange           ::updateLog,            remoteControl, &RemoteControl::logUpdate);
         connect(exchange,             &Exchange           ::updateExchangePrices, remoteControl, &RemoteControl::exchangePricesUpdate);
-        connect(&workOrderController, &WorkOrderController::updateLog,            remoteControl, &RemoteControl::logUpdate);
+//        connect(&workOrderController, &WorkOrderController::updateLog,            remoteControl, &RemoteControl::logUpdate);
         connect(&workOrderController, &WorkOrderController::updateState,          remoteControl, &RemoteControl::workorderStateUpdate);
         connect(remoteControl,        &RemoteControl      ::createWorker,         this,          &Program      ::addWorker);
         connect(remoteControl,        &RemoteControl      ::removeWorker,         this,          &Program      ::removeWorker);
-        connect(remoteControl,        &RemoteControl      ::updateLog,            display,       &Display      ::addToLog);
+        connect(remoteControl,        &RemoteControl      ::updateLog,            this,          &Program      ::updateLog);
 
         // Create thread for remote control
         auto *remoteControlThread = new QThread();
