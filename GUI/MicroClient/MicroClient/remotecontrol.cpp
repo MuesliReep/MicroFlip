@@ -8,6 +8,44 @@
 
 RemoteControl::RemoteControl(Config config) { (void) config; }
 
+QString RemoteControl::remoteConnectionStateString() const {
+
+    QString stateString;
+
+    switch (m_remoteConnectionState) {
+    case REMOTE_ERROR:
+        stateString = "ERROR";
+        break;
+    case REMOTE_IDLE:
+        stateString = "IDLE";
+        break;
+    case REMOTE_CONNECTING:
+        stateString = "CONNECTING";
+        break;
+    case REMOTE_CONNECTED:
+        stateString = "CONNECTED";
+        break;
+    case REMOTE_VERIFIED:
+        stateString = "VERIFIED";
+        break;
+    case REMOTE_DISCONNECTED:
+        stateString = "DISCONNECTED";
+        break;
+    case REMOTE_REJECTED:
+        stateString = "REJECTED";
+        break;
+    }
+
+    return stateString;
+}
+
+void RemoteControl::setRemoteConnectionState(int state) {
+
+    this->m_remoteConnectionState = state;
+
+    emit remoteConnectionStateChanged();
+}
+
 bool RemoteControl::verifySignature(QString message, QString nonce, QString signature) {
 
     bool ok = false;

@@ -9,10 +9,15 @@ class RemoteControl : public QObject {
 
     Q_OBJECT
 
+    Q_PROPERTY(QString remoteConnectionState READ remoteConnectionStateString NOTIFY remoteConnectionStateChanged)
+
 public:
     explicit     RemoteControl                   (Config config);
+    QString      remoteConnectionStateString     () const;
+    void         setRemoteConnectionState        (int state);
 
 private:
+    int          m_remoteConnectionState         {0};
     uint64_t     lastNonce                       {0};
     uint64_t     ourLastNonce                    {0};
     uint64_t     createNonce                     ();
@@ -47,6 +52,7 @@ signals:
     void         isConnected                     (bool state);
     void         isAuthenticated                 (bool state);
     void         updateLog                       (int workID, QString className, QString log, int severity);
+    void         remoteConnectionStateChanged    ();
 };
 
 #endif // REMOTECONTROL_H

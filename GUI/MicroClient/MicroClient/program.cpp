@@ -17,8 +17,8 @@ Program::Program(QQmlApplicationEngine *engine, QObject *parent) : QObject(paren
     // Create Remote Control
     remoteControl = new RemoteControl_TCP(config);
 
-
     engine->rootContext()->setContextProperty("exchangeInfo", &exchangeInfo);
+    engine->rootContext()->setContextProperty("remoteControl", remoteControl);
 
     // Dummy data
     logItemModel.addLogItem(LogItem(112, "classname", "TEST TEST TEST", 1));
@@ -30,9 +30,8 @@ Program::Program(QQmlApplicationEngine *engine, QObject *parent) : QObject(paren
     engine->rootContext()->setContextProperty("workOrderModel", &workOrderModel);
     engine->rootContext()->setContextProperty("logItemModel",   &logItemModel);
 
-
     // Create start shot, this is called when the main event loop is triggered
-    QTimer::singleShot(100, remoteControl, &RemoteControl::open);
+    QTimer::singleShot(1000, remoteControl, &RemoteControl::open);
 //    QTimer::singleShot(1200, this,          &Program::loadDummyData);
 
     connect(remoteControl, &RemoteControl::newExchangeInformation, this, &Program::onNewExchangeInformation);

@@ -68,6 +68,10 @@ ApplicationWindow {
                     id: labelAvgPriceValue
                     text: exchangeInfo.avgPrice
                 }
+                Label {
+                    id: labelRemoteConnectionState
+                    text: remoteControl.remoteConnectionState
+                }
             }
         }
 

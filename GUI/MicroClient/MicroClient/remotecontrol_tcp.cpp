@@ -15,6 +15,8 @@ RemoteControl_TCP::RemoteControl_TCP(Config config) : RemoteControl (config) {
 
 void RemoteControl_TCP::open() {
 
+    this->setRemoteConnectionState(REMOTE_CONNECTING);
+
     qDebug() << "Opening socket " << serverAddress << ":" << QString::number(serverPort);
 
     // Connect to server
@@ -23,10 +25,12 @@ void RemoteControl_TCP::open() {
     // Wait for connection
     if(!socket.waitForConnected(5000)) {
 
+        this->setRemoteConnectionState(REMOTE_ERROR);
         qDebug() << "Could not connect to server, timeout!";
         return;
     }
 
+    this->setRemoteConnectionState(REMOTE_CONNECTED);
     qDebug() << "Connected to server!";
 
 // Does nothing:    connect(&socket, &QTcpSocket::connected,    this, &RemoteControl_TCP::onConnect    );
@@ -47,12 +51,14 @@ void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
 
     if(messageValid && !verified) {
 
+        this->setRemoteConnectionState(REMOTE_REJECTED);
         emit updateLog(00, className, "Could not verify Server", logSeverity::LOG_CRITICAL);
 
         socket.disconnectFromHost();
     } else if(messageValid && verified) {
 
         this->authenticated = true;
+        this->setRemoteConnectionState(REMOTE_VERIFIED);
 
         emit updateLog(00, className, "Verified Server", logSeverity::LOG_INFO);
     }
@@ -74,6 +80,8 @@ void RemoteControl_TCP::onReadyRead() {
 
 void RemoteControl_TCP::onConnect() {
 
+    this->setRemoteConnectionState(REMOTE_CONNECTED);
+
     qDebug() << "Connected to server!";
 
     this->connected = true;
@@ -86,6 +94,7 @@ void RemoteControl_TCP::onConnect() {
 
 void RemoteControl_TCP::onDisconnect() {
 
+    this->setRemoteConnectionState(REMOTE_DISCONNECTED);
     this->connected = false;
 
     emit isConnected(connected);
