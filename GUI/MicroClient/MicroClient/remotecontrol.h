@@ -9,11 +9,9 @@ class RemoteControl : public QObject {
 
     Q_OBJECT
 
-    Q_PROPERTY(QString remoteConnectionState READ remoteConnectionStateString NOTIFY remoteConnectionStateChanged)
-
 public:
     explicit     RemoteControl                   (Config config);
-    QString      remoteConnectionStateString     () const;
+    int          getRmoteConnectionState         () const;
     void         setRemoteConnectionState        (int state);
 
 private:

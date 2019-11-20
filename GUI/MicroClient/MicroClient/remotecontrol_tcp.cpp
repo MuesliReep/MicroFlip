@@ -20,10 +20,11 @@ void RemoteControl_TCP::open() {
     qDebug() << "Opening socket " << serverAddress << ":" << QString::number(serverPort);
 
     // Connect to server
-    socket.connectToHost(QHostAddress(this->serverAddress), this->serverPort);
+    socket = new QTcpSocket;
+    socket->connectToHost(QHostAddress(this->serverAddress), this->serverPort);
 
     // Wait for connection
-    if(!socket.waitForConnected(5000)) {
+    if(!socket->waitForConnected(5000)) {
 
         this->setRemoteConnectionState(REMOTE_ERROR);
         qDebug() << "Could not connect to server, timeout!";
@@ -34,8 +35,8 @@ void RemoteControl_TCP::open() {
     qDebug() << "Connected to server!";
 
 // Does nothing:    connect(&socket, &QTcpSocket::connected,    this, &RemoteControl_TCP::onConnect    );
-    connect(&socket, &QTcpSocket::disconnected, this, &RemoteControl_TCP::onDisconnect );
-    connect(&socket, &QTcpSocket::readyRead,    this, &RemoteControl_TCP::onReadyRead  );
+    connect(socket, &QTcpSocket::disconnected, this, &RemoteControl_TCP::onDisconnect );
+    connect(socket, &QTcpSocket::readyRead,    this, &RemoteControl_TCP::onReadyRead  );
 
     // Send hello message to authenticate
     createHelloMessage();
@@ -54,7 +55,7 @@ void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
         this->setRemoteConnectionState(REMOTE_REJECTED);
         emit updateLog(00, className, "Could not verify Server", logSeverity::LOG_CRITICAL);
 
-        socket.disconnectFromHost();
+        socket->disconnectFromHost();
     } else if(messageValid && verified) {
 
         this->authenticated = true;
@@ -66,7 +67,7 @@ void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
 
 bool RemoteControl_TCP::sendMessage(QString message) {
 
-    if(socket.write(message.toUtf8()) != -1) {
+    if(socket->write(message.toUtf8()) != -1) {
         return true;
     }
 
@@ -75,7 +76,7 @@ bool RemoteControl_TCP::sendMessage(QString message) {
 
 void RemoteControl_TCP::onReadyRead() {
 
-    parseRawMessage(socket.readAll());
+    parseRawMessage(socket->readAll());
 }
 
 void RemoteControl_TCP::onConnect() {

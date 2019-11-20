@@ -37,15 +37,19 @@ signals:
 };
 
 
-class Program : public QObject
-{
+class Program : public QObject {
+
     Q_OBJECT
+
+    Q_PROPERTY(QString remoteConnectionState READ remoteConnectionStateString NOTIFY remoteConnectionStateChanged)
+
 public:
     explicit Program(QQmlApplicationEngine *engine, QObject *parent = nullptr);
+    QString      remoteConnectionStateString     () const;
 
 private:
-    RemoteControl            *remoteControl;
-    ExchangeInfo exchangeInfo;
+    RemoteControl *remoteControl;
+    ExchangeInfo   exchangeInfo;
 
     WorkOrderModel workOrderModel;
     LogItemModel   logItemModel;
@@ -53,6 +57,7 @@ private:
     void startUp();
 
 signals:
+    void         remoteConnectionStateChanged    ();
 
 public slots:
     void         onNewWorkerStatus        (int workID, QString state);

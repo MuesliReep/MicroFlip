@@ -16,7 +16,7 @@ public:
 private:
     QString     serverAddress {};
     uint16_t    serverPort    {};
-    QTcpSocket  socket        {};
+    QTcpSocket *socket        {};
     QByteArray  readBuffer    {};
 
     void parseRawMessage(QByteArray rawData);
