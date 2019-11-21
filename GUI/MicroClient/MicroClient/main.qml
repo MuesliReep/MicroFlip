@@ -161,8 +161,51 @@ ApplicationWindow {
         radius: width
 
         text: "\u002B" // Unicode Character 'Plus Sign'
-        onClicked: textArea.readOnly = true
+        onClicked: popup.open()
         highlighted: true
         Material.accent: Material.Orange
+    }
+
+    Popup {
+        id: popup
+        x: 100
+        y: 100
+        width: 200
+        height: 300
+        modal: true
+        focus: true
+        anchors.centerIn: Overlay.overlay
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        Material.theme: Material.Light
+        Material.accent: Material.Blue
+        Material.elevation: 8
+
+        spacing: 0
+
+        Rectangle {
+
+            width: popup.width
+            height: 20
+            Text {
+                id: name
+                text: qsTr("Create Workorder")
+            }
+        }
+
+        Row {
+            anchors.left: popup.Left
+            anchors.bottom: popup.Bottom
+            height: 20
+            Button {
+
+                text: "Cancel"
+                onClicked: popup.close()
+            }
+            Button {
+
+                text: "Create"
+            }
+        }
     }
 }
