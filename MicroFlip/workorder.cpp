@@ -435,8 +435,8 @@ void WorkOrder::stopOrder() {
     updateLog(workID, className, "Workorder stopping", logSeverity::LOG_CRITICAL);
 
     //
-    if(workState == ERROR || workState == INITIALISE || workState == START ||
-       workState == COMPLETE || workState == ERROR) {
+    if(workState == ERROR || workState == INITIALISE ||
+      workState == START  || workState == COMPLETE) {
 
         workState = WorkState::REMOVED;
     }
