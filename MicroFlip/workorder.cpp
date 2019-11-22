@@ -363,11 +363,6 @@ void WorkOrder::orderInfoReply(int status) {
         }
     }
 
-//  if(status == -2) {
-//    updateLog(workID, "Continuing with order");
-//    return;
-//  }
-
     switch(status) {
         case 0:
             // Order active, do nothing
@@ -407,18 +402,13 @@ void WorkOrder::startOrder() {
     updateLog(workID, className, "Workorder started", logSeverity::LOG_CRITICAL);
 
     // Create timer & connect slot
-//    workThread = new QThread(this);
     timer = new QTimer(this);
     timer->setInterval(intervalShort);
-//    timer->moveToThread(workThread);
 
     // Connect timer to updateTick
 //    connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()), Qt::DirectConnection);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateTick()));
 
-    // Connect thread to timer
-//    QObject::connect(workThread, SIGNAL(started()), timer, SLOT(start()));
-//    workThread->start();
     timer->start();
 }
 
