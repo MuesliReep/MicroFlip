@@ -318,6 +318,10 @@ void Exchange::updateOrderInfoReply(QNetworkReply *reply) {
 
     if(reply->error()) {
         updateLog(currentTask.getSenderID(), className, "Order Info Packet error: " + reply->errorString() + " " + reply->readAll(), logSeverity::LOG_CRITICAL);
+        // If transfer error, send retry
+        if(reply->errorString().contains("Error transferring", Qt::CaseInsensitive)) {
+            status = -2;
+        }
     } else {
         status = parseRawOrderInfoData(reply);
     }

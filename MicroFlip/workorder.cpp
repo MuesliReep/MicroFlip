@@ -379,6 +379,8 @@ void WorkOrder::orderInfoReply(int status) {
             break;
         case -2:
             // Packet error, continue
+            updateLog(workID, className, " Order info Packet Transfer Error, continuing ", logSeverity::LOG_CRITICAL);
+            break;
         case 2:
         case 3:
         default:
