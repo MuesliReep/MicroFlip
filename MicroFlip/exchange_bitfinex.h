@@ -19,7 +19,7 @@ private:
     QString apiKey;
     QString apiSecret;
 
-    uint    lastNonce;
+    uint    lastNonce{};
     QString createNonce();
 
     void updateMarketTicker(QString pair);

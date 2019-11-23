@@ -132,8 +132,8 @@ void Display::addToLog(int workID, QString classID, QString logString, int sever
 void Display::updateExchangePrices(QString symbol, double lastPrice, double avgPrice) {
 
     this->symbol    = std::move(symbol   );
-    this->lastPrice = std::move(lastPrice);
-    this->avgPrice  = std::move(avgPrice );
+    this->lastPrice = lastPrice;
+    this->avgPrice  = avgPrice ;
 
     updateScreen();
 }

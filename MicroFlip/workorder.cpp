@@ -214,7 +214,7 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
 void WorkOrder::initialiseSymbol(QString symbol) {
 
     connect(this, SIGNAL(sendInitialiseSymbol(QString)), exchange, SLOT(receiveInitialiseSymbol(QString)));
-    emit sendInitialiseSymbol(symbol);
+    emit sendInitialiseSymbol(std::move(symbol));
     disconnect(this, SIGNAL(sendInitialiseSymbol(QString)), exchange, SLOT(receiveInitialiseSymbol(QString)));
 }
 

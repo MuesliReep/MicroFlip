@@ -18,21 +18,21 @@ class Downloader : public QObject {
 
 public:
   explicit Downloader(QObject *parent = nullptr);
-  ~Downloader();
+  ~Downloader() override;
 
   QNetworkRequest generateRequest(const QUrl& url);
-  void addHeaderToRequest(QNetworkRequest *request, QByteArray headerName, QByteArray headerValue);
+  void addHeaderToRequest(QNetworkRequest *request, const QByteArray& headerName, const QByteArray& headerValue);
 
   // QNetworkRequest generateGetRequest(QUrl url, QByteArray headerName, QByteArray headerValue);
   // QNetworkRequest generatePostRequest(QUrl url);
 
-  QNetworkAccessManager* doDownload     (QNetworkRequest request, QObject* receiver, const char * method);
-  QNetworkAccessManager* doPostDownload (QNetworkRequest request, QByteArray data, QObject* receiver, const char * method);
-  QNetworkAccessManager* doDeleteRequest(QNetworkRequest request, QObject* receiver, const char * method);
+  QNetworkAccessManager* doDownload     (const QNetworkRequest& request, QObject* receiver, const char * method);
+  QNetworkAccessManager* doPostDownload (const QNetworkRequest& request, const QByteArray& data, QObject* receiver, const char * method);
+  QNetworkAccessManager* doDeleteRequest(const QNetworkRequest& request, QObject* receiver, const char * method);
 
-  void doDownload     (QNetworkRequest request, QNetworkAccessManager *manager, QObject * receiver, const char * method);
-  void doPostDownload (QNetworkRequest request, QNetworkAccessManager *manager, QByteArray data, QObject * receiver, const char * method);
-  void doDeleteRequest(QNetworkRequest request, QNetworkAccessManager *manager, QObject * receiver, const char * method);
+  void doDownload     (const QNetworkRequest& request, QNetworkAccessManager *manager, QObject * receiver, const char * method);
+  void doPostDownload (const QNetworkRequest& request, QNetworkAccessManager *manager, const QByteArray& data, QObject * receiver, const char * method);
+  void doDeleteRequest(const QNetworkRequest& request, QNetworkAccessManager *manager, QObject * receiver, const char * method);
 
 };
 

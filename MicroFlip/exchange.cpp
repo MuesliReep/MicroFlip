@@ -25,7 +25,7 @@ QList<Balance> Exchange::getBalances() const {
     return balances;
 }
 
-double Exchange::getBalance(QString currency) const {
+double Exchange::getBalance(const QString& currency) const {
 
     // TODO
 
@@ -413,7 +413,7 @@ ExchangeTask::ExchangeTask(int Task, QObject *Sender, int senderID, QList<QStrin
     this->task       = Task;
     this->sender     = Sender;
     this->senderID   = senderID;
-    this->attributes = Attributes;
+    this->attributes = std::move(Attributes);
 }
 
 QObject       *ExchangeTask::getSender    () const { return sender;     }

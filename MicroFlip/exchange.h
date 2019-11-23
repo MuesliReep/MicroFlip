@@ -10,6 +10,7 @@
 
 #include <QMessageAuthenticationCode>
 #include <QCryptographicHash>
+#include <utility>
 
 #include "downloader.h"
 #include "config.h"
@@ -44,7 +45,7 @@ private:
 class Balance {
 
 public:
-  Balance(QString Currency, double Amount) { currency = Currency; amount = Amount; }
+  Balance(QString Currency, double Amount) { currency = std::move(Currency); amount = Amount; }
 
   QString getCurrency() const { return currency; }
   double  getAmount  () const { return amount;   }
@@ -73,7 +74,7 @@ public:
     this->age  = -1;
   }
   Ticker(QString symbol, double high, double low, double avg, double last, double buy, double sell, double age) {
-    this->symbol = symbol;
+    this->symbol = std::move(symbol);
     this->high   = high;
     this->low    = low;
     this->avg    = avg;
@@ -119,7 +120,7 @@ public:
 
   double         getFee     ()                 const;
   QList<Balance> getBalances()                 const;
-  double         getBalance (QString currency) const;
+  double         getBalance (const QString& currency) const;
 
   QString getExchangeName() const;
 
@@ -146,26 +147,26 @@ private:
   virtual int    parseRawOrderInfoData       (QNetworkReply *reply) = 0;
 
 protected:
-  Config *config;
+  Config *config {};
 
-  QString exchangeName = "NONE";
-  QString className    = "EXCHANGE";
+  QString exchangeName = {"NONE"};
+  QString className    = {"EXCHANGE"};
 
-  QNetworkAccessManager* tickerDownloadManager;
-  QNetworkAccessManager* updateMarketDepthDownloadManager;
-  QNetworkAccessManager* updateMarketTradesDownloadManager;
-  QNetworkAccessManager* updateBalancesDownloadManager;
-  QNetworkAccessManager* createTradeDownloadManager;
-  QNetworkAccessManager* orderInfoDownloadManager;
-  QNetworkAccessManager* cancelOrderDownloadManager;
-  QNetworkAccessManager* activeOrdersDownloadManager;
+  QNetworkAccessManager* tickerDownloadManager             {};
+  QNetworkAccessManager* updateMarketDepthDownloadManager  {};
+  QNetworkAccessManager* updateMarketTradesDownloadManager {};
+  QNetworkAccessManager* updateBalancesDownloadManager     {};
+  QNetworkAccessManager* createTradeDownloadManager        {};
+  QNetworkAccessManager* orderInfoDownloadManager          {};
+  QNetworkAccessManager* cancelOrderDownloadManager        {};
+  QNetworkAccessManager* activeOrdersDownloadManager       {};
 
-  QTimer *timer;
-  QTimer *tickerTimer;
+  QTimer *timer       {};
+  QTimer *tickerTimer {};
 
   ExchangeTask currentTask;
 
-  double fee;
+  double fee{};
 
   QList<Order>        activeOrders;
   QList<Balance>      balances;
