@@ -1,13 +1,15 @@
 #include "remoteControl.h"
 
+#include <utility>
+
 #include "common.h"
 
 RemoteControl::RemoteControl() = default;
 
-bool RemoteControl::verifySignature(QString message, QString nonce, QString signature) {
+bool RemoteControl::verifySignature(QString message, const QString& nonce, const QString& signature) {
 
     bool ok = false;
-    uint64_t currentNonce = static_cast<uint64_t>(nonce.toULongLong(&ok));
+    auto currentNonce = static_cast<uint64_t>(nonce.toULongLong(&ok));
 
     // Check if nonce is valid
     if(!ok) { return false; }
@@ -17,7 +19,7 @@ bool RemoteControl::verifySignature(QString message, QString nonce, QString sign
         return false;
     }
 
-    QString createdSignature = createSignature(message, privateKey);
+    QString createdSignature = createSignature(std::move(message), privateKey);
 
     if(createdSignature != signature) {
         return false;
@@ -28,7 +30,7 @@ bool RemoteControl::verifySignature(QString message, QString nonce, QString sign
 
 uint64_t RemoteControl::createNonce() {
 
-    uint64_t newNonce = static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
+    auto newNonce = static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
 
     // If alot of messages are sent at once, there wont be enough time between nonces
     // To work around this, just one up the last nonce
@@ -45,7 +47,7 @@ uint64_t RemoteControl::createNonce() {
 // Verified is true when signiture is valid
 // Message can be valid but signature invalid
 // If message is invalid, verified should be ignored
-bool RemoteControl::parseNewMessage(QString message, bool *verified) {
+bool RemoteControl::parseNewMessage(const QString& message, bool *verified) {
 
     // Message components:
     // PREFIX:COMMAND:COMMAND_COMPONENTS:NONCE:SIGNATURE:SUFFIX
@@ -59,8 +61,8 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
     }
 
     // First verify signature
-    QString nonce     = messageComponents.at(NONCE_POSITION);
-    QString signature = messageComponents.at(SIGNATURE_POSITION);
+    const QString& nonce     = messageComponents.at(NONCE_POSITION);
+    const QString& signature = messageComponents.at(SIGNATURE_POSITION);
     if(verifySignature(messageComponents.mid(0,SIGNATURE_POSITION).join(MESSAGE_SPLITTER).append(MESSAGE_SPLITTER), nonce, signature)) {
         *verified = true;
     } else {
@@ -69,12 +71,12 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
     }
 
     // Extract payload
-    QString payload = messageComponents.at(PAYLOAD_POSITION);
+    const QString& payload = messageComponents.at(PAYLOAD_POSITION);
 
     // Next send payload to correct parser
     bool parseResult = false;
 
-    QString messageCommand = messageComponents.at(COMMAND_POSITION);
+    const QString& messageCommand = messageComponents.at(COMMAND_POSITION);
 
     if (messageCommand == HELLO_MESSAGE) {
 
@@ -100,7 +102,7 @@ bool RemoteControl::parseHelloMessage() {
     return true;
 }
 
-bool RemoteControl::parseCreateWorkerMessage(QString message) {
+bool RemoteControl::parseCreateWorkerMessage(const QString& message) {
 
     int     numWorkers;
     QString pair;
@@ -138,7 +140,7 @@ bool RemoteControl::parseCreateWorkerMessage(QString message) {
     return true;
 }
 
-bool RemoteControl::parseRemoveWorkerMessage(QString message) {
+bool RemoteControl::parseRemoveWorkerMessage(const QString& message) {
 
     uint workOrderID;
     bool force;
@@ -193,7 +195,7 @@ void RemoteControl::createHelloMessage() {
     sendMessage(message);
 }
 
-void RemoteControl::logUpdate(int workID, QString className, QString log, int severity) {
+void RemoteControl::logUpdate(int workID, const QString& className, const QString& log, int severity) {
 
     QString message;
 
@@ -230,7 +232,7 @@ void RemoteControl::logUpdate(int workID, QString className, QString log, int se
     sendMessage(message);
 }
 
-void RemoteControl::workorderStateUpdate(int workID, QString state) {
+void RemoteControl::workorderStateUpdate(int workID, const QString& state) {
 
     QString message;
 
@@ -263,7 +265,7 @@ void RemoteControl::workorderStateUpdate(int workID, QString state) {
     sendMessage(message);
 }
 
-void RemoteControl::exchangePricesUpdate(QString symbol, double lastPrice, double avgPrice) {
+void RemoteControl::exchangePricesUpdate(const QString& symbol, double lastPrice, double avgPrice) {
 
     QString message;
 

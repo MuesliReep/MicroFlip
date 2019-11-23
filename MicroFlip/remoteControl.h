@@ -20,20 +20,20 @@ protected:
     QString      serverKey                {};
     QString      privateKey               {};
 
-    bool         verifySignature          (QString message, QString nonce, QString signature);
+    bool         verifySignature          (QString message, const QString& nonce, const QString& signature);
 
-    bool         parseNewMessage          (QString message, bool *verified);
+    bool         parseNewMessage          (const QString& message, bool *verified);
     bool         parseHelloMessage        ();
-    bool         parseCreateWorkerMessage (QString message);
-    bool         parseRemoveWorkerMessage (QString message);
+    bool         parseCreateWorkerMessage (const QString& message);
+    bool         parseRemoveWorkerMessage (const QString& message);
     void         createHelloMessage       ();
     virtual bool sendMessage              (QString message) = 0;
 
 public slots:
     virtual bool open                     () = 0;
-    void         logUpdate                (int workID, QString className, QString log, int severity);
-    void         workorderStateUpdate     (int workID, QString state);
-    void         exchangePricesUpdate     (QString symbol, double lastPrice, double avgPrice);
+    void         logUpdate                (int workID, const QString& className, const QString& log, int severity);
+    void         workorderStateUpdate     (int workID, const QString& state);
+    void         exchangePricesUpdate     (const QString& symbol, double lastPrice, double avgPrice);
 
 signals:
     void         createWorker             (int numWorkers, QString pair, double maxAmount, double profitTarget, int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice);

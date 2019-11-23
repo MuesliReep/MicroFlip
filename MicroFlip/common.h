@@ -38,7 +38,7 @@ static const uint8_t MESSAGE_COMPONENTS = 6;
 //    return static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
 //}
 
-static QByteArray createSignature(QString message, QString key) {
+static QByteArray createSignature(const QString& message, const QString& key) {
 
     return QMessageAuthenticationCode::hash(message.toUtf8(), key.toUtf8(), QCryptographicHash::Sha256).toHex();
 }

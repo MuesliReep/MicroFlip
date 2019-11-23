@@ -17,11 +17,11 @@ public:
     RemoteControl_TCP(quint16 listenPort, QString serverKey, QString privateKey);
 
 private:    
-    QTcpServer            *server;
+    QTcpServer            *server{};
     QList<TcpAuthSocket*>  sockets;
     quint16                listenPort;
 
-    void parseRawMessage(QByteArray rawData, TcpAuthSocket *sender);
+    void parseRawMessage(const QByteArray& rawData, TcpAuthSocket *sender);
 
 private slots:
     void onNewConnection      ();

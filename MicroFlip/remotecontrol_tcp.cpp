@@ -1,10 +1,12 @@
 #include "remotecontrol_tcp.h"
 
+#include <utility>
+
 RemoteControl_TCP::RemoteControl_TCP(quint16 listenPort, QString serverKey, QString privateKey) {
 
     this->listenPort = listenPort;
-    this->serverKey  = serverKey;
-    this->privateKey = privateKey;
+    this->serverKey  = std::move(serverKey);
+    this->privateKey = std::move(privateKey);
 }
 
 bool RemoteControl_TCP::open() {
@@ -22,7 +24,7 @@ bool RemoteControl_TCP::open() {
     return openResult;
 }
 
-void RemoteControl_TCP::parseRawMessage(QByteArray rawData, TcpAuthSocket *sender) {
+void RemoteControl_TCP::parseRawMessage(const QByteArray& rawData, TcpAuthSocket *sender) {
 
     // Send the raw data message to be parsed
     // If message is valid but verification failed, disconnect this client
@@ -45,7 +47,7 @@ void RemoteControl_TCP::parseRawMessage(QByteArray rawData, TcpAuthSocket *sende
 
 void RemoteControl_TCP::onNewConnection() {
 
-    TcpAuthSocket *clientSocket = static_cast<TcpAuthSocket *>(server->nextPendingConnection());
+    auto *clientSocket = static_cast<TcpAuthSocket *>(server->nextPendingConnection());
     connect(clientSocket, &QTcpSocket::readyRead,    this, &RemoteControl_TCP::onReadyRead);
     connect(clientSocket, &QTcpSocket::stateChanged, this, &RemoteControl_TCP::onSocketStateChanged);
 
@@ -58,7 +60,7 @@ void RemoteControl_TCP::onSocketStateChanged(QAbstractSocket::SocketState socket
 
     if (socketState == QAbstractSocket::UnconnectedState)
     {
-        TcpAuthSocket* sender = static_cast<TcpAuthSocket*>(QObject::sender());
+        auto* sender = static_cast<TcpAuthSocket*>(QObject::sender());
 
         emit updateLog(00, className, "Remote client " + sender->peerAddress().toString() + " disconnected", logSeverity::LOG_INFO);
 
@@ -68,7 +70,7 @@ void RemoteControl_TCP::onSocketStateChanged(QAbstractSocket::SocketState socket
 
 void RemoteControl_TCP::onReadyRead() {
 
-    TcpAuthSocket* sender = static_cast<TcpAuthSocket*>(QObject::sender());
+    auto* sender = static_cast<TcpAuthSocket*>(QObject::sender());
 
     parseRawMessage(sender->readAll(), sender);
 
