@@ -168,8 +168,6 @@ ApplicationWindow {
 
     Popup {
         id: popup
-        x: 100
-        y: 100
         width: 200
         height: 300
         modal: true
@@ -177,35 +175,78 @@ ApplicationWindow {
         anchors.centerIn: Overlay.overlay
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        Material.theme: Material.Light
-        Material.accent: Material.Blue
         Material.elevation: 8
 
         spacing: 0
 
-        Rectangle {
+        ColumnLayout {
+            anchors.fill: parent
 
-            width: popup.width
-            height: 20
-            Text {
-                id: name
-                text: qsTr("Create Workorder")
+            Item {
+                id: popupHeader
+
+                Rectangle {
+
+                    Text {
+                        id: name
+                        text: qsTr("Create Workorder")
+                    }
+                }
+            }
+
+            Item {
+                id: popupContent
+            }
+
+            Item {
+                id: popupFooter
+
+                height: 50
+                Row {
+                    Button {
+                        text: "Cancel"
+                        onClicked: popup.close()
+                    }
+                    Button {
+
+                        text: "Create"
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                color: "orange"
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 50
+                color: "blue"
             }
         }
 
-        Row {
-            anchors.left: popup.Left
-            anchors.bottom: popup.Bottom
-            height: 20
-            Button {
 
-                text: "Cancel"
-                onClicked: popup.close()
-            }
-            Button {
-
-                text: "Create"
-            }
-        }
     }
+
+
+//            Row {
+
+//                anchors.left: popup.Left
+//                anchors.bottom: popup.Bottom
+
+//                Button {
+
+//                    text: "Cancel"
+//                    onClicked: popup.close()
+//                }
+//                Button {
+
+//                    text: "Create"
+//                }
+//            }
+
 }
+
