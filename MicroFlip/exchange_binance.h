@@ -19,7 +19,7 @@ private:
     QString apiKey;
     QString apiSecret;
 
-    qint64 deltaTime;
+    qint64 deltaTime{};
 
     void updateMarketTicker(QString pair);
     void updateMarketDepth (QString pair);

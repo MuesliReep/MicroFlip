@@ -14,7 +14,7 @@ QNetworkRequest Downloader::generateRequest(const QUrl &url) {
 }
 
 // Adds a custuom header to the given request
-void Downloader::addHeaderToRequest(QNetworkRequest *request, QByteArray headerName, QByteArray headerValue) {
+void Downloader::addHeaderToRequest(QNetworkRequest *request, const QByteArray& headerName, const QByteArray& headerValue) {
 
     request->setRawHeader(headerName, headerValue);
 }
@@ -35,7 +35,7 @@ void Downloader::addHeaderToRequest(QNetworkRequest *request, QByteArray headerN
 //   return QNetworkRequest(url);
 // }
 
-QNetworkAccessManager* Downloader::doDownload(QNetworkRequest request, QObject * receiver, const char * method) {
+QNetworkAccessManager* Downloader::doDownload(const QNetworkRequest& request, QObject * receiver, const char * method) {
 
     auto *manager = new QNetworkAccessManager(this);
 
@@ -47,7 +47,7 @@ QNetworkAccessManager* Downloader::doDownload(QNetworkRequest request, QObject *
     return manager;
 }
 
-void Downloader::doDownload(QNetworkRequest request, QNetworkAccessManager *manager, QObject * receiver, const char * method) {
+void Downloader::doDownload(const QNetworkRequest& request, QNetworkAccessManager *manager, QObject * receiver, const char * method) {
 
     connect(manager, SIGNAL(finished(QNetworkReply*)),
     receiver, method);
@@ -55,7 +55,7 @@ void Downloader::doDownload(QNetworkRequest request, QNetworkAccessManager *mana
     manager->get(request);
 }
 
-QNetworkAccessManager* Downloader::doPostDownload(QNetworkRequest request, QByteArray data, QObject * receiver, const char * method) {
+QNetworkAccessManager* Downloader::doPostDownload(const QNetworkRequest& request, const QByteArray& data, QObject * receiver, const char * method) {
 
     auto *manager = new QNetworkAccessManager(this);
 
@@ -67,7 +67,7 @@ QNetworkAccessManager* Downloader::doPostDownload(QNetworkRequest request, QByte
     return manager;
 }
 
-void Downloader::doPostDownload(QNetworkRequest request, QNetworkAccessManager *manager, QByteArray data, QObject * receiver, const char * method) {
+void Downloader::doPostDownload(const QNetworkRequest& request, QNetworkAccessManager *manager, const QByteArray& data, QObject * receiver, const char * method) {
 
     connect(manager, SIGNAL(finished(QNetworkReply*)),
             receiver, method);
@@ -75,7 +75,7 @@ void Downloader::doPostDownload(QNetworkRequest request, QNetworkAccessManager *
     manager->post(request, data);
 }
 
-QNetworkAccessManager *Downloader::doDeleteRequest(QNetworkRequest request, QObject *receiver, const char *method) {
+QNetworkAccessManager *Downloader::doDeleteRequest(const QNetworkRequest& request, QObject *receiver, const char *method) {
 
     auto *manager = new QNetworkAccessManager(this);
 
@@ -87,7 +87,7 @@ QNetworkAccessManager *Downloader::doDeleteRequest(QNetworkRequest request, QObj
     return manager;
 }
 
-void Downloader::doDeleteRequest(QNetworkRequest request, QNetworkAccessManager *manager, QObject *receiver, const char *method) {
+void Downloader::doDeleteRequest(const QNetworkRequest& request, QNetworkAccessManager *manager, QObject *receiver, const char *method) {
 
     connect(manager, SIGNAL(finished(QNetworkReply*)),
             receiver, method);

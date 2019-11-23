@@ -114,6 +114,7 @@ void WorkOrder::updateTick() {
 
           // If single shot, stop this workorder
           if(singleShot) {
+              emit updateLog(workID, className, "Work complete!", logSeverity::LOG_INFO);
               timer->stop();
           } else {
               stdInterval         = false;
@@ -154,7 +155,7 @@ void WorkOrder::createSellOrder(double amount) {
     // Create order
     int type   = 1; // Sell
 
-    emit updateLog(workID, "WORKORDER", "Creating Sell Order: " + QString::number(amount) + " BTC for " + QString::number(sellPrice) + " USD", logSeverity::LOG_INFO);
+    emit updateLog(workID, className, "Creating Sell Order: " + QString::number(amount) + " BTC for " + QString::number(sellPrice) + " USD", logSeverity::LOG_INFO);
 
     // Connect & send order
     requestCreateOrder(type, sellPrice, maxAmount);
@@ -167,6 +168,8 @@ void WorkOrder::createBuyOrder() {
     double fee = exchange->getFee();
 
     calculateMinimumBuyTrade(sellPrice, maxAmount,fee, &buyPrice, &buyAmount, &buyTotal, profitTarget);
+
+    emit updateLog(workID, className, "Creating Buy Order: " + QString::number(buyAmount) + " BTC @ " + QString::number(buyPrice) + " USD", logSeverity::LOG_INFO);
 
     // Create order
     int type   = 0; // Buy
@@ -211,7 +214,7 @@ void WorkOrder::calculateMinimumBuyTrade(double sellPrice, double sellAmount, do
 void WorkOrder::initialiseSymbol(QString symbol) {
 
     connect(this, SIGNAL(sendInitialiseSymbol(QString)), exchange, SLOT(receiveInitialiseSymbol(QString)));
-    emit sendInitialiseSymbol(symbol);
+    emit sendInitialiseSymbol(std::move(symbol));
     disconnect(this, SIGNAL(sendInitialiseSymbol(QString)), exchange, SLOT(receiveInitialiseSymbol(QString)));
 }
 
@@ -425,8 +428,8 @@ void WorkOrder::stopOrder() {
     updateLog(workID, className, "Workorder stopping", logSeverity::LOG_CRITICAL);
 
     //
-    if(workState == ERROR || workState == INITIALISE ||
-      workState == START  || workState == COMPLETE) {
+    if(workerState == ERROR || workerState == INITIALISE ||
+       workerState == START || workerState == COMPLETE) {
 
         workerState = WorkerState::REMOVED;
     }
