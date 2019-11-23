@@ -429,7 +429,7 @@ void WorkOrder::stopOrder() {
 
     //
     if(workState == ERROR || workState == INITIALISE ||
-      workState == START  || workState == COMPLETE) {
+       workState == START || workState == COMPLETE) {
 
         workState = WorkState::REMOVED;
     }
