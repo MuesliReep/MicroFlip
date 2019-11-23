@@ -35,7 +35,7 @@ WorkOrder::WorkOrder(Exchange *exchange,  int workID,          QString pair,
     this->mode          = mode;
     this->singleShot    = singleShot;
 
-    workState = INITIALISE;
+    workerState = INITIALISE;
 
     stdInterval         = true;
     longIntervalRequest = false;
@@ -53,12 +53,12 @@ void WorkOrder::updateTick() {
         longIntervalRequest = false;
     }
 
-    switch(workState) {
+    switch(workerState) {
       case INITIALISE:
           emit updateState(workID, INITIALISE_STRING);
           initialiseSymbol(this->getPair());
 
-          workState = START;
+          workerState = START;
           break;
       case START: {
           emit updateState(workID, "START");
@@ -66,7 +66,7 @@ void WorkOrder::updateTick() {
           // Get new data
           requestUpdateMarketTicker();
 
-          workState = WAITINGFORTICKER;
+          workerState = WAITINGFORTICKER;
           break;
         }
       case WAITINGFORTICKER:
@@ -77,7 +77,7 @@ void WorkOrder::updateTick() {
           // Create sell order
           createSellOrder(maxAmount);
 
-          workState = WAITINGFORSELL;
+          workerState = WAITINGFORSELL;
           break;
       case WAITINGFORSELL:
           emit updateState(workID, "WAITINGFORSELL");
@@ -92,14 +92,14 @@ void WorkOrder::updateTick() {
           break;
       case SOLD:
           emit updateState(workID, "SOLD");
-          workState = CREATEBUY;
+          workerState = CREATEBUY;
           break;
       case CREATEBUY:
           emit updateState(workID, "CREATEBUY");
           // Calculate buy order & create order
           createBuyOrder();
 
-          workState = WAITINGFORBUY;
+          workerState = WAITINGFORBUY;
           break;
       case WAITINGFORBUY:
           emit updateState(workID, "WAITINGFORBUY");
@@ -120,7 +120,7 @@ void WorkOrder::updateTick() {
               stdInterval         = false;
               longIntervalRequest = true;
 
-              workState = START;
+              workerState = START;
           }
 
           break;
@@ -258,7 +258,7 @@ void WorkOrder::UpdateMarketTickerReply(const Ticker& ticker) {
         emit updateLog(workID, className, "Received invalid ticker data, resetting", logSeverity::LOG_WARNING);
 
         // Something went wrong with the ticker, we need to revert to start state
-        workState = START;
+        workerState = START;
 
         stdInterval         = false;
         longIntervalRequest = true;
@@ -294,7 +294,7 @@ void WorkOrder::UpdateMarketTickerReply(const Ticker& ticker) {
                                                    + " lower than minimum: " + QString::number(minimumPrice)
                                                    + ". Reverting state!",
                                                      logSeverity::LOG_INFO);
-        workState = START;
+        workerState = START;
 
         // Pause workorder for long interval
         stdInterval         = false;
@@ -302,16 +302,16 @@ void WorkOrder::UpdateMarketTickerReply(const Ticker& ticker) {
     }
 
     // Only go to next state if we are in the correct state
-    if(workState == WAITINGFORTICKER) {
-        workState = CREATESELL;
+    if(workerState == WAITINGFORTICKER) {
+        workerState = CREATESELL;
     }
 }
 
 void WorkOrder::orderCreateReply(qint64 orderID) {
 
     // Check if this is not an old create reply
-    if(workState != WAITINGFORSELL) {
-        if(workState != WAITINGFORBUY) {
+    if(workerState != WAITINGFORSELL) {
+        if(workerState != WAITINGFORBUY) {
             updateLog(workID, className, "Create order reply received during wrong state", logSeverity::LOG_WARNING);
             return;
         }
@@ -319,21 +319,21 @@ void WorkOrder::orderCreateReply(qint64 orderID) {
 
     // Check if order went through ok
     if(orderID == -1) {
-        workState = ERROR;
+        workerState = ERROR;
         return;
     }
 
     if(orderID != 0) { // Order executed immediatly
 
-        switch(workState) {
+        switch(workerState) {
             case WAITINGFORSELL:
                 sellOrderID   = orderID;
-                workState     = SELLORDER;
+                workerState     = SELLORDER;
                 sellOrderTime = QDateTime::currentDateTime();
                 break;
             case WAITINGFORBUY:
                 buyOrderID   = orderID;
-                workState    = BUYORDER;
+                workerState    = BUYORDER;
                 buyOrderTime = QDateTime::currentDateTime();
                 break;
             default:
@@ -341,14 +341,14 @@ void WorkOrder::orderCreateReply(qint64 orderID) {
         }
     } else {
 
-        switch(workState) {
+        switch(workerState) {
             case WAITINGFORSELL:
                 sellOrderID = orderID;
-                workState   = SOLD;
+                workerState   = SOLD;
                 break;
             case WAITINGFORBUY:
                 buyOrderID = orderID;
-                workState  = COMPLETE;
+                workerState  = COMPLETE;
                 break;
             default:
                 break;
@@ -359,8 +359,8 @@ void WorkOrder::orderCreateReply(qint64 orderID) {
 void WorkOrder::orderInfoReply(int status) {
 
     // Check if this is not an old info reply
-    if(workState != SELLORDER) {
-        if(workState != BUYORDER) {
+    if(workerState != SELLORDER) {
+        if(workerState != BUYORDER) {
             updateLog(workID, className, "Received old order info reply", logSeverity::LOG_WARNING);
             return;
         }
@@ -373,7 +373,7 @@ void WorkOrder::orderInfoReply(int status) {
         case 1:
             // Order executed, go to next state
             // If this is a sellorder goto sold state, if buy order goto complete state
-            workState = (workState == SELLORDER) ? SOLD : COMPLETE;
+            workerState = (workerState == SELLORDER) ? SOLD : COMPLETE;
             break;
         case -2:
             // Packet error, continue
@@ -383,7 +383,7 @@ void WorkOrder::orderInfoReply(int status) {
         case 3:
         default:
             updateLog(workID, className, " Critical Order info status: " + QString::number(status), logSeverity::LOG_CRITICAL);
-            workState = ERROR;
+            workerState = ERROR;
             break;
     }
 }
@@ -391,12 +391,12 @@ void WorkOrder::orderInfoReply(int status) {
 void WorkOrder::orderCancelReply(bool succes) {
 
     if(!succes) {
-        workState = ERROR;
+        workerState = ERROR;
         updateLog(workID, className, "Failed to cancel order!", logSeverity::LOG_CRITICAL);
         return;
     }
 
-    workState = WorkState::REMOVED;
+    workerState = WorkerState::REMOVED;
     updateLog(workID, className, "Order cancelled", logSeverity::LOG_INFO);
 }
 
@@ -418,19 +418,19 @@ void WorkOrder::startOrder() {
 void WorkOrder::stopOrder() {
 
     // Skip if already removing
-    if(this->workState == REMOVING || this->workState == REMOVED) {
+    if(this->workerState == REMOVING || this->workerState == REMOVED) {
         return;
     }
 
     //
-    this->workState = WorkState::REMOVING;
+    this->workerState = WorkerState::REMOVING;
 
     updateLog(workID, className, "Workorder stopping", logSeverity::LOG_CRITICAL);
 
     //
-    if(workState == ERROR || workState == INITIALISE ||
-       workState == START || workState == COMPLETE) {
+    if(workerState == ERROR || workerState == INITIALISE ||
+       workerState == START || workerState == COMPLETE) {
 
-        workState = WorkState::REMOVED;
+        workerState = WorkerState::REMOVED;
     }
 }

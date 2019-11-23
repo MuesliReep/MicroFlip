@@ -28,21 +28,22 @@ class WorkOrder : public QObject {
     Q_OBJECT
 
 public:
-    WorkOrder(Exchange *exchange, int workID, QString pair, double maxAmount, double profitTarget,
-            int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice = 0.0, int sellTTL = 5, int buyTTL = 1440, bool highSpeed = false);
+    WorkOrder(Exchange *exchange, int workID,        QString pair, double maxAmount, double profitTarget,
+              int shortInterval,  int longInterval,  int mode,     bool singleShot,  double minSellPrice = 0.0,
+              int sellTTL = 5,    int buyTTL = 1440, bool highSpeed = false);
 
     double  getSellPrice() { return sellPrice; }
     int     getWorkID   () { return workID;    }
     QString getPair     () { return pair;      }
-    int     getOrderSide() { return (workState == BUYORDER ? 0 : 1); }
+    int     getOrderSide() { return (workerState == BUYORDER ? 0 : 1); }
 
 private:
     QString className = "WORKORDER";
 
-    Exchange  *exchange;
-    WorkState  workState;
-    QTimer    *timer{};
-    QThread   *workThread{};
+    Exchange    *exchange;
+    WorkerState  workerState;
+    QTimer      *timer      {};
+    QThread     *workThread {};
 
     qint64  sellOrderID{};
     qint64  buyOrderID{};
