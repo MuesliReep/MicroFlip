@@ -148,11 +148,13 @@ void Program::onAddNewWorker(QString numWorkers,   QString pair,          QStrin
     if(!ok) {
         return;
     }
+    shortIntervalValue *= 1000; // Go from seconds to millis
 
     int longIntervalValue = longInterval.toInt(&ok);
     if(!ok) {
         return;
     }
+    longIntervalValue *= 1000; // Go from seconds to millis
 
     if(mode.isEmpty()) {
         return;
