@@ -288,15 +288,18 @@ ApplicationWindow {
                     Button {
 
                         text: "Create"
-                        onClicked: remoteControl.onAddNewWorker(spinBoxNumWorkers.value,
-                                                                textFieldPair.text,
-                                                                textFieldAmount.text,
-                                                                textFieldProfitTarget.text,
-                                                                spinBoxShortInterval.value,
-                                                                spinBoxLongInterval.value,
-                                                                comboBoxMode.currentText,
-                                                                checkBoxSingleShot.checked,
-                                                                textFieldMinSellPrice.text)
+                        onClicked: {
+                            remoteControl.onAddNewWorker(spinBoxNumWorkers.value,
+                                                         textFieldPair.text,
+                                                         textFieldAmount.text,
+                                                         textFieldProfitTarget.text,
+                                                         spinBoxShortInterval.value,
+                                                         spinBoxLongInterval.value,
+                                                         comboBoxMode.currentText,
+                                                         checkBoxSingleShot.checked,
+                                                         textFieldMinSellPrice.text)
+                            popup.close()
+                        }
                     }
                 }
             }
