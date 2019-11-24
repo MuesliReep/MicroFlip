@@ -70,5 +70,9 @@ bool WorkOrderController::remove(int workID, bool force) {
         }
     }
 
+    if(!result) {
+        emit updateLog(00, className, "Could not remove WorkOrder " + QString::number(workID) + ", it was not found!", logSeverity::LOG_INFO);
+    }
+
     return result;
 }
