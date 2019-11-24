@@ -4,9 +4,7 @@
 #include <QSettings>
 
 Config::Config()
-{
-
-}
+= default;
 
 bool Config::loadConfigFromFile(const QString& fileName) {
 

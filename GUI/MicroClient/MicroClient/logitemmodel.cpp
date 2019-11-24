@@ -29,14 +29,15 @@ QVariant LogItemModel::data(const QModelIndex &index, int role) const
     const LogItem &logItem = logItems[index.row()];
     if (role == WorkIdRole)
         return logItem.workId();
-    else if (role == ClassNameRole)
+    if (role == ClassNameRole)
         return logItem.className();
-    else if (role == LogRole)
+    if (role == LogRole)
         return logItem.log();
-    else if (role == SeverityRole)
+    if (role == SeverityRole)
         return logItem.severity();
-    else if (role == ReportTimeRole)
+    if (role == ReportTimeRole)
         return logItem.reportTime();
+
     return QVariant();
 }
 

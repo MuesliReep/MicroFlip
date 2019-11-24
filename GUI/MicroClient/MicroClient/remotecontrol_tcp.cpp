@@ -3,7 +3,7 @@
 #include <QHostAddress>
 #include "../../../MicroFlip/common.h"
 
-RemoteControl_TCP::RemoteControl_TCP(Config config) : RemoteControl (config) {
+RemoteControl_TCP::RemoteControl_TCP(const Config& config) : RemoteControl (config) {
 
     this->serverKey     = config.getServerKey    ();
     this->privateKey    = config.getPrivateKey   ();
@@ -42,7 +42,7 @@ void RemoteControl_TCP::open() {
     createHelloMessage();
 }
 
-void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
+void RemoteControl_TCP::parseRawMessage(const QByteArray& rawData) {
 
     // Send the raw data message to be parsed
     // If message is valid but verification failed, disconnect this client
@@ -67,11 +67,7 @@ void RemoteControl_TCP::parseRawMessage(QByteArray rawData) {
 
 bool RemoteControl_TCP::sendMessage(QString message) {
 
-    if(socket->write(message.toUtf8()) != -1) {
-        return true;
-    }
-
-    return false;
+    return socket->write(message.toUtf8()) != -1;
 }
 
 void RemoteControl_TCP::onReadyRead() {

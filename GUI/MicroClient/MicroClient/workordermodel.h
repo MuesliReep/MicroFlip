@@ -32,15 +32,15 @@ public:
 
     void addWorkOrderItem(const WorkOrderItem &workOrderItem);
 
-    int rowCount(const QModelIndex & parent = QModelIndex()) const;
+    int rowCount(const QModelIndex & parent = QModelIndex()) const override;
 
-    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
 
 private:
     QList<WorkOrderItem> workOrderItems;
 
 protected:
-    QHash<int, QByteArray> roleNames() const;
+    QHash<int, QByteArray> roleNames() const override;
 };
 
 #endif // WORKORDERMODEL_H

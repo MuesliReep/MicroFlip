@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQmlApplicationEngine>
+#include <utility>
 
 #include "remotecontrol.h"
 #include "logitemmodel.h"
@@ -21,8 +22,8 @@ public:
     QString price    () const { return currentPrice;    }
     QString avgPrice () const { return currentAvgPrice; }
 
-    void setsymbol       (QString symbol)  { currentSymbol   = symbol;                    emit symbolChanged();   }
-    void setCurrentPrice (double price)    { currentPrice    = QString::number(price);    emit priceChanged();    }
+    void setsymbol       (QString symbol ) { currentSymbol   = std::move(symbol);         emit symbolChanged  (); }
+    void setCurrentPrice (double price   ) { currentPrice    = QString::number(price);    emit priceChanged   (); }
     void setAvgPrice     (double avgPrice) { currentAvgPrice = QString::number(avgPrice); emit avgPriceChanged(); }
 
 private:
@@ -57,14 +58,18 @@ private:
     void startUp();
 
 signals:
-    void         remoteConnectionStateChanged    ();
+    void remoteConnectionStateChanged ();
+    void sendCreateWorker(int numWorkers, const QString& pair, double amount, double profitTarget, int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice);
+    void sendRemoveWorker(int workId, bool force);
 
 public slots:
-    void         onNewWorkerStatus        (int workID, QString state);
-    void         onNewBalanceValues       ();
-    void         onNewExchangeInformation (QString symbol, double lastPrice, double avgPrice);
-    void         onNewLogUpdate           (int workID, QString className, QString log, int severity);
-    void         onConsoleLog             (int workID, QString className, QString log, int severity);
+    void onNewWorkerStatus        (int workID, const QString& state);
+    void onNewBalanceValues       ();
+    void onNewExchangeInformation (QString symbol, double lastPrice, double avgPrice);
+    void onNewLogUpdate           (int workID, const QString& className, const QString& log, int severity);
+    void onConsoleLog             (int workID, const QString& className, const QString& log, int severity);
+    void onAddNewWorker(QString numWorkers, QString pair, QString amount, QString profitTarget, QString shortInterval, QString longInterval, QString mode, bool singleShot, QString minSellPrice);
+    void onRemoveWorker(QString workId, bool force);
 
 private slots:
 

@@ -168,7 +168,7 @@ ApplicationWindow {
 
     Popup {
         id: popup
-        width: 200
+        width: 400
         height: 300
         modal: true
         focus: true
@@ -202,6 +202,84 @@ ApplicationWindow {
                 id: popupFooter
 
                 height: 50
+
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: "orange"
+
+                ScrollView {
+                    anchors.fill: parent
+
+                    Column {
+                        SpinBox {
+                            id: spinBoxNumWorkers
+                            editable: true
+                            from: 1
+                            value: 1
+                        }
+
+                        TextField {
+                            id: textFieldPair
+                            text: qsTr("ETHUSDT")
+                        }
+
+                        TextField {
+                            id: textFieldAmount
+                            text: "0.1"
+                        }
+
+                        TextField {
+                            id: textFieldProfitTarget
+                            text: "0.00001"
+                        }
+
+                        TextField {
+                            id: textFieldMinSellPrice
+                            text: "0.0"
+                        }
+
+                        CheckBox {
+                            id: checkBoxSingleShot
+                            text: "Single Shot"
+                            checked: true
+                        }
+
+                        SpinBox {
+                            id: spinBoxShortInterval
+                            editable: true
+                            from: 0
+                            stepSize: 1
+                            value: 5
+                        }
+                        SpinBox {
+                            id: spinBoxLongInterval
+                            editable: true
+                            from: 0
+                            stepSize: 1
+                            value: 10
+                        }
+
+                        ComboBox {
+                            id: comboBoxMode
+                            currentIndex: 0
+
+                            model: ListModel {
+                                ListElement { text: "MINSELL"   }
+                                ListElement { text: "TICKERAVG" }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 50
+                color: "blue"
+
                 Row {
                     Button {
                         text: "Cancel"
@@ -210,43 +288,20 @@ ApplicationWindow {
                     Button {
 
                         text: "Create"
+                        onClicked: remoteControl.onAddNewWorker(spinBoxNumWorkers.value,
+                                                                textFieldPair.text,
+                                                                textFieldAmount.text,
+                                                                textFieldProfitTarget.text,
+                                                                spinBoxShortInterval.value,
+                                                                spinBoxLongInterval.value,
+                                                                comboBoxMode.currentText,
+                                                                checkBoxSingleShot.checked,
+                                                                textFieldMinSellPrice.text)
                     }
                 }
             }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                color: "orange"
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 50
-                color: "blue"
-            }
         }
-
 
     }
 
-
-//            Row {
-
-//                anchors.left: popup.Left
-//                anchors.bottom: popup.Bottom
-
-//                Button {
-
-//                    text: "Cancel"
-//                    onClicked: popup.close()
-//                }
-//                Button {
-
-//                    text: "Create"
-//                }
-//            }
-
-}
-
+} // ApplicationWindow

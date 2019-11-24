@@ -11,7 +11,7 @@ class RemoteControl_TCP : public RemoteControl {
     Q_OBJECT
 
 public:
-    RemoteControl_TCP(Config config);
+    RemoteControl_TCP(const Config& config);
 
 private:
     QString     serverAddress {};
@@ -19,7 +19,7 @@ private:
     QTcpSocket *socket        {};
     QByteArray  readBuffer    {};
 
-    void parseRawMessage(QByteArray rawData);
+    void parseRawMessage(const QByteArray& rawData);
 
 protected:
     bool sendMessage(QString message);

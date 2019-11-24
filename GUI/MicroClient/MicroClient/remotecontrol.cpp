@@ -3,10 +3,11 @@
 #include <QDateTime>
 #include <QMessageAuthenticationCode>
 #include <QCryptographicHash>
+#include <utility>
 
 #include "../../../MicroFlip/common.h"
 
-RemoteControl::RemoteControl(Config config) { (void) config; }
+RemoteControl::RemoteControl(const Config &config) { (void) config; }
 
 int RemoteControl::getRmoteConnectionState() const
 {
@@ -20,10 +21,10 @@ void RemoteControl::setRemoteConnectionState(int state) {
     emit remoteConnectionStateChanged();
 }
 
-bool RemoteControl::verifySignature(QString message, QString nonce, QString signature) {
+bool RemoteControl::verifySignature(const QString& message, const QString& nonce, const QString& signature) {
 
     bool ok = false;
-    uint64_t currentNonce = static_cast<uint64_t>(nonce.toULongLong(&ok));
+    auto currentNonce = static_cast<uint64_t>(nonce.toULongLong(&ok));
 
     // Check if nonce is valid
     if(!ok) {
@@ -37,7 +38,7 @@ bool RemoteControl::verifySignature(QString message, QString nonce, QString sign
         return false;
     }
 
-    QString createdSignature = createSignature(message, serverKey);
+    QString createdSignature = createSignature(std::move(message), serverKey);
 
     if(createdSignature != signature) {
         emit updateLog(00, className, "Signature invalid!", logSeverity::LOG_INFO);
@@ -49,7 +50,7 @@ bool RemoteControl::verifySignature(QString message, QString nonce, QString sign
 
 uint64_t RemoteControl::createNonce() {
 
-    uint64_t newNonce = static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
+    auto newNonce = static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch());
 
     // If alot of messages are sent at once, there wont be enough time between nonces
     // To work around this, just one up the last nonce
@@ -62,7 +63,7 @@ uint64_t RemoteControl::createNonce() {
     return newNonce;
 }
 
-QByteArray RemoteControl::createSignature(QString message, QString key) {
+QByteArray RemoteControl::createSignature(const QString& message, const QString& key) {
 
     return QMessageAuthenticationCode::hash(message.toUtf8(), key.toUtf8(), QCryptographicHash::Sha256).toHex();
 }
@@ -71,7 +72,7 @@ QByteArray RemoteControl::createSignature(QString message, QString key) {
 // Verified is true when signiture is valid
 // Message can be valid but signature invalid
 // If message is invalid, verified should be ignored
-bool RemoteControl::parseNewMessage(QString message, bool *verified) {
+bool RemoteControl::parseNewMessage(const QString& message, bool *verified) {
 
     // Message components:
     // PREFIX:COMMAND:COMMAND_COMPONENTS:NONCE:SIGNATURE:SUFFIX
@@ -85,8 +86,8 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
     }
 
     // First verify signature
-    QString nonce     = messageComponents.at(NONCE_POSITION);
-    QString signature = messageComponents.at(SIGNATURE_POSITION);
+    const QString& nonce     = messageComponents.at(NONCE_POSITION);
+    const QString& signature = messageComponents.at(SIGNATURE_POSITION);
     if(verifySignature(messageComponents.mid(0,SIGNATURE_POSITION).join(MESSAGE_SPLITTER).append(MESSAGE_SPLITTER), nonce, signature)) {
         *verified = true;
     } else {
@@ -95,12 +96,12 @@ bool RemoteControl::parseNewMessage(QString message, bool *verified) {
     }
 
     // Extract payload
-    QString payload = messageComponents.at(PAYLOAD_POSITION);
+    const QString& payload = messageComponents.at(PAYLOAD_POSITION);
 
     // Next send payload to correct parser
     bool parseResult = false;
 
-    QString messageCommand = messageComponents.at(COMMAND_POSITION);
+    const QString& messageCommand = messageComponents.at(COMMAND_POSITION);
 
     if (messageCommand == HELLO_MESSAGE) {
 
@@ -145,7 +146,7 @@ void RemoteControl::createHelloMessage() {
     sendMessage(message);
 }
 
-void RemoteControl::createWorkerMessage(int    numWorkers,   QString pair,          double maxAmount,
+void RemoteControl::createWorkerMessage(int    numWorkers,   const QString& pair,          double amount,
                                         double profitTarget, int     shortInterval, int    longInterval,
                                         int    mode,         bool    singleShot,    double minSellPrice) {
 
@@ -162,7 +163,7 @@ void RemoteControl::createWorkerMessage(int    numWorkers,   QString pair,      
     message.append(PAYLOAD_SPLITTER);
     message.append(pair);
     message.append(PAYLOAD_SPLITTER);
-    message.append(QString::number(maxAmount));
+    message.append(QString::number(amount));
     message.append(PAYLOAD_SPLITTER);
     message.append(QString::number(profitTarget));
     message.append(PAYLOAD_SPLITTER);
@@ -241,7 +242,7 @@ bool RemoteControl::parseHelloMessage() {
     return false;
 }
 
-bool RemoteControl::parseLogUpdateMessage(QString message) {
+bool RemoteControl::parseLogUpdateMessage(const QString& message) {
 
     int     workID;
     QString className;
@@ -268,7 +269,7 @@ bool RemoteControl::parseLogUpdateMessage(QString message) {
     return true;
 }
 
-bool RemoteControl::parseWorkorderUpdateMessage(QString message) {
+bool RemoteControl::parseWorkorderUpdateMessage(const QString& message) {
 
     int     workID;
     QString state;
@@ -291,7 +292,7 @@ bool RemoteControl::parseWorkorderUpdateMessage(QString message) {
     return true;
 }
 
-bool RemoteControl::parseExchangePriceUpdateMessage(QString message) {
+bool RemoteControl::parseExchangePriceUpdateMessage(const QString& message) {
 
     QString symbol;
     double  lastPrice;

@@ -10,7 +10,7 @@ class RemoteControl : public QObject {
     Q_OBJECT
 
 public:
-    explicit     RemoteControl                   (Config config);
+    explicit     RemoteControl                   (const Config& config);
     int          getRmoteConnectionState         () const;
     void         setRemoteConnectionState        (int state);
 
@@ -21,11 +21,11 @@ private:
     uint64_t     createNonce                     ();
     bool         parseNewMessage                 ();
     bool         parseHelloMessage               ();
-    bool         parseLogUpdateMessage           (QString message);
-    bool         parseWorkorderUpdateMessage     (QString message);
-    bool         parseExchangePriceUpdateMessage (QString message);
-    bool         verifySignature                 (QString message, QString nonce, QString signature);
-    QByteArray   createSignature                 (QString message, QString key);
+    bool         parseLogUpdateMessage           (const QString& message);
+    bool         parseWorkorderUpdateMessage     (const QString& message);
+    bool         parseExchangePriceUpdateMessage (const QString& message);
+    bool         verifySignature                 (const QString& message, const QString& nonce, const QString& signature);
+    QByteArray   createSignature                 (const QString& message, const QString& key);
 
 protected:
     QString      className                       {"REMOTECONTROL"};
@@ -35,11 +35,11 @@ protected:
     bool         authenticated                   {false};
     virtual bool sendMessage                     (QString message) = 0;
     void         createHelloMessage              ();
-    bool         parseNewMessage                 (QString message, bool *verified);
+    bool         parseNewMessage                 (const QString& message, bool *verified);
 
 public slots:
     virtual void open                            () = 0;
-    void         createWorkerMessage             (int numWorkers, QString pair, double maxAmount, double profitTarget, int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice);
+    void         createWorkerMessage             (int numWorkers, const QString& pair, double amount, double profitTarget, int shortInterval, int longInterval, int mode, bool singleShot, double minSellPrice);
     bool         createRemoveWorkerMessage       (uint workerID, bool force);
 
 signals:

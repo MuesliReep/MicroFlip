@@ -4,6 +4,7 @@
 
 #include <QQmlContext>
 #include <QThread>
+#include <utility>
 
 #include "remotecontrol_tcp.h"
 #include "config.h"
@@ -47,6 +48,9 @@ Program::Program(QQmlApplicationEngine *engine, QObject *parent) : QObject(paren
     connect(remoteControl, &RemoteControl::newWorkerStatus,              this, &Program::onNewWorkerStatus);
     connect(remoteControl, &RemoteControl::updateLog,                    this, &Program::onConsoleLog);
     connect(remoteControl, &RemoteControl::remoteConnectionStateChanged, this, &Program::remoteConnectionStateChanged);
+
+    connect(this, &Program::sendCreateWorker, remoteControl, &RemoteControl::createWorkerMessage);
+    connect(this, &Program::sendRemoveWorker, remoteControl, &RemoteControl::createRemoveWorkerMessage);
 }
 
 QString Program::remoteConnectionStateString() const {
@@ -81,7 +85,7 @@ QString Program::remoteConnectionStateString() const {
 
 }
 
-void Program::onNewWorkerStatus(int workID, QString state) {
+void Program::onNewWorkerStatus(int workID, const QString& state) {
 
     workOrderModel.addWorkOrderItem(WorkOrderItem(workID, state));
 }
@@ -91,18 +95,18 @@ void Program::onNewBalanceValues() {
 }
 
 void Program::onNewExchangeInformation(QString symbol, double lastPrice, double avgPrice) {
-    exchangeInfo.setsymbol(symbol);
+    exchangeInfo.setsymbol(std::move(symbol));
     exchangeInfo.setCurrentPrice(lastPrice);
     exchangeInfo.setAvgPrice(avgPrice);
 }
 
-void Program::onNewLogUpdate(int workID, QString className, QString log, int severity) {
+void Program::onNewLogUpdate(int workID, const QString& className, const QString& log, int severity) {
 
     // Append new log item, gui will be notified through model binding
     logItemModel.addLogItem(LogItem(workID, className, log, severity));
 }
 
-void Program::onConsoleLog(int workID, QString className, QString log, int severity) {
+void Program::onConsoleLog(int workID, const QString& className, const QString& log, int  /*severity*/) {
 
     QString message;
 
@@ -112,6 +116,77 @@ void Program::onConsoleLog(int workID, QString className, QString log, int sever
 
     qDebug() << message;
 
+}
+
+void Program::onAddNewWorker(QString numWorkers,   QString pair,          QString amount,
+                             QString profitTarget, QString shortInterval, QString longInterval,
+                             QString mode,         bool singleShot,       QString minSellPrice) {
+
+    bool ok = false;
+
+    // Check each value
+    int numWorkersValue = numWorkers.toInt(&ok);
+    if(!ok) {
+        return;
+    }
+
+    if(pair.isEmpty()) {
+        return;
+    }
+
+    double amountValue = amount.toDouble(&ok);
+    if(!ok) {
+        return;
+    }
+
+    double profitTargetValue = profitTarget.toDouble(&ok);
+    if(!ok) {
+        return;
+    }
+
+    int shortIntervalValue = shortInterval.toInt(&ok);
+    if(!ok) {
+        return;
+    }
+
+    int longIntervalValue = longInterval.toInt(&ok);
+    if(!ok) {
+        return;
+    }
+
+    if(mode.isEmpty()) {
+        return;
+    }
+    int modeValue = 0;
+    if(mode == "MINSELL") {
+        modeValue = 0;
+    } else if(mode == "TICKERAVG") {
+        modeValue = 1;
+    } else {
+        return;
+    }
+
+    double minSellPriceValue = minSellPrice.toDouble(&ok);
+    if(!ok) {
+        return;
+    }
+
+    emit sendCreateWorker(numWorkersValue, pair, amountValue, profitTargetValue, shortIntervalValue, longIntervalValue, modeValue, singleShot, minSellPriceValue);
+}
+
+void Program::onRemoveWorker(QString workId, bool force) {
+
+    bool ok = false;
+
+    int workIdValue = workId.toInt(&ok);
+    if(!ok) {
+        return;
+    }
+    if(workId < 1) {
+        return;
+    }
+
+    emit sendRemoveWorker(workIdValue, force);
 }
 
 void Program::loadDummyData()

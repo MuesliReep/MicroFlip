@@ -24,6 +24,7 @@ void WorkOrderModel::addWorkOrderItem(const WorkOrderItem &workOrderItem)
                 emit dataChanged(index(i), index(i));
 
                 update = true;
+                return;
             }
         }
     }
@@ -50,7 +51,7 @@ QVariant WorkOrderModel::data(const QModelIndex &index, int role) const
     const WorkOrderItem &workOrderItem = workOrderItems[index.row()];
     if (role == WorkIdRole)
         return workOrderItem.workId();
-    else if (role == StateRole)
+    if (role == StateRole)
         return workOrderItem.workState();
     return QVariant();
 }
