@@ -24,7 +24,7 @@ bool RemoteControl_TCP::open() {
     return openResult;
 }
 
-void RemoteControl_TCP::parseRawMessage(const QByteArray& rawData, TcpAuthSocket *sender) {
+bool RemoteControl_TCP::parseRawMessage(const QByteArray& rawData, TcpAuthSocket *sender) {
 
     // Send the raw data message to be parsed
     // If message is valid but verification failed, disconnect this client
@@ -37,12 +37,16 @@ void RemoteControl_TCP::parseRawMessage(const QByteArray& rawData, TcpAuthSocket
         emit updateLog(00, className, "Could not verify remote client " + sender->peerAddress().toString(), logSeverity::LOG_INFO);
 
         sender->disconnectFromHost();
+
+        return false;
     } else if(messageValid && verified) {
 
         sender->setAuthenticated(true);
 
         emit updateLog(00, className, "Verified remote client " + sender->peerAddress().toString(), logSeverity::LOG_INFO);
     }
+
+    return true;
 }
 
 void RemoteControl_TCP::onNewConnection() {
@@ -72,8 +76,42 @@ void RemoteControl_TCP::onReadyRead() {
 
     auto* sender = static_cast<TcpAuthSocket*>(QObject::sender());
 
-    parseRawMessage(sender->readAll(), sender);
+//    parseRawMessage(sender->readAll(), sender);
 
+    readBuffer.append(sender->readAll());
+
+    QByteArray prefix = MESSAGE_PREFIX.toUtf8();
+    QByteArray suffix = MESSAGE_SUFFIX.toUtf8();
+
+    bool continueParsing = true;
+
+    while (continueParsing) {
+
+        int prefixIndex = readBuffer.indexOf(prefix);
+        if(prefixIndex == -1) { return; } // No message
+        if(prefixIndex > 0) { // If there is a partial message at the beginning, remove it
+            readBuffer = readBuffer.remove(0, prefixIndex);
+        }
+
+        int suffixIndex = readBuffer.indexOf(suffix);
+        if(suffixIndex == -1) { return; } // Not a full message, retry later
+        else {
+
+            // Grab new message
+            QByteArray message = readBuffer.mid(0, suffixIndex + suffix.length());
+
+            // Remove it from the buffer
+            readBuffer = readBuffer.remove(0, message.length());
+
+            // Parse message, continue if parse was verified
+            continueParsing = parseRawMessage(message, sender);
+
+            // Check if we can continue with parsing
+            if(readBuffer.length() <= suffix.length()) {
+                continueParsing = false;
+            }
+        }
+    }
 }
 
 bool RemoteControl_TCP::sendMessage(QString message) {

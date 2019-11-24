@@ -20,8 +20,9 @@ private:
     QTcpServer            *server{};
     QList<TcpAuthSocket*>  sockets;
     quint16                listenPort;
+    QByteArray             readBuffer;
 
-    void parseRawMessage(const QByteArray& rawData, TcpAuthSocket *sender);
+    bool parseRawMessage(const QByteArray& rawData, TcpAuthSocket *sender);
 
 private slots:
     void onNewConnection      ();

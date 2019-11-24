@@ -19,7 +19,7 @@ private:
     QTcpSocket *socket        {};
     QByteArray  readBuffer    {};
 
-    void parseRawMessage(const QByteArray& rawData);
+    bool parseRawMessage(const QByteArray& rawData);
 
 protected:
     bool sendMessage(QString message);

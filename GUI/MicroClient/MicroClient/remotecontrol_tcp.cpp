@@ -42,7 +42,7 @@ void RemoteControl_TCP::open() {
     createHelloMessage();
 }
 
-void RemoteControl_TCP::parseRawMessage(const QByteArray& rawData) {
+bool RemoteControl_TCP::parseRawMessage(const QByteArray& rawData) {
 
     // Send the raw data message to be parsed
     // If message is valid but verification failed, disconnect this client
@@ -56,6 +56,9 @@ void RemoteControl_TCP::parseRawMessage(const QByteArray& rawData) {
         emit updateLog(00, className, "Could not verify Server", logSeverity::LOG_CRITICAL);
 
         socket->disconnectFromHost();
+
+        return false;
+
     } else if(messageValid && verified) {
 
         this->authenticated = true;
@@ -63,6 +66,8 @@ void RemoteControl_TCP::parseRawMessage(const QByteArray& rawData) {
 
         emit updateLog(00, className, "Verified Server", logSeverity::LOG_INFO);
     }
+
+    return true;
 }
 
 bool RemoteControl_TCP::sendMessage(QString message) {
@@ -72,7 +77,40 @@ bool RemoteControl_TCP::sendMessage(QString message) {
 
 void RemoteControl_TCP::onReadyRead() {
 
-    parseRawMessage(socket->readAll());
+    readBuffer.append(socket->readAll());
+
+    QByteArray prefix = MESSAGE_PREFIX.toUtf8();
+    QByteArray suffix = MESSAGE_SUFFIX.toUtf8();
+
+    bool continueParsing = true;
+
+    while (continueParsing) {
+
+        int prefixIndex = readBuffer.indexOf(prefix);
+        if(prefixIndex == -1) { return; } // No message
+        if(prefixIndex > 0) { // If there is a partial message at the beginning, remove it
+            readBuffer = readBuffer.remove(0, prefixIndex);
+        }
+
+        int suffixIndex = readBuffer.indexOf(suffix);
+        if(suffixIndex == -1) { return; } // Not a full message, retry later
+        else {
+
+            // Grab new message
+            QByteArray message = readBuffer.mid(0, suffixIndex + suffix.length());
+
+            // Remove it from the buffer
+            readBuffer = readBuffer.remove(0, message.length());
+
+            // Parse message, continue if parse was verified
+            continueParsing = parseRawMessage(message);
+
+            // Check if we can continue with parsing
+            if(readBuffer.length() <= suffix.length()) {
+                continueParsing = false;
+            }
+        }
+    }
 }
 
 void RemoteControl_TCP::onConnect() {
