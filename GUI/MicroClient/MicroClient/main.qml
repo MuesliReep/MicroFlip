@@ -89,9 +89,11 @@ ApplicationWindow {
                 model: workOrderModel
                 width: workOrderPane.width
                 height: workOrderPane.height
+//                Layout.fillWidth: true
+//                Layout.fillHeight: true
 
                 delegate: Rectangle {
-                    id: wordOrderRectangle
+                    id: workOrderRectangle
                     height: 25
                     width: workOrderView.width
 
@@ -100,10 +102,16 @@ ApplicationWindow {
                     MouseArea {
                         id: workerMouseArea
                         anchors {
-                            left: wordOrderRectangle.left; top: wordOrderRectangle.top;
-                            right: wordOrderRectangle.right; bottom: wordOrderRectangle.bottom
+                            left: workOrderRectangle.left; top: workOrderRectangle.top;
+                            right: workOrderRectangle.right; bottom: workOrderRectangle.bottom
                         }
                         hoverEnabled: true
+                        onClicked: {
+
+                            workOrderRectangle.height = 50
+                            buttonRemoveWorkOrder.visible = true
+                        }
+
                     }
 
                     Row {
@@ -113,8 +121,20 @@ ApplicationWindow {
                             font.pixelSize: 15
                         }
                         Text {
+
                             text: workState
                             font.pixelSize: 15
+                        }
+                        Rectangle {
+//                            Layout.fillWidth: true
+                            width: 55
+                        }
+
+                        Button {
+                            id: buttonRemoveWorkOrder
+                            text: "Remove"
+                            visible: false
+                            onClicked: remoteControl.onRemoveWorker(workId, false);
                         }
                     }
 
