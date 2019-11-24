@@ -7,12 +7,14 @@ WorkOrderModel::WorkOrderModel(QObject *parent)
 void WorkOrderModel::addWorkOrderItem(const WorkOrderItem &workOrderItem)
 {
 
-    bool update = false;
+    bool insert = true;
 
     // Check if this work order is already present
     for (int i = 0; i < workOrderItems.length(); i++) {
 
         if(workOrderItem.workId() == workOrderItems.at(i).workId()) {
+
+            insert = false;
 
             // If so update item
             if(workOrderItem.workState() != workOrderItems.at(i).workState()) {
@@ -23,13 +25,12 @@ void WorkOrderModel::addWorkOrderItem(const WorkOrderItem &workOrderItem)
 
                 emit dataChanged(index(i), index(i));
 
-                update = true;
                 return;
             }
         }
     }
 
-    if(!update) {
+    if(insert) {
 
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         workOrderItems << workOrderItem;
