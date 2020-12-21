@@ -87,7 +87,7 @@ void Exchange_Binance::createOrder(QString pair, int type, double rate, double a
 
     // Symbol
     query.append("symbol=");
-    query.append(pair);
+    query.append(pair.toUtf8());
 
     // Side
     query.append("&side=");
@@ -165,7 +165,7 @@ void Exchange_Binance::updateOrderInfo(qint64 orderID) {
 
     // Symbol
     query.append("symbol=");
-    query.append((dynamic_cast<WorkOrder*>(currentTask.getSender()))->getPair());
+    query.append((dynamic_cast<WorkOrder*>(currentTask.getSender()))->getPair().toUtf8());
 
 //    // Side
 //    query.append("&side=");

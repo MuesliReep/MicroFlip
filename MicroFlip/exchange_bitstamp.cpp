@@ -95,10 +95,10 @@ void Exchange_bitstamp::createOrder(QString Pair, int Type, double Rate, double 
     }
 
     QByteArray price("price=");
-    price.append(QString::number(Rate,'f',precision));
+    price.append(QString::number(Rate,'f',precision).toUtf8());
 
     QByteArray amount("amount=");
-    amount.append(QString::number(Amount,'f',8));
+    amount.append(QString::number(Amount,'f',8).toUtf8());
 
     // Create signature from nonce, userid & apikey
     QByteArray nonce;
@@ -146,7 +146,7 @@ void Exchange_bitstamp::updateActiveOrders(QString pair) {
 void Exchange_bitstamp::updateOrderInfo(qint64 OrderID) {
 
     QByteArray orderID("id=");
-    orderID.append(QString::number(OrderID));
+    orderID.append(QString::number(OrderID).toUtf8());
 
     // Create signature from nonce, userid & apikey
     QByteArray nonce;
