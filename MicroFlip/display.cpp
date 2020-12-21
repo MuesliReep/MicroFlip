@@ -182,7 +182,7 @@ void Display::drawHeader() {
   header.append(programName + "       " + exchangeName + "       " + last + QString::number(lastPrice,'f',2) + "  " + average + QString::number(avgPrice,'f',2));
 
   // Draw header
-  if(header < columns) {
+  if(header.length() < columns) {
       header.resize(header.length() + (columns - header.length()), ' ');
   } else {
       header.truncate(columns);

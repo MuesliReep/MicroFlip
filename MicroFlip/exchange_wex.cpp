@@ -95,7 +95,7 @@ void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amoun
     nonce.prepend("nonce=");
 
     QByteArray pair("pair=");
-    pair.append(Pair);
+    pair.append(Pair.toUtf8());
 
     QByteArray type("type=");
     if(Type == 0) {
@@ -106,10 +106,10 @@ void Exchange_wex::createOrder(QString Pair, int Type, double Rate, double Amoun
     }
 
     QByteArray price("rate=");
-    price.append(QString::number(Rate,'f',3));
+    price.append(QString::number(Rate,'f',3).toUtf8());
 
     QByteArray amount("amount=");
-    amount.append(QString::number(Amount,'f',8));
+    amount.append(QString::number(Amount,'f',8).toUtf8());
 
     QByteArray data(method +"&"+ nonce +"&"+ pair +"&"+ type +"&"+ price +"&"+ amount);
 
@@ -149,7 +149,7 @@ void Exchange_wex::updateOrderInfo(qint64 OrderID) {
     nonce.prepend("nonce=");
 
     QByteArray orderID("order_id=");
-    orderID.append(QString::number(OrderID));
+    orderID.append(QString::number(OrderID).toUtf8());
 
     QByteArray data(method +"&"+ nonce + "&" + orderID);
 

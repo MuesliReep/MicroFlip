@@ -10,6 +10,8 @@ QT       += network
 
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+lessThan(QT_MAJOR_VERSION, 6): error("requires Qt 6")
+
 TARGET = MicroFlip
 
 CONFIG   += console
